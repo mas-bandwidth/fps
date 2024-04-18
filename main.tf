@@ -31,9 +31,9 @@ resource "random_id" "postfix" {
   byte_length = 8
 }
 
-resource "google_project" "udp" {
-  name            = "UDP Test"
-  project_id      = "udp-${random_id.postfix.hex}"
+resource "google_project" "fps" {
+  name            = "FPS Test"
+  project_id      = "fps-${random_id.postfix.hex}"
   org_id          = var.google_org_id
   billing_account = var.google_billing_account
 }
@@ -47,9 +47,9 @@ locals {
   ]
 }
 
-resource "google_project_service" "udp" {
+resource "google_project_service" "fps" {
   count    = length(local.services)
-  project  = google_project.udp.project_id
+  project  = google_project.fps.project_id
   service  = local.services[count.index]
   timeouts {
     create = "30m"
@@ -122,8 +122,8 @@ data "archive_file" "source_zip" {
 }
 
 resource "google_storage_bucket" "source" {
-  name          = "${var.google_org_id}_udp_source"
-  project       = google_project.udp.project_id
+  name          = "${var.google_org_id}_fps_source"
+  project       = google_project.fps.project_id
   location      = "US"
   force_destroy = true
   public_access_prevention = "enforced"
@@ -139,52 +139,52 @@ resource "google_storage_bucket_object" "source_zip" {
 
 # ----------------------------------------------------------------------------------------
 
-resource "google_service_account" "udp_runtime" {
-  project  = google_project.udp.project_id
-  account_id   = "udp-runtime"
-  display_name = "UDP Runtime Service Account"
+resource "google_service_account" "fps_runtime" {
+  project  = google_project.fps.project_id
+  account_id   = "fps-runtime"
+  display_name = "FPS Runtime Service Account"
 }
 
-resource "google_project_iam_member" "udp_runtime_compute_viewer" {
-  project = google_project.udp.project_id
+resource "google_project_iam_member" "fps_runtime_compute_viewer" {
+  project = google_project.f.project_id
   role    = "roles/compute.viewer"
-  member  = google_service_account.udp_runtime.member
+  member  = google_service_account.fps_runtime.member
 }
 
-resource "google_storage_bucket_iam_member" "udp_runtime_storage_admin" {
+resource "google_storage_bucket_iam_member" "fps_runtime_storage_admin" {
   bucket = google_storage_bucket.source.name
   role   = "roles/storage.objectAdmin"
-  member = google_service_account.udp_runtime.member
+  member = google_service_account.fps_runtime.member
   depends_on = [google_storage_bucket.source]
 }
 
 # ----------------------------------------------------------------------------------------
 
-resource "google_compute_network" "udp" {
-  name                    = "udp"
-  project                 = google_project.udp.project_id
+resource "google_compute_network" "fps" {
+  name                    = "fps"
+  project                 = google_project.fps.project_id
   auto_create_subnetworks = false
 }
 
-resource "google_compute_subnetwork" "udp" {
-  name                     = "udp"
-  project                  = google_project.udp.project_id
+resource "google_compute_subnetwork" "fps" {
+  name                     = "fps"
+  project                  = google_project.fps.project_id
   ip_cidr_range            = "10.0.0.0/16"
   region                   = var.google_region
-  network                  = google_compute_network.udp.id
+  network                  = google_compute_network.fps.id
   private_ip_google_access = true
 }
 
 resource "google_compute_router" "router" {
   name    = "router-to-internet"
-  network = google_compute_network.udp.id
-  project = google_project.udp.project_id
+  network = google_compute_network.fps.id
+  project = google_project.fps.project_id
   region  = var.google_region
 }
 
 resource "google_compute_router_nat" "nat" {
   name                               = "nat"
-  project                            = google_project.udp.project_id
+  project                            = google_project.fps.project_id
   router                             = google_compute_router.router.name
   region                             = var.google_region
   nat_ip_allocate_option             = "AUTO_ONLY"
@@ -193,9 +193,9 @@ resource "google_compute_router_nat" "nat" {
 
 resource "google_compute_firewall" "allow_ssh" {
   name          = "allow-ssh"
-  project       = google_project.udp.project_id
+  project       = google_project.fps.project_id
   direction     = "INGRESS"
-  network       = google_compute_network.udp.id
+  network       = google_compute_network.fps.id
   source_ranges = ["130.211.0.0/22", "35.191.0.0/16", "35.235.240.0/20"]
   allow {
     protocol = "tcp"
@@ -206,9 +206,9 @@ resource "google_compute_firewall" "allow_ssh" {
 
 resource "google_compute_firewall" "allow_http" {
   name          = "allow-http"
-  project       = google_project.udp.project_id
+  project       = google_project.fps.project_id
   direction     = "INGRESS"
-  network       = google_compute_network.udp.id
+  network       = google_compute_network.fps.id
   source_ranges = ["0.0.0.0/0"]
   allow {
     protocol = "tcp"
@@ -219,9 +219,9 @@ resource "google_compute_firewall" "allow_http" {
 
 resource "google_compute_firewall" "allow_udp" {
   name          = "allow-udp"
-  project       = google_project.udp.project_id
+  project       = google_project.fps.project_id
   direction     = "INGRESS"
-  network       = google_compute_network.udp.id
+  network       = google_compute_network.fps.id
   source_ranges = ["0.0.0.0/0"]
   allow {
     protocol = "udp"
@@ -235,13 +235,13 @@ resource "google_compute_instance_template" "client" {
 
   name         = "client-${var.tag}"
 
-  project      = google_project.udp.project_id
+  project      = google_project.fps.project_id
 
   machine_type = "n1-standard-8"
 
   network_interface {
-    network    = google_compute_network.udp.id
-    subnetwork = google_compute_subnetwork.udp.id
+    network    = google_compute_network.fps.id
+    subnetwork = google_compute_subnetwork.fps.id
     access_config {}
   }
 
@@ -262,7 +262,7 @@ resource "google_compute_instance_template" "client" {
     NEEDRESTART_SUSPEND=1 apt install golang-go unzip -y
     mkdir /app
     cd /app
-    gsutil cp gs://${var.google_org_id}_udp_source/source-${var.tag}.zip .
+    gsutil cp gs://${var.google_org_id}_fps_source/source-${var.tag}.zip .
     unzip *.zip
     export HOME=/app
     go get
@@ -284,7 +284,7 @@ resource "google_compute_instance_template" "client" {
   }
 
   service_account {
-    email  = google_service_account.udp_runtime.email
+    email  = google_service_account.fps_runtime.email
     scopes = ["cloud-platform"]
   }
 
@@ -296,7 +296,7 @@ resource "google_compute_instance_template" "client" {
 resource "google_compute_region_instance_group_manager" "client" {
   target_size               = 100
   name                      = "client"
-  project                   = google_project.udp.project_id
+  project                   = google_project.fps.project_id
   region                    = var.google_region
   distribution_policy_zones = var.google_zones
   version {
@@ -319,14 +319,14 @@ resource "google_compute_region_instance_group_manager" "client" {
 
 resource "google_compute_address" "server_address" {
   name    = "server-${var.tag}-address"
-  project = google_project.udp.project_id
+  project = google_project.fps.project_id
 }
 
 resource "google_compute_instance" "server" {
 
   name         = "server-${var.tag}"
-  project      = google_project.udp.project_id
-  machine_type = "c3-highcpu-44"
+  project      = google_project.fps.project_id
+  machine_type = "n1-standard-8" # "c3-highcpu-44"
   zone         = var.google_zone
   tags         = ["allow-ssh", "allow-udp"]
 
@@ -339,16 +339,18 @@ resource "google_compute_instance" "server" {
   }
 
   network_interface {
-    network    = google_compute_network.udp.id
-    subnetwork = google_compute_subnetwork.udp.id
+    network    = google_compute_network.fps.id
+    subnetwork = google_compute_subnetwork.fps.id
     access_config {
       nat_ip = google_compute_address.server_address.address
     }
   }
 
+/*
   advanced_machine_features {
     threads_per_core = 1
   }
+*/
 
   metadata = {
 
@@ -369,7 +371,7 @@ resource "google_compute_instance" "server" {
 
       mkdir /app
       cd /app
-      gsutil cp gs://${var.google_org_id}_udp_source/source-${var.tag}.zip .
+      gsutil cp gs://${var.google_org_id}_fps_source/source-${var.tag}.zip .
       unzip *.zip
 
       wget https://github.com/xdp-project/xdp-tools/releases/download/v1.4.2/xdp-tools-1.4.2.tar.gz
@@ -402,7 +404,7 @@ resource "google_compute_instance" "server" {
   }
 
   service_account {
-    email  = google_service_account.udp_runtime.email
+    email  = google_service_account.fps_runtime.email
     scopes = ["cloud-platform"]
   }
 }
