@@ -146,7 +146,7 @@ resource "google_service_account" "fps_runtime" {
 }
 
 resource "google_project_iam_member" "fps_runtime_compute_viewer" {
-  project = google_project.f.project_id
+  project = google_project.fps.project_id
   role    = "roles/compute.viewer"
   member  = google_service_account.fps_runtime.member
 }
