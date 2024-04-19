@@ -31,6 +31,8 @@
 #define JOIN_REQUEST_PACKET_SIZE                             ( 1 + 8 + 8 + PLAYER_DATA_SIZE )
 #define JOIN_RESPONSE_PACKET_SIZE                                           ( 1 + 8 + 8 + 8 )
 
+#define MAX_SESSIONS                                                                  1000000
+
 #if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && \
     __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define bpf_ntohs(x)        __builtin_bswap16(x)
@@ -50,6 +52,20 @@
 #else // #if DEBUG
 #define debug_printf(...) do { } while (0)
 #endif // #if DEBUG
+
+struct session_data 
+{
+    __u8 player_data[PLAYER_DATA_SIZE];
+    __u64 last_input_sequence;
+};
+
+struct {
+    __uint( type, BPF_MAP_TYPE_LRU_HASH );
+    __type( key, __u64 );
+    __type( value, __u64 );
+    __uint( max_entries, MAX_SESSIONS );
+    __uint( pinning, LIBBPF_PIN_BY_NAME );
+} session_map SEC(".maps");
 
 static void reflect_packet( void * data, int payload_bytes )
 {
@@ -122,6 +138,18 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                 if ( packet_type == JOIN_REQUEST_PACKET && (void*) payload + JOIN_REQUEST_PACKET_SIZE <= data_end )
                                 {
                                     debug_printf( "received join request packet" );
+
+                                    __u64 session_id = (__u64) payload[1];
+                                    session_id |= ( (__u64) payload[2] ) << 8;
+                                    session_id |= ( (__u64) payload[3] ) << 16;
+                                    session_id |= ( (__u64) payload[4] ) << 24;
+                                    session_id |= ( (__u64) payload[5] ) << 32;
+                                    session_id |= ( (__u64) payload[6] ) << 40;
+                                    session_id |= ( (__u64) payload[7] ) << 48;
+                                    session_id |= ( (__u64) payload[8] ) << 56;
+
+                                    // todo
+                                    (void) session_id;
 
                                     reflect_packet( data, JOIN_RESPONSE_PACKET_SIZE );
 

@@ -209,8 +209,9 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 			packetData := buffer[:packetBytes]
 			packetType := packetData[0]
 			if packetType == JoinResponsePacket && packetBytes == JoinResponsePacketSize {
+				fmt.Printf("received join response packet\n")
 				atomic.AddUint64(&joined, 1)
-				// ...
+				// todo: grab ping estimate, initial time etc.
 			}
 			atomic.AddUint64(&packetsReceived, 1)
 		}
@@ -224,14 +225,19 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 
 	playerData := make([]byte, PlayerDataSize)
 
-	ticker := time.NewTicker(time.Millisecond * 250)
+	ticker := time.NewTicker(time.Millisecond * 10)
 
  	for {
+ 		stop := false
+
 		select {
 
 	 	case <-ticker.C:
 
-	 		// todo: check if we have received a join response
+			joined := atomic.LoadUint64(&joined)
+			if joined > 0 {
+				stop = true
+			}
 
 	 		fmt.Printf("sent join request packet\n")
 
@@ -242,8 +248,7 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 			conn.WriteToUDP(joinRequestPacket, serverAddress)
 	 	}
 
-		joined := atomic.LoadUint64(&joined)
-		if joined > 0 {
+		if stop {
 			break
 		}
 
@@ -261,8 +266,6 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 	sequence := uint64(1000)
 
 	inputBuffer := make([]Input, InputHistory)
-
-	ticker = time.NewTicker(time.Millisecond * 10)
 
  	for {
 		select {

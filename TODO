@@ -1,0 +1,35 @@
+DONE
+
+	Sketch out input packets and read them in XDP
+
+	Setup join request and join response packets
+
+	Client sends join requests until join response
+
+TODO
+
+	Work out how to get linux boot time in nanoseconds in server.c
+
+	Store the linux boot time in a config map and set it when server.c starts up
+
+	Store the server startup time since boot in nanos, and put it in a map 
+
+	Now I can work out server time in nanos.
+
+	Return the server time in nanos back in the join response
+
+	Read the server time in nanos
+
+	Estimate round trip latency in milliseconds using sent time vs. receive time for join request.
+
+	Think hard about how far ahead I want the client time to be of the server. The goal here is fairness, and the same performance for all players, [0,100ms] RTT.
+
+	So in general, assume the server is ticking 100HZ, and sending out snapshots for players. We generally will want all players to have already simulated their state ahead of server time by the point that the snapshot is sent.
+
+	If a player has 0ms RTT to server, the player delivers its input to the server right away. Even for this player, due to 100HZ, we want to deliver at least 10ms ahead of time, maybe 20ms in case a packet is lost.
+
+	If a player has 100ms RTT to server, assume symmetric RTT, the player needs to be 50ms "ahead" of the server, plus 10ms or 20ms for packet loss safety, minimum.
+
+	But is there any benefit to players with low latency delivering inputs to the server way ahead, so they are penalized? eg. input delay or such
+
+	In terms of fairness, yes. But for now, let's just deliver ahead by RTT/2 plus some safety factor, let's say 50ms.
