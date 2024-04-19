@@ -10,18 +10,31 @@ import (
 	"syscall"
 	"strconv"
 	"sync/atomic"
-	"math/rand"
 )
 
 const StartPort = 10000
-const MaxPacketSize = 1500
-const SocketBufferSize = 256*1024*1024
+const MaxPacketSize = 1384
+const SocketBufferSize = 2*1024*1024
+
+const InputSize = 100
+const InputsPerPacket = 10
+const InputPacketSize = 1 + 8 + 8 + (InputSize + 8) * InputsPerPacket
+const InputHistory = 1024
+
+const InputPacket = 1
 
 var numClients int
 
 var quit uint64
 var packetsSent uint64
 var packetsReceived uint64
+
+type Input struct {
+	sequence uint64
+	t        float64
+	dt       float64
+	input    []byte	
+}
 
 func GetInt(name string, defaultValue int) int {
 	valueString, ok := os.LookupEnv(name)
@@ -74,7 +87,6 @@ func main() {
 	ticker := time.NewTicker(time.Second)
  
 	prev_sent := uint64(0)
-	prev_received := uint64(0)
 
  	for {
 		select {
@@ -83,12 +95,9 @@ func main() {
 			atomic.StoreUint64(&quit, 1)
 	 	case <-ticker.C:
 	 		sent := atomic.LoadUint64(&packetsSent)
-	 		received := atomic.LoadUint64(&packetsReceived)
 	 		sent_delta := sent - prev_sent
-	 		received_delta := received - prev_received
-	 		fmt.Printf("sent delta %d, received delta %d\n", sent_delta, received_delta)
+	 		fmt.Printf("input packets sent delta %d\n", sent_delta)
 			prev_sent = sent
-			prev_received = received
 	 	}
 		quit := atomic.LoadUint64(&quit)
 		if quit != 0 {
@@ -101,6 +110,21 @@ func main() {
 	wg.Wait()	
 
 	fmt.Printf("done.\n")
+}
+
+func sampleInput(sequence uint64, t float64, dt float64) Input {
+	// todo: here you would sample player input, eg. keyboard, mouse or controller
+	return Input{input: make([]byte, 100), t: t, dt: dt}
+}
+
+func addInput(sequence uint64, inputBuffer []Input, input Input) {
+	index := sequence % InputHistory
+	inputBuffer[index] = input
+}
+
+func createInputPacket(sequence uint64, inputBuffer []Input) []byte {
+	// todo
+	return make([]byte, InputPacketSize)
 }
 
 func runClient(clientIndex int, serverAddress *net.UDPAddr) {
@@ -139,19 +163,39 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 		}
 	}()
 
-	packetData := make([]byte, 100)
+	// todo: get initial time from server on connect
 
-	rand.Read(packetData)
+	t := float64(0)
+	dt := float64(1.0/100.0)
 
-	for {
+	sequence := uint64(1)
+
+	inputBuffer := make([]Input, InputHistory)
+
+	ticker := time.NewTicker(time.Millisecond * 10)
+
+ 	for {
+		select {
+
+	 	case <-ticker.C:
+
+			input := sampleInput(sequence, t, dt)
+
+			addInput(sequence, inputBuffer, input)
+
+			inputPacket := createInputPacket(sequence, inputBuffer)
+
+			conn.WriteToUDP(inputPacket, serverAddress)
+
+			atomic.AddUint64(&packetsSent, 1)
+
+			t += dt
+			sequence++
+	 	}
+
 		quit := atomic.LoadUint64(&quit)
 		if quit != 0 {
 			break
 		}
-		for i := 0; i < 10; i++ {
-			conn.WriteToUDP(packetData[:], serverAddress)
-		}
-		atomic.AddUint64(&packetsSent, 10)
-		time.Sleep(time.Millisecond*100)
-	}
+ 	}
 }
