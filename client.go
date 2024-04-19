@@ -35,6 +35,7 @@ const InputPacket = 3
 var numClients int
 
 var quit uint64
+var joined uint64
 var packetsSent uint64
 var packetsReceived uint64
 
@@ -202,8 +203,15 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 			if err != nil {
 				break
 			}
-			// todo: process sync response, state packets etc...
-			_ = packetBytes
+			if packetBytes < 1 {
+				continue
+			}
+			packetData := buffer[:packetBytes]
+			packetType := packetData[0]
+			if packetType == JoinResponsePacket {
+				atomic.AddUint64(&joined, 1)
+				// ...
+			}
 			atomic.AddUint64(&packetsReceived, 1)
 		}
 	}()
@@ -233,6 +241,11 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 
 			conn.WriteToUDP(joinRequestPacket, serverAddress)
 	 	}
+
+		joined := atomic.LoadUint64(&joined)
+		if joined > 0 {
+			break
+		}
 
 		quit := atomic.LoadUint64(&quit)
 		if quit != 0 {

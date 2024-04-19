@@ -28,6 +28,9 @@
 
 #define PLAYER_DATA_SIZE                                                                 1024
 
+#define JOIN_REQUEST_PACKET_SIZE                             ( 1 + 8 + 8 + PLAYER_DATA_SIZE )
+#define JOIN_RESPONSE_PACKET_SIZE                                           ( 1 + 8 + 8 + 8 )
+
 #if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && \
     __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define bpf_ntohs(x)        __builtin_bswap16(x)
@@ -116,11 +119,19 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                             {
                                 int packet_type = payload[0];
 
-                                if ( packet_type == JOIN_REQUEST_PACKET && (void*) payload + 1 + 8 + PLAYER_DATA_SIZE <= data_end )
+                                if ( packet_type == JOIN_REQUEST_PACKET && (void*) payload + JOIN_REQUEST_PACKET_SIZE <= data_end )
                                 {
                                     debug_printf( "received join request packet" );
 
-                                    // ...
+                                    reflect_packet( data, JOIN_RESPONSE_PACKET_SIZE );
+
+                                    payload[0] = JOIN_RESPONSE_PACKET
+
+                                    // todo: store current time in nanoseconds at end of packet 1 + 8 + 8 index
+
+                                    bpf_xdp_adjust_tail( ctx, -( JOIN_REQUEST_PACKET_SIZE - JOIN_RESPONSE_PACKET_SIZE ) );
+
+                                    return XDP_TX;
                                 }
                                 else if ( packet_type == INPUT_PACKET && (void*) payload + 1 + 8 + 8 + 8 + 8 + INPUT_SIZE <= data_end )
                                 {
