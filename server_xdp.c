@@ -24,7 +24,7 @@
 
 #define INPUT_SIZE                                                              100
 #define INPUTS_PER_PACKET                                                        10
-#define INPUT_PACKET_SIZE         ( 1 + 8 + 8 + (InputSize + 8) * InputsPerPacket )
+#define INPUT_PACKET_SIZE        ( 1 + 8 + 8 + (INPUT_SIZE + 8) * InputsPerPacket )
 
 #if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && \
     __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
