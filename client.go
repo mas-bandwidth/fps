@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 	"math"
+	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
@@ -20,7 +21,7 @@ const SocketBufferSize = 2*1024*1024
 
 const InputSize = 100
 const InputsPerPacket = 10
-const InputPacketSize = 1 + 8 + 8 + (InputSize + 8) * InputsPerPacket
+const InputPacketSize = 1 + 8 + 8 + 8 + (8 + InputSize) * InputsPerPacket
 const InputHistory = 1024
 
 const SyncRequestPacket = 1
@@ -126,11 +127,15 @@ func addInput(sequence uint64, inputBuffer []Input, input Input) {
 	inputBuffer[index] = input
 }
 
-func writeInputPacket(sequence uint64, inputBuffer []Input) []byte {
-	packet := make([]byte, InputPacketSize)
-	packetIndex := 0
+func writeInputPacket(sessionId uint64, sequence uint64, inputBuffer []Input) []byte {
 	index := sequence % InputHistory
 	input := inputBuffer[index]
+	packet := make([]byte, InputPacketSize)
+	packetIndex := 0
+	packet[0] = InputPacket
+	packetIndex++
+	binary.LittleEndian.PutUint64(packet[packetIndex:], sessionId)
+	packetIndex += 8
 	binary.LittleEndian.PutUint64(packet[packetIndex:], input.sequence)
 	packetIndex += 8
 	binary.LittleEndian.PutUint64(packet[packetIndex:], math.Float64bits(input.t))
@@ -190,6 +195,8 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 	t := float64(0)
 	dt := float64(1.0/100.0)
 
+	sessionId := rand.Uint64()
+
 	sequence := uint64(1000)
 
 	inputBuffer := make([]Input, InputHistory)
@@ -205,7 +212,7 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 
 			addInput(sequence, inputBuffer, input)
 
-			inputPacket := writeInputPacket(sequence, inputBuffer)
+			inputPacket := writeInputPacket(sessionId, sequence, inputBuffer)
 
 			conn.WriteToUDP(inputPacket, serverAddress)
 
