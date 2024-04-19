@@ -208,7 +208,7 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 			}
 			packetData := buffer[:packetBytes]
 			packetType := packetData[0]
-			if packetType == JoinResponsePacket {
+			if packetType == JoinResponsePacket && packetBytes == JoinResponsePacketSize {
 				atomic.AddUint64(&joined, 1)
 				// ...
 			}
