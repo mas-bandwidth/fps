@@ -119,7 +119,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     t.int_value |= ( (__u64) payload[23] ) << 48;
                                     t.int_value |= ( (__u64) payload[24] ) << 56;
 
-                                    debug_printf( "t = %f", t );
+                                    debug_printf( "t = %f", (float)t );
 
                                     union double_uint64 dt;
                                     dt.int_value = (__u64) payload[25];
@@ -131,7 +131,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     dt.int_value |= ( (__u64) payload[31] ) << 48;
                                     dt.int_value |= ( (__u64) payload[32] ) << 56;
 
-                                    debug_printf( "dt = %f", t );
+                                    debug_printf( "dt = %f", (float)dt );
 
                                     // todo: extract first input
 
