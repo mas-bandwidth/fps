@@ -18,13 +18,13 @@
 #include <linux/string.h>
 #include <bpf/bpf_helpers.h>
 
-#define SYNC_REQUEST_PACKET                                                       1
-#define SYNC_RESPONSE_PACKET                                                      2
-#define INPUT_PACKET                                                              3
+#define SYNC_REQUEST_PACKET                                                                 1
+#define SYNC_RESPONSE_PACKET                                                                2
+#define INPUT_PACKET                                                                        3
 
-#define INPUT_SIZE                                                              100
-#define INPUTS_PER_PACKET                                                        10
-#define INPUT_PACKET_SIZE        ( 1 + 8 + 8 + (INPUT_SIZE + 8) * InputsPerPacket )
+#define INPUT_SIZE                                                                        100
+#define INPUTS_PER_PACKET                                                                  10
+#define INPUT_PACKET_SIZE                ( 1 + 8 + 8 + (INPUT_SIZE + 8) * INPUTS_PER_PACKET )
 
 #if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && \
     __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
