@@ -78,7 +78,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                 debug_printf( "packet type is %d", packet_type );
 
-                                if ( packet_type == INPUT_PACKET && (void*) payload + 1 + 8 + 8 + 8 + 8 + InputSize <= data_end )
+                                if ( packet_type == INPUT_PACKET && (void*) payload + 1 + 8 + 8 + 8 + 8 + INPUT_SIZE <= data_end )
                                 {
                                     debug_printf( "received input packet" );
 
