@@ -125,7 +125,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     reflect_packet( data, JOIN_RESPONSE_PACKET_SIZE );
 
-                                    payload[0] = JOIN_RESPONSE_PACKET
+                                    payload[0] = JOIN_RESPONSE_PACKET;
 
                                     // todo: store current time in nanoseconds at end of packet 1 + 8 + 8 index
 
