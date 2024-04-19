@@ -5,11 +5,13 @@ import (
 	"net"
 	"sync"
 	"time"
+	"math"
 	"os"
 	"os/signal"
 	"syscall"
 	"strconv"
 	"sync/atomic"
+	"encoding/binary"
 )
 
 const StartPort = 10000
@@ -21,7 +23,9 @@ const InputsPerPacket = 10
 const InputPacketSize = 1 + 8 + 8 + (InputSize + 8) * InputsPerPacket
 const InputHistory = 1024
 
-const InputPacket = 1
+const SyncRequestPacket = 1
+const SyncResponsePacket = 2
+const InputPacket = 3
 
 var numClients int
 
@@ -114,7 +118,7 @@ func main() {
 
 func sampleInput(sequence uint64, t float64, dt float64) Input {
 	// todo: here you would sample player input, eg. keyboard, mouse or controller
-	return Input{input: make([]byte, 100), t: t, dt: dt}
+	return Input{input: make([]byte, 100), sequence: sequence, t: t, dt: dt}
 }
 
 func addInput(sequence uint64, inputBuffer []Input, input Input) {
@@ -122,9 +126,28 @@ func addInput(sequence uint64, inputBuffer []Input, input Input) {
 	inputBuffer[index] = input
 }
 
-func createInputPacket(sequence uint64, inputBuffer []Input) []byte {
-	// todo
-	return make([]byte, InputPacketSize)
+func writeInputPacket(sequence uint64, inputBuffer []Input) []byte {
+	packet := make([]byte, InputPacketSize)
+	packetIndex := 0
+	index := sequence % InputHistory
+	input := inputBuffer[index]
+	binary.LittleEndian.PutUint64(packet[packetIndex:], input.sequence)
+	packetIndex += 8
+	binary.LittleEndian.PutUint64(packet[packetIndex:], math.Float64bits(input.t))
+	packetIndex += 8
+	for i := 0; i < InputsPerPacket; i++ {
+		binary.LittleEndian.PutUint64(packet[packetIndex:], math.Float64bits(input.dt))
+		packetIndex += 8
+		copy(packet[packetIndex:], input.input)
+		packetIndex += InputSize
+		sequence --
+		index = sequence % InputHistory
+		input = inputBuffer[index]
+		if input.sequence != sequence {
+			break
+		}
+	}
+	return packet[:packetIndex]
 }
 
 func runClient(clientIndex int, serverAddress *net.UDPAddr) {
@@ -156,19 +179,18 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 			if err != nil {
 				break
 			}
-			if packetBytes != 8 {
-				continue
-			}
+			// todo: process sync response, state packets etc...
+			_ = packetBytes
 			atomic.AddUint64(&packetsReceived, 1)
 		}
 	}()
 
-	// todo: get initial time from server on connect
+	// todo: send sync packets until we get a response to synchronize time
 
 	t := float64(0)
 	dt := float64(1.0/100.0)
 
-	sequence := uint64(1)
+	sequence := uint64(1000)
 
 	inputBuffer := make([]Input, InputHistory)
 
@@ -183,13 +205,14 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 
 			addInput(sequence, inputBuffer, input)
 
-			inputPacket := createInputPacket(sequence, inputBuffer)
+			inputPacket := writeInputPacket(sequence, inputBuffer)
 
 			conn.WriteToUDP(inputPacket, serverAddress)
 
 			atomic.AddUint64(&packetsSent, 1)
 
 			t += dt
+
 			sequence++
 	 	}
 
