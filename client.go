@@ -5,7 +5,6 @@ import (
 	"net"
 	"sync"
 	"time"
-	"math"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -24,8 +23,13 @@ const InputsPerPacket = 10
 const InputPacketSize = 1 + 8 + 8 + 8 + (8 + InputSize) * InputsPerPacket
 const InputHistory = 1024
 
-const SyncRequestPacket = 1
-const SyncResponsePacket = 2
+const JoinRequestPacketSize = 1 + 8 + 8
+const JoinResponsePacketSize = 1 + 8 + 8 + 8
+
+const PlayerDataSize = 1024
+
+const JoinRequestPacket = 1
+const JoinResponsePacket = 2
 const InputPacket = 3
 
 var numClients int
@@ -36,8 +40,8 @@ var packetsReceived uint64
 
 type Input struct {
 	sequence uint64
-	t        float64
-	dt       float64
+	t        uint64
+	dt       uint64
 	input    []byte	
 }
 
@@ -117,7 +121,7 @@ func main() {
 	fmt.Printf("done.\n")
 }
 
-func sampleInput(sequence uint64, t float64, dt float64) Input {
+func sampleInput(sequence uint64, t uint64, dt uint64) Input {
 	// todo: here you would sample player input, eg. keyboard, mouse or controller
 	return Input{input: make([]byte, 100), sequence: sequence, t: t, dt: dt}
 }
@@ -125,6 +129,20 @@ func sampleInput(sequence uint64, t float64, dt float64) Input {
 func addInput(sequence uint64, inputBuffer []Input, input Input) {
 	index := sequence % InputHistory
 	inputBuffer[index] = input
+}
+
+func writeJoinRequestPacket(sessionId uint64, sentTime uint64, playerData []byte) []byte {
+	packet := make([]byte, InputPacketSize)
+	packetIndex := 0
+	packet[0] = JoinRequestPacket
+	packetIndex++
+	binary.LittleEndian.PutUint64(packet[packetIndex:], sessionId)
+	packetIndex += 8
+	binary.LittleEndian.PutUint64(packet[packetIndex:], sentTime)
+	packetIndex += 8
+	copy(packet[packetIndex:], playerData)
+	packetIndex += PlayerDataSize
+	return packet[:packetIndex]
 }
 
 func writeInputPacket(sessionId uint64, sequence uint64, inputBuffer []Input) []byte {
@@ -138,10 +156,10 @@ func writeInputPacket(sessionId uint64, sequence uint64, inputBuffer []Input) []
 	packetIndex += 8
 	binary.LittleEndian.PutUint64(packet[packetIndex:], input.sequence)
 	packetIndex += 8
-	binary.LittleEndian.PutUint64(packet[packetIndex:], math.Float64bits(input.t))
+	binary.LittleEndian.PutUint64(packet[packetIndex:], input.t)
 	packetIndex += 8
 	for i := 0; i < InputsPerPacket; i++ {
-		binary.LittleEndian.PutUint64(packet[packetIndex:], math.Float64bits(input.dt))
+		binary.LittleEndian.PutUint64(packet[packetIndex:], input.dt)
 		packetIndex += 8
 		copy(packet[packetIndex:], input.input)
 		packetIndex += InputSize
@@ -190,18 +208,48 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 		}
 	}()
 
-	// todo: send sync packets until we get a response to synchronize time
-
-	t := float64(0)
-	dt := float64(1.0/100.0)
+	// join
 
 	sessionId := rand.Uint64()
+
+	fmt.Printf("joining server as session %016x\n", sessionId)
+
+	playerData := make([]byte, PlayerDataSize)
+
+	ticker := time.NewTicker(time.Millisecond * 250)
+
+ 	for {
+		select {
+
+	 	case <-ticker.C:
+
+	 		// todo: check if we have received a join response
+
+	 		fmt.Printf("sent join request packet\n")
+
+	 		sentTime := uint64(time.Now().UnixNano())
+
+			joinRequestPacket := writeJoinRequestPacket(sessionId, sentTime, playerData)
+
+			conn.WriteToUDP(joinRequestPacket, serverAddress)
+	 	}
+
+		quit := atomic.LoadUint64(&quit)
+		if quit != 0 {
+			return
+		}
+ 	}
+
+	// main loop
+
+	t := uint64(0)					// nanoseconds
+	dt := uint64(1000000000)/100 	// 100ms in nanoseconds
 
 	sequence := uint64(1000)
 
 	inputBuffer := make([]Input, InputHistory)
 
-	ticker := time.NewTicker(time.Millisecond * 10)
+	ticker = time.NewTicker(time.Millisecond * 10)
 
  	for {
 		select {
@@ -225,7 +273,7 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 
 		quit := atomic.LoadUint64(&quit)
 		if quit != 0 {
-			break
+			return
 		}
  	}
 }

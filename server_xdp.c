@@ -18,13 +18,15 @@
 #include <linux/string.h>
 #include <bpf/bpf_helpers.h>
 
-#define SYNC_REQUEST_PACKET                                                                 1
-#define SYNC_RESPONSE_PACKET                                                                2
+#define JOIN_REQUEST_PACKET                                                                 1
+#define JOIN_RESPONSE_PACKET                                                                2
 #define INPUT_PACKET                                                                        3
 
 #define INPUT_SIZE                                                                        100
 #define INPUTS_PER_PACKET                                                                  10
 #define INPUT_PACKET_SIZE                ( 1 + 8 + 8 + (INPUT_SIZE + 8) * INPUTS_PER_PACKET )
+
+#define PLAYER_DATA_SIZE                                                                 1024
 
 #if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && \
     __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -45,6 +47,44 @@
 #else // #if DEBUG
 #define debug_printf(...) do { } while (0)
 #endif // #if DEBUG
+
+static void reflect_packet( void * data, int payload_bytes )
+{
+    struct ethhdr * eth = data;
+    struct iphdr  * ip  = data + sizeof( struct ethhdr );
+    struct udphdr * udp = (void*) ip + sizeof( struct iphdr );
+
+    __u16 a = udp->source;
+    udp->source = udp->dest;
+    udp->dest = a;
+    udp->check = 0;
+    udp->len = bpf_htons( sizeof(struct udphdr) + payload_bytes );
+
+    __u32 b = ip->saddr;
+    ip->saddr = ip->daddr;
+    ip->daddr = b;
+    ip->tot_len = bpf_htons( sizeof(struct iphdr) + sizeof(struct udphdr) + payload_bytes );
+    ip->check = 0;
+
+    char c[ETH_ALEN];
+    memcpy( c, eth->h_source, ETH_ALEN );
+    memcpy( eth->h_source, eth->h_dest, ETH_ALEN );
+    memcpy( eth->h_dest, c, ETH_ALEN );
+
+    __u16 * p = (__u16*) ip;
+    __u32 checksum = p[0];
+    checksum += p[1];
+    checksum += p[2];
+    checksum += p[3];
+    checksum += p[4];
+    checksum += p[5];
+    checksum += p[6];
+    checksum += p[7];
+    checksum += p[8];
+    checksum += p[9];
+    checksum = ~ ( ( checksum & 0xFFFF ) + ( checksum >> 16 ) );
+    ip->check = checksum;
+}
 
 SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx ) 
 { 
@@ -76,9 +116,13 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                             {
                                 int packet_type = payload[0];
 
-                                debug_printf( "packet type is %d", packet_type );
+                                if ( packet_type == JOIN_REQUEST_PACKET && (void*) payload + 1 + 8 + PLAYER_DATA_SIZE <= data_end )
+                                {
+                                    debug_printf( "received join request packet" );
 
-                                if ( packet_type == INPUT_PACKET && (void*) payload + 1 + 8 + 8 + 8 + 8 + INPUT_SIZE <= data_end )
+                                    // ...
+                                }
+                                else if ( packet_type == INPUT_PACKET && (void*) payload + 1 + 8 + 8 + 8 + 8 + INPUT_SIZE <= data_end )
                                 {
                                     debug_printf( "received input packet" );
 
@@ -91,8 +135,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     session_id |= ( (__u64) payload[7] ) << 48;
                                     session_id |= ( (__u64) payload[8] ) << 56;
 
-                                    debug_printf( "session id = %016x", session_id );
-
                                     __u64 sequence = (__u64) payload[9];
                                     sequence |= ( (__u64) payload[10] ) << 8;
                                     sequence |= ( (__u64) payload[11] ) << 16;
@@ -102,36 +144,23 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     sequence |= ( (__u64) payload[15] ) << 48;
                                     sequence |= ( (__u64) payload[16] ) << 56;
 
-                                    debug_printf( "sequence = %lld", sequence );
+                                    __u64 t = (__u64) payload[17];
+                                    t |= ( (__u64) payload[18] ) << 8;
+                                    t |= ( (__u64) payload[19] ) << 16;
+                                    t |= ( (__u64) payload[20] ) << 24;
+                                    t |= ( (__u64) payload[21] ) << 32;
+                                    t |= ( (__u64) payload[22] ) << 40;
+                                    t |= ( (__u64) payload[23] ) << 48;
+                                    t |= ( (__u64) payload[24] ) << 56;
 
-                                    union double_uint64 {
-                                        __u64 int_value;
-                                        double float_value;
-                                    };
-
-                                    union double_uint64 t;
-                                    t.int_value = (__u64) payload[17];
-                                    t.int_value |= ( (__u64) payload[18] ) << 8;
-                                    t.int_value |= ( (__u64) payload[19] ) << 16;
-                                    t.int_value |= ( (__u64) payload[20] ) << 24;
-                                    t.int_value |= ( (__u64) payload[21] ) << 32;
-                                    t.int_value |= ( (__u64) payload[22] ) << 40;
-                                    t.int_value |= ( (__u64) payload[23] ) << 48;
-                                    t.int_value |= ( (__u64) payload[24] ) << 56;
-
-                                    debug_printf( "t = %f", t.float_value );
-
-                                    union double_uint64 dt;
-                                    dt.int_value = (__u64) payload[25];
-                                    dt.int_value |= ( (__u64) payload[26] ) << 8;
-                                    dt.int_value |= ( (__u64) payload[27] ) << 16;
-                                    dt.int_value |= ( (__u64) payload[28] ) << 24;
-                                    dt.int_value |= ( (__u64) payload[29] ) << 32;
-                                    dt.int_value |= ( (__u64) payload[30] ) << 40;
-                                    dt.int_value |= ( (__u64) payload[31] ) << 48;
-                                    dt.int_value |= ( (__u64) payload[32] ) << 56;
-
-                                    debug_printf( "dt = %f", dt.float_value );
+                                    __u64 dt = (__u64) payload[25];
+                                    dt |= ( (__u64) payload[26] ) << 8;
+                                    dt |= ( (__u64) payload[27] ) << 16;
+                                    dt |= ( (__u64) payload[28] ) << 24;
+                                    dt |= ( (__u64) payload[29] ) << 32;
+                                    dt |= ( (__u64) payload[30] ) << 40;
+                                    dt |= ( (__u64) payload[31] ) << 48;
+                                    dt |= ( (__u64) payload[32] ) << 56;
 
                                     // todo: extract first input
 
