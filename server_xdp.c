@@ -75,7 +75,7 @@ struct join_response_packet
 
 struct session_data 
 {
-    __u64 last_input_sequence;
+    __u64 next_input_sequence;
 };
 
 struct {
@@ -165,7 +165,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     struct join_request_packet * request = (struct join_request_packet*) payload;
 
-                                    struct session_data value;
+                                    struct session_data session;
+                                    session.next_input_sequence = 1000;
                                     if ( bpf_map_update_elem( &session_map, &request->session_id, &value, BPF_NOEXIST ) == 0 )
                                     {
                                         debug_printf( "created session 0x%llx", request->session_id );
@@ -186,8 +187,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                 {
                                     debug_printf( "received input packet" );
 
-                                    // todo: switch to this via overlay struct
-
                                     __u64 session_id = (__u64) payload[1];
                                     session_id |= ( (__u64) payload[2] ) << 8;
                                     session_id |= ( (__u64) payload[3] ) << 16;
@@ -196,6 +195,12 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     session_id |= ( (__u64) payload[6] ) << 40;
                                     session_id |= ( (__u64) payload[7] ) << 48;
                                     session_id |= ( (__u64) payload[8] ) << 56;
+
+                                    struct session_data * session = (struct session_data*) bpf_map_lookup_elem( &session_map, &session_id );
+                                    if ( session == NULL )
+                                    {
+                                        return XDP_DROP;
+                                    }
 
                                     __u64 sequence = (__u64) payload[9];
                                     sequence |= ( (__u64) payload[10] ) << 8;
@@ -224,11 +229,17 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     dt |= ( (__u64) payload[31] ) << 48;
                                     dt |= ( (__u64) payload[32] ) << 56;
 
-                                    // todo: extract first input
+                                    if ( session->next_input_sequence == sequence )
+                                    {
+                                        debug_printf("input simple case: %lld", sequence );
+                                        session->next_input_sequence = sequence + 1;
+                                    }
+                                    else
+                                    {
+                                        debug_printf("complex case")
 
-                                    // todo: check if common case, eg. no packet loss, first input only
-
-                                    // todo: else, handle going back n inputs
+                                        // todo: implement complex case
+                                    }
                                 }
                                 else
                                 {

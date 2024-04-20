@@ -10,8 +10,10 @@ DONE
 
 	Read the server time in nanos and print it in client.go
 
-TODO
-
 	Estimate round trip latency in milliseconds using sent time vs. receive time for join request.
 
-	Set client time to RTT/2 plus some safety (50ms).
+	Set client time to RTT/2 plus some safety (100ms for now, to exaggerate effect...)
+
+TODO
+
+	
