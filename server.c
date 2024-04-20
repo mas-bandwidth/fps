@@ -44,7 +44,7 @@ static double time_start;
 
 void platform_init()
 {
-    timespec ts;
+    struct timespec ts;
     clock_gettime( CLOCK_MONOTONIC_RAW, &ts );
     time_start = ts.tv_sec + ( (double) ( ts.tv_nsec ) ) / 1000000000.0;
 }
