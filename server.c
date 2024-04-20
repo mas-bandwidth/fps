@@ -15,6 +15,7 @@
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>
 #include <xdp/libxdp.h>
+#include <sys/resource.h>
 
 void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
@@ -154,7 +155,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     }
     */
 
-    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 250000, process_input, lost_input, NULL );
+    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 250000, process_input, NULL, NULL );
 
     return 0;
 }
