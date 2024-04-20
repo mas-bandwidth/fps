@@ -228,17 +228,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     dt |= ( (__u64) payload[31] ) << 48;
                                     dt |= ( (__u64) payload[32] ) << 56;
 
-                                    if ( session->next_input_sequence == sequence )
-                                    {
-                                        // the common case: input delivered with no packet loss
-
-                                        debug_printf( "process input %lld", sequence );
-
-                                        session->next_input_sequence = sequence + 1;
-
-                                        // todo: pass (sequence, t, dt, input) input down to userspace application via AF_XDP
-                                    }
-                                    else if ( sequence > session->next_input_sequence )
+                                    if ( session->next_input_sequence >= sequence )
                                     {
                                         __u64 n = ( sequence - session->next_input_sequence ) + 1;
                                         if ( n > 10 )
@@ -250,7 +240,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         session->next_input_sequence = sequence + 1;
 
-                                        // todo: pass packet with only n required inputs down to userspace application via AF_XDP
+                                        // todo: pass packet with only n inputs down to userspace application via AF_XDP
                                         (void) n;
                                     }
                                     else
