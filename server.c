@@ -271,7 +271,7 @@ int main( int argc, char *argv[] )
             {
                 total_inputs_processed += inputs_processed[i];
             }
-            printf( "total inputs processed: %d\n", total_inputs_processed );
+            printf( "total inputs processed: %lld\n", total_inputs_processed );
             last_print_time = current_time;
         }
     }
