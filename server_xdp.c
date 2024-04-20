@@ -238,11 +238,11 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         // todo: pass (sequence, t, dt, input) input down to userspace application via AF_XDP
                                     }
-                                    else if ( sequence > session_next_input_sequence )
+                                    else if ( sequence > session->next_input_sequence )
                                     {
                                         session->next_input_sequence = sequence + 1;
 
-                                        __u64 n = ( sequence - session_next_input_sequence ) + 1;
+                                        __u64 n = ( sequence - session->next_input_sequence ) + 1;
                                         if ( n > 10 )
                                         {
                                             n = 10;
