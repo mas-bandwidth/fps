@@ -33,6 +33,8 @@
 
 #define MAX_SESSIONS                                                                  1000000
 
+#define HEAP_SIZE                                                                        2048
+
 #if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && \
     __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define bpf_ntohs(x)        __builtin_bswap16(x)
@@ -92,11 +94,15 @@ struct {
     __uint( value_size, sizeof(int) );
 } input_buffer SEC(".maps");
 
+struct heap {
+    __u8 data[HEAP_SIZE];
+}
+
 struct {
     __uint( type, BPF_MAP_TYPE_PERCPU_ARRAY );
     __uint( max_entries, 1 );
     __type( key, int );
-    __type( value, 1500 );
+    __type( value, struct heap );
 } heap SEC(".maps");
 
 static void reflect_packet( void * data, int payload_bytes )
@@ -254,7 +260,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         session->next_input_sequence = sequence + 1;
 
                                         int zero = 0;
-                                        void * data = bpf_map_lookup_elem( &heap, &zero );
+                                        __u8 * data = (__u8*) bpf_map_lookup_elem( &heap, &zero );
                                         if ( !data ) // can't happen
                                             return XDP_DROP;
 
@@ -262,7 +268,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         for ( int i = 0; i < input_size; i++ )
                                         {
-                                            (__u8*)data[i] = payload[17+i];
+                                            data[i] = payload[17+i];
                                         }
 
                                         bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, &data, input_size );
