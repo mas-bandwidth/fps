@@ -18,12 +18,72 @@ DONE
 
 	Simple case.
 
-TODO
-
 	Complex case. Walk the inputs up to max in packet
+
+	Handle old input packets.
+
+	Unify simple and complex input case with n.
+
+	Docs:
+
+		https://nakryiko.com/posts/bpf-ringbuf/#bpf-ringbuf-vs-bpf-perfbuf
+
+		https://www.kernel.org/doc/html/next/networking/af_xdp.html
+
+		https://github.com/xdp-project/xdp-tutorial/tree/master/advanced03-AF_XDP
 
 	Forward the input packet to userspace for processing, eg. AF_XDP socket
 
-	https://www.kernel.org/doc/html/next/networking/af_xdp.html
+	Alternatively use bpf ringbuf, or perfbuf.
 
-	Scale up and implement a simple system with input and state per-player
+	What I really want are a number of worker threads processing the inputs, eg. distribute.
+
+	It seems that AF_XDP is really focused on a single socket processing all data?
+
+	I really want all inputs to come in, on multiple cores, and then go to a ring buffer, per-receive queue.
+
+TODO
+
+	Seems like perfbuf is ironically the closest thing I need, because I want it to be a per-CPU queue, and I do need to process millions of packets per-second.
+
+	https://nakryiko.com/posts/bpf-ringbuf/#bpf-ringbuf-vs-bpf-perfbuf
+
+	------------------------
+
+	Scale up and implement a simple system with input and state per-player that gets evolved forward with inputs and t,dt in userspace.
+
+	------------------------
+
+	int index = ctx->rx_queue_index;
+
+	You can get the receive queue from the XDP context.
+
+	------------------------
+
+	Implement user space worker threads that receive input packets and evolve player state forward
+
+	Player state needs to be stored in its own datastructure per-worker thread ideally. This should be an entirely userspace datastructure.
+
+	------------------------
+
+	Most recent player state data as evolved needs to live somewhere, indexed by session id.
+
+	Ideally this would not need to be thread protected, since a player always runs on one thread.
+
+	------------------------
+
+	Historical state needs to be stored somewhere, indexed by session id in a ring buffer index (rolling).
+
+	Cache misses are going to really hurt, so player states need to be stored next to each other for interpolation queries.
+
+	------------------------
+
+	Now we need to have a tick that sends out predicted player state at 100HZ back out to each player.
+
+	This could potentially be driven by the same code that processes inputs, eg. with each input processed, reply back with latest processed state.
+
+	------------------------
+
+	Next there is another 
+
+	------------------------

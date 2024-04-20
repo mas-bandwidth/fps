@@ -288,10 +288,7 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 
 			inputPacket := writeInputPacket(sessionId, sequence, inputBuffer)
 
-			// todo: hack up complex case by dropping every 2nd packet
-			if sequence % 2 == 0 {
-				conn.WriteToUDP(inputPacket, serverAddress)
-			}
+			conn.WriteToUDP(inputPacket, serverAddress)
 
 			atomic.AddUint64(&packetsSent, 1)
 
