@@ -221,7 +221,7 @@ int main( int argc, char *argv[] )
 
     while ( !quit )
     {
-        err = perf_buffer__poll( bpf->input_buffer, 1 );
+        int err = perf_buffer__poll( bpf->input_buffer, 1 );
         if ( err == -EINTR ) 
         {
             err = 0;
