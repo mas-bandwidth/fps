@@ -249,6 +249,7 @@ int main( int argc, char *argv[] )
     }
 
     double last_print_time = platform_time();
+    uint64_t last_inputs = 0;
 
     while ( !quit )
     {
@@ -272,7 +273,9 @@ int main( int argc, char *argv[] )
             {
                 total_inputs_processed += inputs_processed[i];
             }
-            printf( "total inputs processed: %" PRId64 "\n", total_inputs_processed );
+            uint64_t input_delta = total_inputs_processed = last_inputs;
+            printf( "input delta: %" PRId64 "\n", input_deltay );
+            last_inputs = total_inputs_processed;
             last_print_time = current_time;
         }
     }
