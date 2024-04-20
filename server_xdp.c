@@ -167,7 +167,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     struct session_data session;
                                     session.next_input_sequence = 1000;
-                                    if ( bpf_map_update_elem( &session_map, &request->session_id, &value, BPF_NOEXIST ) == 0 )
+                                    if ( bpf_map_update_elem( &session_map, &request->session_id, &session, BPF_NOEXIST ) == 0 )
                                     {
                                         debug_printf( "created session 0x%llx", request->session_id );
                                     }
@@ -237,7 +237,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     }
                                     else
                                     {
-                                        debug_printf("complex case")
+                                        debug_printf( "complex case" );
 
                                         // todo: implement complex case
                                     }
