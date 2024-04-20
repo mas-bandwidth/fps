@@ -249,7 +249,8 @@ int main( int argc, char *argv[] )
     }
 
     double last_print_time = platform_time();
-    uint64_t last_inputs = 0;
+    uint64_t last_inputs[MAX_CPUS];
+    memset( last_inputs, 0, sizeof(last_inputs) );
 
     while ( !quit )
     {
@@ -268,14 +269,19 @@ int main( int argc, char *argv[] )
         double current_time = platform_time();
         if ( last_print_time + 1.0 <= current_time )
         {
-            uint64_t total_inputs_processed = 0;
+            uint64_t current_inputs[MAX_CPUS];
+            uint64_t input_delta[MAX_CPUS];
+            memset( current_inputs, 0, sizeof(current_inputs) );
+            memset( input_delta, 0, sizeof(input_delta) );
+            printf( "input delta:" );
             for ( int i = 0; i < MAX_CPUS; i++ )
             {
-                total_inputs_processed += inputs_processed[i];
+                current_inputs[i] = inputs_processed[i];
+                input_delta[i] = current_inputs[i] - last_inputs[i];
+                printf( " %" PRId64 "\n", input_delta[i] );
+                last_inputs[i] = total_inputs_processed;
             }
-            uint64_t input_delta = total_inputs_processed - last_inputs;
-            printf( "input delta: %" PRId64 "\n", input_delta );
-            last_inputs = total_inputs_processed;
+            printf( "\n" );
             last_print_time = current_time;
         }
     }
