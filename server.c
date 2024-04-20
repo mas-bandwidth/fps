@@ -16,7 +16,7 @@
 #include <bpf/libbpf.h>
 #include <xdp/libxdp.h>
 
-void handle_event( void * ctx, int cpu, void * data, unsigned int data_sz )
+void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
     (void) ctx;
     (void) data;
@@ -142,6 +142,8 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // create the input perf buffer
 
+    /*
+
     struct perf_buffer_opts pb_opts;        
     pb_opts.sample_cb = handle_event;
     bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 250000, &pb_opts );
@@ -150,6 +152,9 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         printf( "\nerror: could not create input buffer\n\n" );
         return 1;
     }
+    */
+
+    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 250000, process_input, lost_input, NULL );
 
     return 0;
 }
