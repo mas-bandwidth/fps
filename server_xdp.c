@@ -24,7 +24,7 @@
 
 #define INPUT_SIZE                                                                        100
 #define INPUTS_PER_PACKET                                                                  10
-#define INPUT_PACKET_SIZE                ( 1 + 8 + 8 + (INPUT_SIZE + 8) * INPUTS_PER_PACKET )
+#define INPUT_PACKET_SIZE            ( 1 + 8 + 8 + 8 + (INPUT_SIZE + 8) * INPUTS_PER_PACKET )
 
 #define PLAYER_DATA_SIZE                                                                 1024
 

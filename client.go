@@ -20,13 +20,13 @@ const SocketBufferSize = 2*1024*1024
 
 const InputSize = 100
 const InputsPerPacket = 10
-const InputPacketSize = 1 + 8 + 8 + 8 + (8 + InputSize) * InputsPerPacket
 const InputHistory = 1024
 
-const JoinRequestPacketSize = 1 + 8 + 8
-const JoinResponsePacketSize = 1 + 8 + 8 + 8
-
 const PlayerDataSize = 1024
+
+const InputPacketSize = 1 + 8 + 8 + 8 + (8 + InputSize) * InputsPerPacket
+const JoinRequestPacketSize = 1 + 8 + 8 + PlayerDataSize
+const JoinResponsePacketSize = 1 + 8 + 8 + 8
 
 const JoinRequestPacket = 1
 const JoinResponsePacket = 2
@@ -154,6 +154,8 @@ func writeInputPacket(sessionId uint64, sequence uint64, inputBuffer []Input) []
 	packetIndex := 0
 	packet[0] = InputPacket
 	packetIndex++
+	binary.LittleEndian.PutUint64(packet[packetIndex:], sequence)
+	packetIndex += 8
 	binary.LittleEndian.PutUint64(packet[packetIndex:], sessionId)
 	packetIndex += 8
 	binary.LittleEndian.PutUint64(packet[packetIndex:], input.sequence)
