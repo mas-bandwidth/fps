@@ -135,7 +135,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // get the file handle to the input buffer
 
-    int bpf->input_buffer_fd = bpf_obj_get( "/sys/fs/bpf/input_buffer" );
+    bpf->input_buffer_fd = bpf_obj_get( "/sys/fs/bpf/input_buffer" );
     if ( bpf->input_buffer_fd <= 0 )
     {
         printf( "\nerror: could not get input buffer: %s\n\n", strerror(errno) );
