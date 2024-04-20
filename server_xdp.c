@@ -75,7 +75,6 @@ struct join_response_packet
 
 struct session_data 
 {
-    __u8 player_data[PLAYER_DATA_SIZE];
     __u64 last_input_sequence;
 };
 
@@ -166,7 +165,11 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     struct join_request_packet * request = (struct join_request_packet*) payload;
 
-                                    // todo: create map entry for session id if it doesn't already exist
+                                    struct session_data value;
+                                    if ( bpf_map_update_elem( &session_map, &request->session_id, &value, BPF_NOEXIST ) == 0 )
+                                    {
+                                        relay_printf( "created session 0x%llx", request->session_id );
+                                    }
 
                                     reflect_packet( data, sizeof(struct join_response_packet) );
 
