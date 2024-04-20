@@ -228,7 +228,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     dt |= ( (__u64) payload[31] ) << 48;
                                     dt |= ( (__u64) payload[32] ) << 56;
 
-                                    if ( session->next_input_sequence >= sequence )
+                                    if ( sequence >= session->next_input_sequence )
                                     {
                                         __u64 n = ( sequence - session->next_input_sequence ) + 1;
                                         if ( n > 10 )
