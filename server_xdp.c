@@ -160,7 +160,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                             {
                                 int packet_type = payload[0];
 
-                                if ( packet_type == JOIN_REQUEST_PACKET && (void*) payload + sizeof(join_request_packet) <= data_end )
+                                if ( packet_type == JOIN_REQUEST_PACKET && (void*) payload + sizeof(struct join_request_packet) <= data_end )
                                 {
                                     debug_printf( "received join request packet" );
 
@@ -175,7 +175,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     response->packet_type = JOIN_RESPONSE_PACKET;
                                     response->server_time = get_server_time();
 
-                                    bpf_xdp_adjust_tail( ctx, -( sizeof(struct join_request_packet) - sizeof(struct join_response_packet) ) );
+                                    bpf_xdp_adjust_tail( ctx, -( JOIN_REQUEST_PACKET_SIZE - JOIN_RESPONSE_PACKET_SIZE ) );
 
                                     return XDP_TX;
                                 }
