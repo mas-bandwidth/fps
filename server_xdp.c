@@ -264,8 +264,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         if ( !data ) // can't happen
                                             return XDP_DROP;
 
-                                        const int input_size = ;
-
                                         if ( (void*) payload + 1 + 8 + 8 + 8 + (8+INPUT_SIZE) <= data_end )
                                         {
                                             for ( int i = 0; i < (8+8+INPUT_SIZE); i++ )
