@@ -261,10 +261,12 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         int zero = 0;
                                         __u8 * data = (__u8*) bpf_map_lookup_elem( &heap, &zero );
-                                        if ( !data ) // can't happen
-                                            return XDP_DROP;
+                                        if ( !data ) 
+                                        {
+                                            return XDP_DROP; // can't happen
+                                        }
 
-                                        if ( n == 1 && (void*) payload + 1 + 8 + 8 + (8+INPUT_SIZE) <= data_end )
+                                        if ( n == 1 && (void*) payload + 1 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
                                             for ( int i = 0; i < 8 + 8 + INPUT_SIZE; i++ )
                                             {
@@ -273,6 +275,12 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                             bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + INPUT_SIZE );
                                         }
+                                        /*
+                                        else if ( n == 2 && ... )
+                                        {
+                                            // ...
+                                        }
+                                        */
                                     }
                                     else
                                     {
