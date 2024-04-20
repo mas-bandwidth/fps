@@ -50,6 +50,19 @@ void platform_init()
     time_start = ts.tv_sec + ( (double) ( ts.tv_nsec ) ) / 1000000000.0;
 }
 
+double next_platform_time()
+{
+    timespec ts;
+    clock_gettime( CLOCK_MONOTONIC_RAW, &ts );
+    double current = ts.tv_sec + ( (double) ( ts.tv_nsec ) ) / 1000000000.0;
+    return current - time_start;
+}
+
+void next_platform_sleep( double time )
+{
+    usleep( (int) ( time * 1000000 ) );
+}
+
 int bpf_init( struct bpf_t * bpf, const char * interface_name )
 {
     // we can only run xdp programs as root
