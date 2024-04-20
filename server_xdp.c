@@ -266,12 +266,15 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         const int input_size = 8 + (8+INPUT_SIZE) * n;
 
-                                        for ( int i = 0; i < input_size; i++ )
+                                        if ( (void*) payload + 17 + input_size <= data_end )
                                         {
-                                            data[i] = payload[17+i];
-                                        }
+                                            for ( int i = 0; i < input_size; i++ )
+                                            {
+                                                data[i] = payload[17+i];
+                                            }
 
-                                        bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, &data, input_size );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, &data, input_size );
+                                        }
                                     }
                                     else
                                     {
