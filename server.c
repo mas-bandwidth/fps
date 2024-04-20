@@ -156,7 +156,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     }
     */
 
-    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 250000, process_input, NULL, NULL );
+    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 250000, process_input, NULL, NULL, NULL );
 
     return 0;
 }
