@@ -280,7 +280,7 @@ int main( int argc, char *argv[] )
                 input_delta[i] = current_inputs[i] - last_inputs[i];
                 if ( input_delta[i] != 0 )
                 {
-                    printf( " %d:%" PRId64, i, input_delta[i] );
+                    printf( " #%d:%" PRId64, i, input_delta[i] );
                 }
                 last_inputs[i] = current_inputs[i];
             }
