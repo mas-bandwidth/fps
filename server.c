@@ -16,12 +16,20 @@
 #include <bpf/libbpf.h>
 #include <xdp/libxdp.h>
 
+void handle_event( void * ctx, int cpu, void * data, unsigned int data_sz )
+{
+    (void) ctx;
+    (void) data;
+    printf( "process input on cpu %d (%d bytes)", cpu, data_sz );
+}
+
 struct bpf_t
 {
     int interface_index;
     struct xdp_program * program;
     bool attached_native;
     bool attached_skb;
+    int input_buffer_fd;
 };
 
 int bpf_init( struct bpf_t * bpf, const char * interface_name )
@@ -122,6 +130,15 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         return 1;
     }
 
+    // get the file handle to the input buffer
+
+    int bpf->input_buffer_fd = bpf_obj_get( "/sys/fs/bpf/input_buffer" );
+    if ( bpf->input_buffer_fd <= 0 )
+    {
+        printf( "\nerror: could not get input buffer: %s\n\n", strerror(errno) );
+        return 1;
+    }
+
     return 0;
 }
 
@@ -186,6 +203,29 @@ int main( int argc, char *argv[] )
 
     while ( !quit )
     {
+        pb_opts.sample_cb = handle_event;
+        pb = perf_buffer__new( bpf_map__fd( skel->maps.pb ), 250000, &pb_opts );
+        if (libbpf_get_error(pb)) {
+            err = -1;
+            fprintf(stderr, "Failed to create perf buffer\n");
+            goto cleanup;
+        }
+
+        /* Process events */
+        printf("%-8s %-5s %-7s %-16s %s\n",
+               "TIME", "EVENT", "PID", "COMM", "FILENAME");
+        while (!exiting) {
+            err = perf_buffer__poll(pb, 100 /* timeout, ms */);
+            /* Ctrl-C will cause -EINTR */
+            if (err == -EINTR) {
+                err = 0;
+                break;
+            }
+            if (err < 0) {
+                printf("Error polling perf buffer: %d\n", err);
+                break;
+            }
+        }        
         usleep( 1000000 );
     }
 
