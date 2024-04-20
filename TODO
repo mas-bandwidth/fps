@@ -50,9 +50,17 @@ DONE
 
 	Hack up to 10 inputs per-entry with perf buffer.
 
+	Look how to implement the userspace side of perf buffer.
+
 TODO
 
-	Look how to implement the userspace side of perf buffer.
+	Implement counters so I can track input processing
+
+	Convert counters to print out the delta inputs per-second
+
+	------------------------
+
+	Scale up something in google cloud to see if I can do 10k, 25k, 50k, 100k player inputs
 
 	------------------------
 

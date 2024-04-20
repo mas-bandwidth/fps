@@ -178,13 +178,13 @@ func writeInputPacket(sessionId uint64, sequence uint64, inputBuffer []Input) []
 func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 
 	addr := net.UDPAddr{
-	    Port: StartPort + clientIndex,
+	    Port: 0,
 	    IP:   net.ParseIP("0.0.0.0"),
 	}
 
 	conn, err := net.ListenUDP("udp", &addr)
 	if err != nil {
-		return // IMPORTANT: to get as many clients as possible on one machine, if we can't bind to a specific port, just ignore and carry on
+		panic( "could not create client")
 	}
 	defer conn.Close()
 
@@ -226,6 +226,8 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 	}()
 
 	// join
+
+	rand.Seed(time.Now().UnixNano())
 
 	sessionId := rand.Uint64()
 
@@ -288,10 +290,7 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 
 			inputPacket := writeInputPacket(sessionId, sequence, inputBuffer)
 
-			// todo: hack up complex case by dropping every 2nd packet
-			if sequence % 3 == 0 {
-				conn.WriteToUDP(inputPacket, serverAddress)
-			}
+			conn.WriteToUDP(inputPacket, serverAddress)
 
 			atomic.AddUint64(&packetsSent, 1)
 

@@ -18,11 +18,15 @@
 #include <xdp/libxdp.h>
 #include <sys/resource.h>
 
+#define MAX_CPUS 1024
+
+static uint64_t inputs_processed[MAX_CPUS];
+
 void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
     (void) ctx;
     (void) data;
-    printf( "process input on cpu %d (%d bytes)\n", cpu, data_sz );
+    __sync_fetch_and_add( &inputs_processed[cpu], 1 );
 }
 
 struct bpf_t
@@ -34,6 +38,15 @@ struct bpf_t
     int input_buffer_fd;
     struct perf_buffer * input_buffer;
 };
+
+static double time_start;
+
+void platform_init()
+{
+    timespec ts;
+    clock_gettime( CLOCK_MONOTONIC_RAW, &ts );
+    time_start = ts.tv_sec + ( (double) ( ts.tv_nsec ) ) / 1000000000.0;
+}
 
 int bpf_init( struct bpf_t * bpf, const char * interface_name )
 {
@@ -84,6 +97,10 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
             return 1;
         }
     }
+
+    // initialize platform
+
+    platform_init();
 
     // load the server_xdp program and attach it to the network interface
 
@@ -151,6 +168,8 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         return 1;
     }
 
+    printf( "ready\n" );
+
     return 0;
 }
 
@@ -213,6 +232,8 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
+    double last_print_time = platform_time();
+
     while ( !quit )
     {
         int err = perf_buffer__poll( bpf.input_buffer, 1 );
@@ -225,6 +246,18 @@ int main( int argc, char *argv[] )
         {
             printf( "\nerror: could not poll input buffer: %d\n", err );
             break;
+        }
+
+        double current_time = platform_time();
+        if ( last_print_time + 1.0 <= current_time )
+        {
+            uint64_t total_inputs_processed = 0;
+            for ( int i = 0; i < MAX_CPUS; i++ )
+            {
+                total_inputs_processed += inputs_processed[i];
+            }
+            printf( "total inputs processed: %d\n", total_inputs_processed );
+            last_print_time = current_time;
         }
     }
 
