@@ -18,6 +18,10 @@
 #include <linux/string.h>
 #include <bpf/bpf_helpers.h>
 
+#ifndef memcpy
+#define memcpy(dest, src, n) __builtin_memcpy((dest), (src), (n))
+#endif
+
 #define JOIN_REQUEST_PACKET                                                                 1
 #define JOIN_RESPONSE_PACKET                                                                2
 #define INPUT_PACKET                                                                        3
@@ -260,7 +264,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         const int input_size = 8 + (8+INPUT_SIZE) * n;
 
-                                        bpf_memcpy( data, &payload[17], input_size );
+                                        memcpy( data, &payload[17], input_size );
 
                                         bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, &data, input_size );
                                     }
