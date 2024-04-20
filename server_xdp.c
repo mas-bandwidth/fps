@@ -92,6 +92,7 @@ struct {
     __uint( type, BPF_MAP_TYPE_PERF_EVENT_ARRAY );
     __uint( key_size, sizeof(int) );
     __uint( value_size, sizeof(int) );
+    __uint( pinning, LIBBPF_PIN_BY_NAME );
 } input_buffer SEC(".maps");
 
 struct heap {
