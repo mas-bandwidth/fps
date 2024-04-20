@@ -240,8 +240,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     }
                                     else if ( sequence > session->next_input_sequence )
                                     {
-                                        session->next_input_sequence = sequence + 1;
-
                                         __u64 n = ( sequence - session->next_input_sequence ) + 1;
                                         if ( n > 10 )
                                         {
@@ -249,6 +247,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         }
 
                                         debug_printf( "process input %lld (n=%d)", sequence, n );
+
+                                        session->next_input_sequence = sequence + 1;
 
                                         // todo: pass packet with only n required inputs down to userspace application via AF_XDP
                                         (void) n;
