@@ -271,7 +271,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[17+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, &data, (8+8+INPUT_SIZE) );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, (8+8+INPUT_SIZE) );
                                         }
                                     }
                                     else
