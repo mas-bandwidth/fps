@@ -264,14 +264,16 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         if ( !data ) // can't happen
                                             return XDP_DROP;
 
-                                        if ( (void*) payload + 1 + 8 + 8 + 8 + (8+INPUT_SIZE) <= data_end )
+                                        const int input_size = 8 + (8+INPUT_SIZE) * n;
+
+                                        if ( (void*) payload + 1 + 8 + 8 + input_size <= data_end )
                                         {
-                                            for ( int i = 0; i < (8+8+INPUT_SIZE); i++ )
+                                            for ( int i = 0; i < input_size; i++ )
                                             {
                                                 data[i] = payload[17+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, (8+8+INPUT_SIZE) );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, input_size );
                                         }
                                     }
                                     else
