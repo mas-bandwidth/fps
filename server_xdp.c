@@ -92,6 +92,13 @@ struct {
     __uint( value_size, sizeof(int) );
 } input_buffer SEC(".maps");
 
+struct {
+    __uint( type, BPF_MAP_TYPE_PERCPU_ARRAY );
+    __uint( max_entries, 1 );
+    __type( key, int );
+    __type( value, 1500 );
+} heap SEC(".maps");
+
 static void reflect_packet( void * data, int payload_bytes )
 {
     struct ethhdr * eth = data;
@@ -246,7 +253,16 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         session->next_input_sequence = sequence + 1;
 
-                                        bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, &payload[17], 8 + (8+INPUT_SIZE) * n );
+                                        int zero = 0;
+                                        void * data = bpf_map_lookup_elem( &heap, &zero );
+                                        if ( !data ) // can't happen
+                                            return XDP_DROP;
+
+                                        const int input_size = 8 + (8+INPUT_SIZE) * n;
+
+                                        memcpy( data, &payload[17], input_size );
+
+                                        bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, &data, input_size );
                                     }
                                     else
                                     {
