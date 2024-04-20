@@ -268,6 +268,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         if ( (void*) payload + 1 + 8 + 8 + input_size <= data_end )
                                         {
+                                            #pragma unroll
                                             for ( int i = 0; i < input_size; i++ )
                                             {
                                                 data[i] = payload[17+i];
