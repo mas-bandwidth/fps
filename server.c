@@ -17,6 +17,7 @@
 #include <bpf/libbpf.h>
 #include <xdp/libxdp.h>
 #include <sys/resource.h>
+#include <sys/types.h>
 
 #define MAX_CPUS 1024
 
