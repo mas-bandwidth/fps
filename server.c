@@ -50,7 +50,7 @@ void platform_init()
     time_start = ts.tv_sec + ( (double) ( ts.tv_nsec ) ) / 1000000000.0;
 }
 
-double next_platform_time()
+double platform_time()
 {
     struct timespec ts;
     clock_gettime( CLOCK_MONOTONIC_RAW, &ts );
@@ -58,7 +58,7 @@ double next_platform_time()
     return current - time_start;
 }
 
-void next_platform_sleep( double time )
+void platform_sleep( double time )
 {
     usleep( (int) ( time * 1000000 ) );
 }
