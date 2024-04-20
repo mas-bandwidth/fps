@@ -185,8 +185,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                 }
                                 else if ( packet_type == INPUT_PACKET && (void*) payload + 1 + 8 + 8 + 8 + 8 + INPUT_SIZE <= data_end )
                                 {
-                                    debug_printf( "received input packet" );
-
                                     __u64 session_id = (__u64) payload[1];
                                     session_id |= ( (__u64) payload[2] ) << 8;
                                     session_id |= ( (__u64) payload[3] ) << 16;
@@ -232,14 +230,32 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     if ( session->next_input_sequence == sequence )
                                     {
-                                        debug_printf("input simple case: %lld", sequence );
+                                        // the common case: input delivered with no packet loss
+
+                                        debug_printf( "process input %lld", sequence );
+
                                         session->next_input_sequence = sequence + 1;
+
+                                        // todo: pass (sequence, t, dt, input) input down to userspace application via AF_XDP
+                                    }
+                                    else if ( sequence > session_next_input_sequence )
+                                    {
+                                        session->next_input_sequence = sequence + 1;
+
+                                        __u64 n = ( sequence - session_next_input_sequence ) + 1;
+                                        if ( n > 10 )
+                                        {
+                                            n = 10;
+                                        }
+
+                                        debug_printf( "process input %lld (n=%d)", sequence, n );
+
+                                        // todo: pass packet with only n required inputs down to userspace application via AF_XDP
+                                        (void) n;
                                     }
                                     else
                                     {
-                                        debug_printf( "complex case" );
-
-                                        // todo: implement complex case
+                                        debug_printf( "input packet is old" );
                                     }
                                 }
                                 else

@@ -14,6 +14,16 @@ DONE
 
 	Set client time to RTT/2 plus some safety (100ms for now, to exaggerate effect...)
 
+	Implement input processing logic
+
+	Simple case.
+
 TODO
 
-	Implement input processing logic
+	Complex case. Walk the inputs up to max in packet
+
+	Forward the input packet to userspace for processing, eg. AF_XDP socket
+
+	https://www.kernel.org/doc/html/next/networking/af_xdp.html
+
+	Scale up and implement a simple system with input and state per-player
