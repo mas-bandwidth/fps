@@ -7,6 +7,7 @@
 #include <memory.h>
 #include <stdio.h>
 #include <signal.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <assert.h>
 #include <unistd.h>
