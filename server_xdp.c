@@ -262,7 +262,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         for ( int i = 0; i < input_size; i++ )
                                         {
-                                            data[i] = payload[17+i];
+                                            (__u8*)data[i] = payload[17+i];
                                         }
 
                                         bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, &data, input_size );
