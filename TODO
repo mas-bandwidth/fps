@@ -52,13 +52,13 @@ DONE
 
 	Look how to implement the userspace side of perf buffer.
 
-TODO
-
 	Implement counters so I can track input processing
 
 	Convert counters to print out the delta inputs per-second
 
-	------------------------
+	Convert counters to per-CPU delta inputs per-second, hiding zeros.
+
+TODO
 
 	Scale up something in google cloud to see if I can do 10k, 25k, 50k, 100k player inputs
 
