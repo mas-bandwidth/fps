@@ -96,7 +96,7 @@ struct {
 
 struct heap {
     __u8 data[HEAP_SIZE];
-}
+};
 
 struct {
     __uint( type, BPF_MAP_TYPE_PERCPU_ARRAY );
