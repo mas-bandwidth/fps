@@ -22,7 +22,7 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
     (void) ctx;
     (void) data;
-    printf( "process input on cpu %d (%d bytes)", cpu, data_sz );
+    printf( "process input on cpu %d (%d bytes)\n", cpu, data_sz );
 }
 
 struct bpf_t
