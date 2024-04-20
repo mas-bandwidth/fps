@@ -30,6 +30,7 @@ struct bpf_t
     bool attached_native;
     bool attached_skb;
     int input_buffer_fd;
+    struct perf_buffer * input_buffer;
 };
 
 int bpf_init( struct bpf_t * bpf, const char * interface_name )
@@ -139,6 +140,17 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         return 1;
     }
 
+    // create the input perf buffer
+
+    struct perf_buffer_opts pb_opts;        
+    pb_opts.sample_cb = handle_event;
+    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 250000, &pb_opts );
+    if ( libbpf_get_error( bpf->input_buffer ) ) 
+    {
+        printf( "\nerror: could not create input buffer\n\n" );
+        return 1;
+    }
+
     return 0;
 }
 
@@ -203,30 +215,17 @@ int main( int argc, char *argv[] )
 
     while ( !quit )
     {
-        pb_opts.sample_cb = handle_event;
-        pb = perf_buffer__new( bpf_map__fd( skel->maps.pb ), 250000, &pb_opts );
-        if (libbpf_get_error(pb)) {
-            err = -1;
-            fprintf(stderr, "Failed to create perf buffer\n");
-            goto cleanup;
+        err = perf_buffer__poll( bpf->input_buffer, 1 );
+        if ( err == -EINTR ) 
+        {
+            err = 0;
+            break;
         }
-
-        /* Process events */
-        printf("%-8s %-5s %-7s %-16s %s\n",
-               "TIME", "EVENT", "PID", "COMM", "FILENAME");
-        while (!exiting) {
-            err = perf_buffer__poll(pb, 100 /* timeout, ms */);
-            /* Ctrl-C will cause -EINTR */
-            if (err == -EINTR) {
-                err = 0;
-                break;
-            }
-            if (err < 0) {
-                printf("Error polling perf buffer: %d\n", err);
-                break;
-            }
-        }        
-        usleep( 1000000 );
+        if ( err < 0 ) 
+        {
+            printf( "\nerror: could not poll input buffer: %d\n", err );
+            break;
+        }
     }
 
     cleanup();
