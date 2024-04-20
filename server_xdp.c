@@ -260,7 +260,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         const int input_size = 8 + (8+INPUT_SIZE) * n;
 
-                                        memcpy( data, &payload[17], input_size );
+                                        bpf_memcpy( data, &payload[17], input_size );
 
                                         bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, &data, input_size );
                                     }
