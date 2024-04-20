@@ -199,6 +199,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     struct session_data * session = (struct session_data*) bpf_map_lookup_elem( &session_map, &session_id );
                                     if ( session == NULL )
                                     {
+                                        debug_printf( "could not find session 0x%llx", session_id );
                                         return XDP_DROP;
                                     }
 
