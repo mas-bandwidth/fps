@@ -42,11 +42,15 @@ DONE
 
 	I really want all inputs to come in, on multiple cores, and then go to a ring buffer, per-receive queue.
 
-TODO
-
 	Seems like perfbuf is ironically the closest thing I need, because I want it to be a per-CPU queue, and I do need to process millions of packets per-second.
 
 	https://nakryiko.com/posts/bpf-ringbuf/#bpf-ringbuf-vs-bpf-perfbuf
+
+TODO
+
+	Implement xdp side with perf buffer.
+
+	Might need to include the time with each input, so it can be passed down.
 
 	------------------------
 

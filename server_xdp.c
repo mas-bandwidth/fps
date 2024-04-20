@@ -86,6 +86,12 @@ struct {
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } session_map SEC(".maps");
 
+struct {
+    __uint( type, BPF_MAP_TYPE_PERF_EVENT_ARRAY );
+    __uint( key_size, sizeof(int) );
+    __uint( value_size, sizeof(int) );
+} input_buffer SEC(".maps");
+
 static void reflect_packet( void * data, int payload_bytes )
 {
     struct ethhdr * eth = data;
@@ -240,8 +246,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         session->next_input_sequence = sequence + 1;
 
-                                        // todo: pass packet with only n inputs down to userspace application via AF_XDP
-                                        (void) n;
+                                        bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, &payload[17], 8 + (8+INPUT_SIZE) * n );
                                     }
                                     else
                                     {
