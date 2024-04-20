@@ -18,6 +18,7 @@
 #include <xdp/libxdp.h>
 #include <sys/resource.h>
 #include <sys/types.h>
+#include <inttypes.h>
 #include <time.h>
 
 #define MAX_CPUS 1024
