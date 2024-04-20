@@ -109,6 +109,19 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         }
     }
 
+    // bump rlimit for the perf buffer
+
+    struct rlimit rlim_new = {
+        .rlim_cur   = RLIM_INFINITY,
+        .rlim_max   = RLIM_INFINITY,
+    };
+
+    if ( setrlimit( RLIMIT_MEMLOCK, &rlim_new ) ) 
+    {
+        printf( "\nerror: could not increase RLIMIT_MEMLOCK limit!\n\n" );
+        return 1;
+    }
+
     return 0;
 }
 

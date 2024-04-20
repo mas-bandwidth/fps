@@ -46,11 +46,13 @@ DONE
 
 	https://nakryiko.com/posts/bpf-ringbuf/#bpf-ringbuf-vs-bpf-perfbuf
 
-TODO
-
 	Implement xdp side with perf buffer.
 
-	Might need to include the time with each input, so it can be passed down.
+	Hack up to 10 inputs per-entry with perf buffer.
+
+TODO
+
+	Look how to implement the userspace side of perf buffer.
 
 	------------------------
 

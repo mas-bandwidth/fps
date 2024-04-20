@@ -154,11 +154,9 @@ func writeInputPacket(sessionId uint64, sequence uint64, inputBuffer []Input) []
 	packetIndex := 0
 	packet[0] = InputPacket
 	packetIndex++
-	binary.LittleEndian.PutUint64(packet[packetIndex:], sequence)
-	packetIndex += 8
 	binary.LittleEndian.PutUint64(packet[packetIndex:], sessionId)
 	packetIndex += 8
-	binary.LittleEndian.PutUint64(packet[packetIndex:], input.sequence)
+	binary.LittleEndian.PutUint64(packet[packetIndex:], sequence)
 	packetIndex += 8
 	binary.LittleEndian.PutUint64(packet[packetIndex:], input.t)
 	packetIndex += 8
