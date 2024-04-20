@@ -268,21 +268,22 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
-                                            /*
                                             for ( int i = 0; i < 8 + 8 + INPUT_SIZE; i++ )
                                             {
                                                 data[i] = payload[17+i];
                                             }
-                                            */
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, payload + 17, 8 + 8 + INPUT_SIZE );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + INPUT_SIZE );
                                         }
-                                        /*
-                                        else if ( n == 2 && ... )
+                                        if ( n == 2 && (void*) payload + 1 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2 <= data_end )
                                         {
-                                            // ...
+                                            for ( int i = 0; i < 8 + 8 + INPUT_SIZE; i++ )
+                                            {
+                                                data[i] = payload[17+i];
+                                            }
+
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + ( 8 + INPUT_SIZE ) * 2 );
                                         }
-                                        */
                                     }
                                     else
                                     {
