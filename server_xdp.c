@@ -53,6 +53,26 @@
 #define debug_printf(...) do { } while (0)
 #endif // #if DEBUG
 
+#pragma pack(push, 1)
+
+struct join_request_packet
+{
+    __u8 packet_type;
+    __u64 session_id;
+    __u64 send_time;
+    __u8 player_data[PLAYER_DATA_SIZE];
+};
+
+struct join_response_packet
+{
+    __u8 packet_type;
+    __u64 session_id;
+    __u64 send_time;
+    __u64 server_time;
+};
+
+#pragma pack(pop)
+
 struct session_data 
 {
     __u8 player_data[PLAYER_DATA_SIZE];
@@ -105,6 +125,11 @@ static void reflect_packet( void * data, int payload_bytes )
     ip->check = checksum;
 }
 
+static __u64 get_server_time()
+{
+    return bpf_ktime_get_boot_ns();
+}
+
 SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx ) 
 { 
     void * data = (void*) (long) ctx->data; 
@@ -135,35 +160,30 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                             {
                                 int packet_type = payload[0];
 
-                                if ( packet_type == JOIN_REQUEST_PACKET && (void*) payload + JOIN_REQUEST_PACKET_SIZE <= data_end )
+                                if ( packet_type == JOIN_REQUEST_PACKET && (void*) payload + sizeof(join_request_packet) <= data_end )
                                 {
                                     debug_printf( "received join request packet" );
 
-                                    __u64 session_id = (__u64) payload[1];
-                                    session_id |= ( (__u64) payload[2] ) << 8;
-                                    session_id |= ( (__u64) payload[3] ) << 16;
-                                    session_id |= ( (__u64) payload[4] ) << 24;
-                                    session_id |= ( (__u64) payload[5] ) << 32;
-                                    session_id |= ( (__u64) payload[6] ) << 40;
-                                    session_id |= ( (__u64) payload[7] ) << 48;
-                                    session_id |= ( (__u64) payload[8] ) << 56;
+                                    struct join_request_packet * request = (struct join_request_packet*) payload;
 
-                                    // todo
-                                    (void) session_id;
+                                    // todo: create map entry for session id if it doesn't already exist
 
-                                    reflect_packet( data, JOIN_RESPONSE_PACKET_SIZE );
+                                    reflect_packet( data, sizeof(struct join_response_packet) );
 
-                                    payload[0] = JOIN_RESPONSE_PACKET;
+                                    struct join_response_packet * response = (struct join_response_packet*) payload;
 
-                                    // todo: store current time in nanoseconds at end of packet 1 + 8 + 8 index
+                                    response->packet_type = JOIN_RESPONSE_PACKET;
+                                    response->server_time = get_server_time();
 
-                                    bpf_xdp_adjust_tail( ctx, -( JOIN_REQUEST_PACKET_SIZE - JOIN_RESPONSE_PACKET_SIZE ) );
+                                    bpf_xdp_adjust_tail( ctx, -( sizeof(struct join_request_packet) - sizeof(struct join_response_packet) ) );
 
                                     return XDP_TX;
                                 }
                                 else if ( packet_type == INPUT_PACKET && (void*) payload + 1 + 8 + 8 + 8 + 8 + INPUT_SIZE <= data_end )
                                 {
                                     debug_printf( "received input packet" );
+
+                                    // todo: switch to this via overlay struct
 
                                     __u64 session_id = (__u64) payload[1];
                                     session_id |= ( (__u64) payload[2] ) << 8;

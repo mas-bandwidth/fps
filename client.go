@@ -36,6 +36,7 @@ var numClients int
 
 var quit uint64
 var joined uint64
+var serverTime uint64
 var packetsSent uint64
 var packetsReceived uint64
 
@@ -211,7 +212,8 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 			if packetType == JoinResponsePacket && packetBytes == JoinResponsePacketSize {
 				fmt.Printf("received join response packet\n")
 				atomic.AddUint64(&joined, 1)
-				// todo: grab ping estimate, initial time etc.
+				joinServerTime := binary.LittleEndian.Uint64(packetData[1+8+8:])
+				atomic.StoreUint64(&serverTime, joinServerTime)
 			}
 			atomic.AddUint64(&packetsReceived, 1)
 		}
@@ -259,6 +261,8 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
  	}
 
 	// main loop
+
+	fmt.Printf("server time is %d\n", serverTime)
 
 	t := uint64(0)					// nanoseconds
 	dt := uint64(1000000000)/100 	// 100ms in nanoseconds
