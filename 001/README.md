@@ -30,13 +30,13 @@ https://nakryiko.com/posts/bpf-ringbuf/#bpf-ringbuf-vs-bpf-perfbuf
 
 Player input packets and the resulting inputs processed in userspace via the perf buffer are *always* processed on the same thread, because client packets all go to a single XDP thread for receive queue processing via receive queue hashing of source address and dest address. This is incredibly convenient, because now we don't need any synchronization primitives when modifying player state.
 
-## Results:
+## Results
 
-I'm able to run 1k clients on n1-standard-8 sending input packets at 100HZ, then scale up this up in a managed instance group (MIG) up to any number of players on google cloud.
+I'm able to run 1000 clients per n1-standard-8 instance in google cloud. I can scale up this up in a managed instance group (MIG) up to any number of players I need.
 
-I can run a player server on c3-standard-44 modified so it has 22 cpus (avoid 2 cores-per CPU) and it tops out processing ~50k players worth of inputs. 
+I setup one player server on a c3-standard-44 VM, modified so it has 22 cpus (avoid 2 cores-per CPU) and it tops out processing ~50k players worth of inputs. 
 
-Increasing CPU count on the player server instance doesn't allow more player inputs to be processed, so it's definitely IO bound.
+Increasing CPU count on the player server VM doesn't allow more player inputs to be processed, so it's definitely IO bound.
 
 How much bandwidth is being sent? 
 
