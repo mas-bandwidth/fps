@@ -22,7 +22,7 @@ Player inputs are sent at 100HZ, and each input is 100 bytes long. This is typic
 
 Inputs are sent over UDP because they are time series data and are extremely latency sensitive. All inputs must arrive for simulation, or the client will see mispredictions, because the server state is authoritative. We rely on the client and server running the same simulation on the same inputs and delta times and getting (approximately) the same result. This is known as client side prediction, or outside of game development, optimistic execution with rollback.
 
-We cannot use TCP for this reliability, because head of line blocking would cause significant delays in input delivery under both latency and packet loss. Instead, we send the most recent 10 inputs in each input packet, thus we have 10X redundancy. Inputs are relatively small compared to player state (1000 bytes) so this strategy is acceptable, and if one input packet is dropped, the very next packet 1/100th of a second later contains the dropped input PLUS the next input we need to step the player forward. Perfect.
+We cannot use TCP for this reliability, because head of line blocking would cause significant delays in input delivery under both latency and packet loss. Instead, we send the most recent 10 inputs in each input packet, thus we have 10X redundancy. Inputs are relatively small compared so this strategy is acceptable, and if one input packet is dropped, the very next packet 1/100th of a second later contains the dropped input PLUS the next input we need to step the player forward. Perfect.
 
 This reliability is performed entirely in XDP, and inputs (excluding redundant ones) are queued up in a bpf perf buffer to be passed down to the userspace player server application for processing.
 
