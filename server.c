@@ -275,7 +275,7 @@ int main( int argc, char *argv[] )
                 current_inputs += inputs_processed[i];
             }
             uint64_t input_delta = current_inputs - last_inputs;
-            printf( "input delta: %" PRId64, input_delta );
+            printf( "input delta: %" PRId64 "\n", input_delta );
             last_inputs = current_inputs;
             last_print_time = current_time;
         }
