@@ -6,7 +6,7 @@ It won't be possible to have all players simulated on one server, there's simply
 
 So let's create a new type of server. A "player server". Each player server handles player input processing and simulation, each with n players connected to them. 
 
-Player servers take the player input + delta time (dt) and step the player state forward in time. Players are simulated forward only when input packets arrive from their client. There is no global tick on a player server. This is similar to how most first person shooters in the quake netcode model work. For example, Counterstrike, Titanfall and Apex Legends.
+Player servers take the player input + delta time (dt) and step the player state forward in time. Players are simulated forward only when input packets arrive from their client. There is no global tick on a player server. This is similar to how most first person shooters in the quake netcode model process player inputs. For example, Counterstrike, Titanfall and Apex Legends.
 
 The assumptions made here are: 
 
