@@ -50,7 +50,7 @@ With each player sending 1 mbit/sec, 1M players are sending 1,000,000 mbit/sec -
 
 That's a non-trivial amount of bandwidth. 
 
-For 50k players we are sending 50,000 * 1mbit = 50,000 mbit/sec -> 50gbit/sec. No wonder google cloud is getting IO bound @ 50k players.
+For 50k players we are sending 50,000 * 1mbit -> 50gbit/sec. No wonder google cloud is getting IO bound.
 
 Being conservative, it seems that 20 player servers with 100gbit/nics are required for 1M players.
 
