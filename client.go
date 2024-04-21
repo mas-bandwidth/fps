@@ -27,10 +27,14 @@ const PlayerDataSize = 1024
 const InputPacketSize = 1 + 8 + 8 + 8 + (8 + InputSize) * InputsPerPacket
 const JoinRequestPacketSize = 1 + 8 + 8 + PlayerDataSize
 const JoinResponsePacketSize = 1 + 8 + 8 + 8
+const StatsRequestPacketSize = 1 + 8
+const StatsResponsePacketSize = 1 + 8
 
 const JoinRequestPacket = 1
 const JoinResponsePacket = 2
 const InputPacket = 3
+const StatsRequestPacket = 4
+const StatsResponsePacket = 5
 
 var numClients int
 
@@ -175,6 +179,12 @@ func writeInputPacket(sessionId uint64, sequence uint64, inputBuffer []Input) []
 	return packet[:packetIndex]
 }
 
+func writeStatsRequestPacket() []byte {
+	packet := make([]byte, StatsRequestPacketSize)
+	packet[0] = StatsRequestPacket
+	return packet
+}
+
 func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 
 	addr := net.UDPAddr{
@@ -200,16 +210,22 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 
 	go func() {
 		for {
+	
 			packetBytes, _, err := conn.ReadFromUDP(buffer)
 			if err != nil {
 				break
 			}
+	
 			if packetBytes < 1 {
 				continue
 			}
+
 			packetData := buffer[:packetBytes]
+
 			packetType := packetData[0]
+
 			if packetType == JoinResponsePacket && packetBytes == JoinResponsePacketSize {
+
 				fmt.Printf("received join response packet\n")
 				atomic.AddUint64(&joined, 1)
 				sentTime := binary.LittleEndian.Uint64(packetData[1+8:])
@@ -221,6 +237,13 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 				startTime := joinServerTime + offset
 				atomic.StoreUint64(&serverTime, startTime)
 			}
+			else if packetType == StatsResponsePacket {
+
+				inputsProcessed := binary.LittleEndian.Uint64(packetData[1:])
+				fmt.Printf("inputs processed: %d\n", inputsProcessed )
+
+			}
+
 			atomic.AddUint64(&packetsReceived, 1)
 		}
 	}()
@@ -230,43 +253,67 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 	rand.Seed(time.Now().UnixNano())
 
 	sessionId := rand.Uint64()
+	{
+		fmt.Printf("joining server as session %016x\n", sessionId)
 
-	fmt.Printf("joining server as session %016x\n", sessionId)
+		playerData := make([]byte, PlayerDataSize)
 
-	playerData := make([]byte, PlayerDataSize)
+		ticker := time.NewTicker(time.Millisecond * 10)
 
-	ticker := time.NewTicker(time.Millisecond * 10)
+	 	for {
+	 		stop := false
 
- 	for {
- 		stop := false
+			select {
 
-		select {
+		 	case <-ticker.C:
 
-	 	case <-ticker.C:
+				joined := atomic.LoadUint64(&joined)
+				if joined > 0 {
+					stop = true
+				}
 
-			joined := atomic.LoadUint64(&joined)
-			if joined > 0 {
-				stop = true
+		 		fmt.Printf("sent join request packet\n")
+
+		 		sentTime := uint64(time.Now().UnixNano())
+
+				joinRequestPacket := writeJoinRequestPacket(sessionId, sentTime, playerData)
+
+				conn.WriteToUDP(joinRequestPacket, serverAddress)
+		 	}
+
+			if stop {
+				break
 			}
 
-	 		fmt.Printf("sent join request packet\n")
-
-	 		sentTime := uint64(time.Now().UnixNano())
-
-			joinRequestPacket := writeJoinRequestPacket(sessionId, sentTime, playerData)
-
-			conn.WriteToUDP(joinRequestPacket, serverAddress)
+			quit := atomic.LoadUint64(&quit)
+			if quit != 0 {
+				return
+			}
 	 	}
+	}
 
-		if stop {
-			break
-		}
+ 	// stats loop
 
-		quit := atomic.LoadUint64(&quit)
-		if quit != 0 {
-			return
-		}
- 	}
+ 	go func() {
+
+		ticker := time.NewTicker(time.Second)
+
+	 	for {
+			select {
+
+		 	case <-ticker.C:
+
+				statsRequestPacket := writeStatsRequestPacket()
+
+				conn.WriteToUDP(statsRequestPacket, serverAddress)
+		 	}
+
+			quit := atomic.LoadUint64(&quit)
+			if quit != 0 {
+				return
+			}
+	 	}
+ 	}()
 
 	// main loop
 
@@ -278,6 +325,8 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 	sequence := uint64(1000)
 
 	inputBuffer := make([]Input, InputHistory)
+
+	ticker := time.NewTicker(time.Millisecond * 10)
 
  	for {
 		select {

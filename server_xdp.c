@@ -21,6 +21,8 @@
 #define JOIN_REQUEST_PACKET                                                                 1
 #define JOIN_RESPONSE_PACKET                                                                2
 #define INPUT_PACKET                                                                        3
+#define STATS_REQUEST_PACKET                                                                4
+#define STATS_RESPONSE_PACKET                                                               5
 
 #define INPUT_SIZE                                                                        100
 #define INPUTS_PER_PACKET                                                                  10
@@ -30,6 +32,8 @@
 
 #define JOIN_REQUEST_PACKET_SIZE                             ( 1 + 8 + 8 + PLAYER_DATA_SIZE )
 #define JOIN_RESPONSE_PACKET_SIZE                                           ( 1 + 8 + 8 + 8 )
+#define STATS_REQUEST_PACKET_SIZE                                                           1
+#define STATS_RESPONSE_PACKET_SIZE                                                  ( 1 + 8 )
 
 #define MAX_SESSIONS                                                                  1000000
 
@@ -71,6 +75,12 @@ struct join_response_packet
     __u64 session_id;
     __u64 send_time;
     __u64 server_time;
+};
+
+struct stats_request_packet
+{
+    __u8 packet_type;
+    __u64 inputs_processed;
 };
 
 #pragma pack(pop)
@@ -362,6 +372,17 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     {
                                         debug_printf( "input packet is old" );
                                     }
+                                }
+                                else if ( packet_type == STATS_REQUEST_PACKET && (void*) payload + STATS_REQUEST_PACKET_SIZE <= data_end )
+                                {
+                                    struct stats_request_packet * packet = (struct stats_request_packet*) payload;
+
+                                    uint64_t inputs_processed = 0x12345;
+
+                                    packet->packet_type = STATS_RESPONSE_PACKET;
+                                    packet->inputs_processed = inputs_processed;
+
+                                    reflect_packet( data, sizeof(struct stats_response_packet) );
                                 }
                                 else
                                 {
