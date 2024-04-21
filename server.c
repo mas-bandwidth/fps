@@ -1,5 +1,5 @@
 /*
-    UDP server XDP program (Userspace)
+    FPS server XDP program (Userspace)
 
     Runs on Ubuntu 22.04 LTS 64bit with Linux Kernel 6.5+ *ONLY*
 */
@@ -297,6 +297,7 @@ int main( int argc, char *argv[] )
             server_stats stats;
             stats.inputs_processed = current_inputs;
 
+            printf( "updating server stats\n" );
             __u32 key = 0;
             int err = bpf_map_update_elem( bpf.server_stats_fd, &key, &stats, BPF_ANY );
             if ( err != 0 )
