@@ -43,6 +43,7 @@ var joined uint64
 var serverTime uint64
 var packetsSent uint64
 var packetsReceived uint64
+var totalInputsProcessed uint64
 
 type Input struct {
 	sequence uint64
@@ -102,6 +103,7 @@ func main() {
 	ticker := time.NewTicker(time.Second)
  
 	prev_sent := uint64(0)
+	prev_processed := uint64(0)
 
  	for {
 		select {
@@ -110,9 +112,12 @@ func main() {
 			atomic.StoreUint64(&quit, 1)
 	 	case <-ticker.C:
 	 		sent := atomic.LoadUint64(&packetsSent)
+	 		processed := atomic.LoadUint64(&totalInputsProcessed)
 	 		sent_delta := sent - prev_sent
-	 		fmt.Printf("input packets sent delta %d\n", sent_delta)
+	 		processed_delta := processed - prev_processed
+	 		fmt.Printf("inputs sent delta %d, inputs processed delta %d\n", sent_delta, processed_delta)
 			prev_sent = sent
+			prev_processed = processed
 	 	}
 		quit := atomic.LoadUint64(&quit)
 		if quit != 0 {
@@ -224,8 +229,6 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 
 			packetType := packetData[0]
 
-			fmt.Printf("received packet type %d\n", packetType)
-
 			if packetType == JoinResponsePacket && packetBytes == JoinResponsePacketSize {
 
 				fmt.Printf("received join response packet\n")
@@ -241,8 +244,8 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 
 			} else if packetType == StatsResponsePacket && packetBytes == StatsResponsePacketSize {
 
-				inputsProcessed := binary.LittleEndian.Uint64(packetData[1:])
-				fmt.Printf("inputs processed: %d\n", inputsProcessed )
+				packetInputsProcessed := binary.LittleEndian.Uint64(packetData[1:])
+				atomic.StoreUint64(&totalInputsProcessed, packetInputsProcessed)
 
 			}
 
