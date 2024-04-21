@@ -38,7 +38,7 @@ I'm able to run 1k clients on n1-standard-8 sending input packets at 100HZ, then
 
 I can run a player server on c3-standard-44 modified so it has 22 cores visible (avoid 2 cores-per CPU) and tops out processing 50k players worth of inputs. 
 
-Increasing CPU count on the player server instance doesn't allow more player inputs to be processed, so it's definitely IO bound. This is around 50gbps, so it's totally understandable.
+Increasing CPU count on the player server instance doesn't allow more player inputs to be processed, so it's definitely IO bound.
 
 This confirms the assumption of 20 player servers required for 1M players.
 
