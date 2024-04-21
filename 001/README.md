@@ -36,12 +36,12 @@ Player input packets and the resulting inputs processed in userspace via the per
 
 I'm able to run 1k clients on n1-standard-8 sending input packets at 100HZ, then scale up this up in a managed instance group (MIG) up to 1M players on google cloud.
 
-I can run a player server on c3-standard-22 that tops out processing 50k players worth of inputs. 
+I can run a player server on c3-standard-44 modified so it has 22 cores visible (avoid 2 cores-per CPU) and tops out processing 50k players worth of inputs. 
 
 Increasing CPU count on the player server instance doesn't allow more player inputs to be processed, so it's definitely IO bound. This is around 50gbps, so it's totally understandable.
 
 This confirms the assumption of 20 player servers required for 1M players.
 
-Assuming ~16k per-month per player, server the total player server cost per-month is: $320k USD
+Assuming ~16k per-month per player server, the total player server cost per-month is: $320k USD
 
 Verdict: *DEFINITELY POSSIBLE.*
