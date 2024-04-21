@@ -377,7 +377,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                 {
                                     struct stats_request_packet * packet = (struct stats_request_packet*) payload;
 
-                                    uint64_t inputs_processed = 0x12345;
+                                    // todo: get from map
+                                    __u64 inputs_processed = 0x12345;
 
                                     packet->packet_type = STATS_RESPONSE_PACKET;
                                     packet->inputs_processed = inputs_processed;
