@@ -6,8 +6,6 @@ It won't be possible to have all players simulated on one server, there's simply
 
 So let's create a new type of server. A "player server". Each player server handles player input processing and simulation, each with n players connected to them. 
 
-I expect 50k players can be simulated per player server, so for 1M players, let's assume we can probably have 20 player servers.
-
 Player servers take the player input + delta time (dt) and step the player state forward in time. Players are simulated forward only when input packets arrive from their client. There is no global tick on a player server. This is similar to how most first person shooters in the quake netcode model work. For example, Counterstrike, Titanfall and Apex Legends.
 
 The assumptions made here are: 
@@ -36,12 +34,26 @@ Player input packets and the resulting inputs processed in userspace via the per
 
 I'm able to run 1k clients on n1-standard-8 sending input packets at 100HZ, then scale up this up in a managed instance group (MIG) up to 1M players on google cloud.
 
-I can run a player server on c3-standard-44 modified so it has 22 cores visible (avoid 2 cores-per CPU) and tops out processing 50k players worth of inputs. 
+I can run a player server on c3-standard-44 modified so it has 22 cpus (avoid 2 cores-per CPU) and it tops out processing ~50k players worth of inputs. 
 
 Increasing CPU count on the player server instance doesn't allow more player inputs to be processed, so it's definitely IO bound.
 
-This confirms the assumption of 20 player servers required for 1M players.
+How much bandwidth is being sent? 
 
-Assuming ~16k per-month per player server, the total player server cost per-month is: $320k USD
+100 packets per-second, and each packet is around 1300 bytes (10 inputs @ 100 bytes + overhead).
+
+Per-client this gives 100*1300 bytes per-second -> 130,000 bytes/sec, or around 130 kilobytes/sec.
+
+Converting this to megabits, we see that each client sends just under 1mbit/sec for player inputs.
+
+With each player sending 1 mbit/sec, 1M players are sending 1,000,000 mbit/sec -> 1,000gbit/sec -> 1tbit/sec.
+
+That's a non-trivial amount of bandwidth. 
+
+For 50k players we are sending 50,000 * 1mbit = 50,000 mbit/sec -> 50gbit/sec. No wonder google cloud is getting IO bound @ 50k players.
+
+Being conservative, it seems that 20 player servers with 100gbit/nics are required for 1M players.
+
+Assuming ~20k per-month per-player server, the total player server cost per-month is $400k USD
 
 Verdict: *DEFINITELY POSSIBLE.*
