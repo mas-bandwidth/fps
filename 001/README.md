@@ -42,7 +42,7 @@ Increasing CPU count on the player server VM doesn't allow more player inputs to
 
 How much bandwidth is being sent? 
 
-Each client sends 100 packets per-second, and each packet is around 1,300 bytes (10 inputs @ 100 bytes + overhead).
+Each client sends 100 packets per-second, and each packet is around 1300 bytes (10 inputs @ 100 bytes + overhead).
 
 Per-client this gives 100*1300 bytes per-second -> 130,000 bytes/sec, or around 130 kilobytes/sec.
 
