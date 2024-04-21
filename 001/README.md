@@ -44,4 +44,4 @@ This confirms the assumption of 20 player servers required for 1M players. Thus,
 
 Total player server cost per-month: $320k USD (conservative)
 
-Verdict: POSSIBLE.
+Verdict: *POSSIBLE.*
