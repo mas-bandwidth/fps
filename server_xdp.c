@@ -375,6 +375,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                 }
                                 else if ( packet_type == STATS_REQUEST_PACKET && (void*) payload + STATS_REQUEST_PACKET_SIZE <= data_end )
                                 {
+                                    debug_printf( "received stats request packet" );
+
                                     struct stats_request_packet * packet = (struct stats_request_packet*) payload;
 
                                     // todo: get from map

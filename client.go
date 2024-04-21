@@ -236,8 +236,8 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 				fmt.Printf("time offset is %d milliseconds\n", offset/1000000)
 				startTime := joinServerTime + offset
 				atomic.StoreUint64(&serverTime, startTime)
-			}
-			else if packetType == StatsResponsePacket {
+
+			} else if packetType == StatsResponsePacket && packetBytpes == StatsResponsePacketBytes {
 
 				inputsProcessed := binary.LittleEndian.Uint64(packetData[1:])
 				fmt.Printf("inputs processed: %d\n", inputsProcessed )
