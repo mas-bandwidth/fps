@@ -40,4 +40,4 @@ Increasing CPU count on the player server instance doesn't allow more player inp
 
 This confirms the assumption of 20 player servers required for 1M players. Thus, for 1M players, the cost of each player server with bare metal would be ~$16k USD per-month for a 100G NIC + bare metal in datapacket.com
 
-Total player server cost per-month: $320k USD
+Total player server cost per-month: $320k USD (conservative)
