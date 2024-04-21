@@ -32,7 +32,7 @@ Player input packets and the resulting inputs processed in userspace via the per
 
 ## Results:
 
-I'm able to run 1k clients on n1-standard-8 sending input packets at 100HZ, then scale up this up in a managed instance group (MIG) up to 1M players on google cloud.
+I'm able to run 1k clients on n1-standard-8 sending input packets at 100HZ, then scale up this up in a managed instance group (MIG) up to any number of players on google cloud.
 
 I can run a player server on c3-standard-44 modified so it has 22 cpus (avoid 2 cores-per CPU) and it tops out processing ~50k players worth of inputs. 
 
@@ -46,7 +46,7 @@ Per-client this gives 100*1300 bytes per-second -> 130,000 bytes/sec, or around 
 
 Converting this to megabits, we see that each client sends just under 1mbit/sec for player inputs.
 
-With each player sending 1 mbit/sec, 1M players are sending 1,000,000 mbit/sec -> 1,000gbit/sec -> 1tbit/sec.
+With each player sending 1 mbit/sec, 1M players are sending 1,000,000 mbit/sec -> 1,000 gbit/sec -> 1 tbit/sec.
 
 That's a non-trivial amount of bandwidth. 
 
