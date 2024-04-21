@@ -294,10 +294,9 @@ int main( int argc, char *argv[] )
             last_inputs = current_inputs;
             last_print_time = current_time;
 
-            server_stats stats;
+            struct server_stats stats;
             stats.inputs_processed = current_inputs;
 
-            printf( "updating server stats\n" );
             __u32 key = 0;
             int err = bpf_map_update_elem( bpf.server_stats_fd, &key, &stats, BPF_ANY );
             if ( err != 0 )
