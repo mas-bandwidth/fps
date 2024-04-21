@@ -56,6 +56,6 @@ Being conservative, it seems that 20 player servers with 100gbit/nics are requir
 
 Assuming ~20k per-month per-player server, the total player server cost per-month is $400k USD
 
-_OR..._ 40c per-player, per-month.
+This sounds like a lot, but it's only 40c per-player, per-month.
 
 Verdict: *DEFINITELY POSSIBLE.*
