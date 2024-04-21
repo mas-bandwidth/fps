@@ -32,19 +32,21 @@ Player input packets and the resulting inputs processed in userspace via the per
 
 ## Results
 
-I'm able to run 1000 clients per n1-standard-8 instance in google cloud. I can scale up this up in a managed instance group (MIG) up to any number of players I need.
+I'm able to run 1000 clients per n1-standard-8 instance in google cloud. 
 
-I setup one player server on a c3-standard-44 VM, modified so it has 22 cpus (avoid 2 cores-per CPU) and it tops out processing ~50k players worth of inputs. 
+I can scale up this up in a managed instance group (MIG) up to any number of players I need and point the players at a player server.
+
+I setup one player server on a c3-standard-44 VM, modified so it has 22 cpus (avoid 2 cores-per CPU) and it tops out processing ~50k players worth of inputs.
 
 Increasing CPU count on the player server VM doesn't allow more player inputs to be processed, so it's definitely IO bound.
 
 How much bandwidth is being sent? 
 
-100 packets per-second, and each packet is around 1,300 bytes (10 inputs @ 100 bytes + overhead).
+Each client sends 100 packets per-second, and each packet is around 1,300 bytes (10 inputs @ 100 bytes + overhead).
 
 Per-client this gives 100*1300 bytes per-second -> 130,000 bytes/sec, or around 130 kilobytes/sec.
 
-Converting this to megabits, we see that each client sends just under 1mbit/sec for player inputs.
+Converting to megabits, each client sends just under 1mbit/sec for player inputs.
 
 With each player sending 1 mbit/sec, 1M players are sending 1,000,000 mbit/sec -> 1,000 gbit/sec -> 1 tbit/sec.
 
