@@ -224,6 +224,8 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 
 			packetType := packetData[0]
 
+			fmt.Printf("received packet type %d\n", packetType)
+
 			if packetType == JoinResponsePacket && packetBytes == JoinResponsePacketSize {
 
 				fmt.Printf("received join response packet\n")
@@ -304,8 +306,6 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 		 	case <-ticker.C:
 
 				statsRequestPacket := writeStatsRequestPacket()
-
-		 		fmt.Printf("send stats request packet (%d bytes)\n", len(statsRequestPacket))
 
 				conn.WriteToUDP(statsRequestPacket, serverAddress)
 		 	}

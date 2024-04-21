@@ -388,6 +388,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     packet->inputs_processed = inputs_processed;
 
                                     reflect_packet( data, sizeof(struct stats_request_packet) );
+
+                                    return XDP_TX;
                                 }
                                 else
                                 {
