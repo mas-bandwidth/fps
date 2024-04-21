@@ -38,10 +38,10 @@ I'm able to run 1k clients on n1-standard-8 sending input packets at 100HZ, then
 
 I can run a player server on c3-standard-22 that tops out processing 50k players worth of inputs. 
 
-Increasing CPU count on the player server instance doesn't allow more player inputs to be processed, so it's definitely IO bound. We're processing around 50gbps/sec, so this is totally understandable.
+Increasing CPU count on the player server instance doesn't allow more player inputs to be processed, so it's definitely IO bound. This is around 50gbps, so it's totally understandable.
 
-This confirms the assumption of 20 player servers required for 1M players. Thus, for 1M players, the cost of each player server with bare metal would be ~$16k USD per-month for a 100G NIC + bare metal in datapacket.com
+This confirms the assumption of 20 player servers required for 1M players.
 
-Total player server cost per-month: $320k USD (conservative)
+Assuming ~16k per-month per player, server the total player server cost per-month is: $320k USD
 
-Verdict: *POSSIBLE.*
+Verdict: *DEFINITELY POSSIBLE.*
