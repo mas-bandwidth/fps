@@ -2,9 +2,9 @@
 
 To build an FPS with a million players, we're first going to need a way to process player inputs at scale. 
 
-It won't be possible to have all players simulated on one server, there's simply too much bandwidth and CPU cost.
+It won't be possible to have all players simulated on one server, there's simply too much bandwidth and CPU cost for a single machine.
 
-Let's create a new type of server. A "player server". Each player server handles player input processing and simulatior, each with n players connected to them. 
+So let's create a new type of server. A "player server". Each player server handles player input processing and simulation, each with n players connected to them. 
 
 I expect 50k players can be simulated per player server, so for 1M players, let's assume we can probably have 20 player servers.
 
