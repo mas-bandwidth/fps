@@ -32,7 +32,7 @@
 
 #define JOIN_REQUEST_PACKET_SIZE                             ( 1 + 8 + 8 + PLAYER_DATA_SIZE )
 #define JOIN_RESPONSE_PACKET_SIZE                                           ( 1 + 8 + 8 + 8 )
-#define STATS_REQUEST_PACKET_SIZE                                                           1
+#define STATS_REQUEST_PACKET_SIZE                                                   ( 1 + 8 )
 #define STATS_RESPONSE_PACKET_SIZE                                                  ( 1 + 8 )
 
 #define MAX_SESSIONS                                                                  1000000
