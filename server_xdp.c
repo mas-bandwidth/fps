@@ -189,6 +189,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                             {
                                 int packet_type = payload[0];
 
+                                debug_printf( "received packet type %d", packet_type );
+
                                 if ( packet_type == JOIN_REQUEST_PACKET && (void*) payload + sizeof(struct join_request_packet) <= data_end )
                                 {
                                     debug_printf( "received join request packet" );

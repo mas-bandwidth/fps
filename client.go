@@ -237,7 +237,7 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 				startTime := joinServerTime + offset
 				atomic.StoreUint64(&serverTime, startTime)
 
-			} else if packetType == StatsResponsePacket && packetBytpes == StatsResponsePacketBytes {
+			} else if packetType == StatsResponsePacket && packetBytes == StatsResponsePacketSize {
 
 				inputsProcessed := binary.LittleEndian.Uint64(packetData[1:])
 				fmt.Printf("inputs processed: %d\n", inputsProcessed )
@@ -304,6 +304,8 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 		 	case <-ticker.C:
 
 				statsRequestPacket := writeStatsRequestPacket()
+
+		 		fmt.Printf("send stats request packet (%d bytes)\n", len(statsRequestPacket))
 
 				conn.WriteToUDP(statsRequestPacket, serverAddress)
 		 	}
