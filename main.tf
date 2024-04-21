@@ -294,7 +294,7 @@ resource "google_compute_instance_template" "client" {
 }
 
 resource "google_compute_region_instance_group_manager" "client" {
-  target_size               = 100
+  target_size               = 1000
   name                      = "client"
   project                   = google_project.fps.project_id
   region                    = var.google_region
@@ -326,7 +326,7 @@ resource "google_compute_instance" "server" {
 
   name         = "server-${var.tag}"
   project      = google_project.fps.project_id
-  machine_type = "n1-standard-8" # "c3-highcpu-44"
+  machine_type = "c3-highcpu-44"
   zone         = var.google_zone
   tags         = ["allow-ssh", "allow-udp"]
 
@@ -346,11 +346,9 @@ resource "google_compute_instance" "server" {
     }
   }
 
-/*
   advanced_machine_features {
     threads_per_core = 1
   }
-*/
 
   metadata = {
 
