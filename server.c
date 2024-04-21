@@ -39,6 +39,7 @@ struct bpf_t
     bool attached_native;
     bool attached_skb;
     int input_buffer_fd;
+    int server_stats_fd;
     struct perf_buffer * input_buffer;
 };
 
@@ -175,6 +176,15 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         return 1;
     }
 
+    // get the file handle to the server stats
+
+    bpf->server_stats_fd = bpf_obj_get( "/sys/fs/bpf/server_stats" );
+    if ( bpf->server_stats_fd <= 0 )
+    {
+        printf( "\nerror: could not get server stats: %s\n\n", strerror(errno) );
+        return 1;
+    }
+
     // create the input perf buffer
 
     bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, NULL, NULL, NULL );
@@ -228,6 +238,15 @@ static void cleanup()
     fflush( stdout );
 }
 
+#pragma pack(push, 1)
+
+struct server_stats
+{
+    __u64 inputs_processed;
+};
+
+#pragma pack(pop)
+
 int main( int argc, char *argv[] )
 {
     signal( SIGINT,  interrupt_handler );
@@ -255,14 +274,10 @@ int main( int argc, char *argv[] )
     while ( !quit )
     {
         int err = perf_buffer__poll( bpf.input_buffer, 1 );
-        if ( err == -EINTR ) 
-        {
-            err = 0;
-            break;
-        }
         if ( err < 0 ) 
         {
             printf( "\nerror: could not poll input buffer: %d\n", err );
+            quit = true;
             break;
         }
 
@@ -278,6 +293,18 @@ int main( int argc, char *argv[] )
             printf( "input delta: %" PRId64 "\n", input_delta );
             last_inputs = current_inputs;
             last_print_time = current_time;
+
+            server_stats stats;
+            stats.inputs_processed = current_inputs;
+
+            __u32 key = 0;
+            int err = bpf_map_update_elem( bpf.server_stats_fd, &key, &stats, BPF_ANY );
+            if ( err != 0 )
+            {
+                printf( "\nerror: failed to update server stats: %s\n\n", strerror(errno) );
+                quit = true;
+                break;
+            }
         }
     }
 

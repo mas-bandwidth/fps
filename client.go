@@ -232,19 +232,29 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 			if packetType == JoinResponsePacket && packetBytes == JoinResponsePacketSize {
 
 				fmt.Printf("received join response packet\n")
+
 				atomic.AddUint64(&joined, 1)
+
 				sentTime := binary.LittleEndian.Uint64(packetData[1+8:])
+
 				joinServerTime := binary.LittleEndian.Uint64(packetData[1+8+8:])
+
 				rtt := uint64(time.Now().UnixNano()) - sentTime
+
 				safety := uint64(100 * time.Millisecond)
+
 				offset := rtt/2 + safety
+
 				fmt.Printf("time offset is %d milliseconds\n", offset/1000000)
+
 				startTime := joinServerTime + offset
+
 				atomic.StoreUint64(&serverTime, startTime)
 
 			} else if packetType == StatsResponsePacket && packetBytes == StatsResponsePacketSize {
 
 				packetInputsProcessed := binary.LittleEndian.Uint64(packetData[1:])
+
 				atomic.StoreUint64(&totalInputsProcessed, packetInputsProcessed)
 
 			}

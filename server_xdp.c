@@ -83,6 +83,11 @@ struct stats_request_packet
     __u64 inputs_processed;
 };
 
+struct server_stats
+{
+    __u64 inputs_processed;
+};
+
 #pragma pack(pop)
 
 struct session_data 
@@ -115,6 +120,14 @@ struct {
     __type( key, int );
     __type( value, struct heap );
 } heap SEC(".maps");
+
+struct {
+    __uint( type, BPF_MAP_TYPE_ARRAY );
+    __uint( max_entries, 1 );
+    __type( key, int );
+    __type( value, struct server_stats );
+    __uint( pinning, LIBBPF_PIN_BY_NAME );
+} server_stats SEC(".maps");
 
 static void reflect_packet( void * data, int payload_bytes )
 {
@@ -381,11 +394,15 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     struct stats_request_packet * packet = (struct stats_request_packet*) payload;
 
-                                    // todo: get from map
-                                    __u64 inputs_processed = 0x12345;
+                                    int zero = 0;
+                                    struct server_stats * stats = (struct server_stats*) bpf_map_lookup_elem( &server_stats, &zero );
+                                    if ( !stats ) 
+                                    {
+                                        return XDP_DROP; // can't happen
+                                    }
 
                                     packet->packet_type = STATS_RESPONSE_PACKET;
-                                    packet->inputs_processed = inputs_processed;
+                                    packet->inputs_processed = stats->inputs_processed;
 
                                     reflect_packet( data, sizeof(struct stats_request_packet) );
 
