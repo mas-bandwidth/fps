@@ -1,39 +1,21 @@
-# 002
+# 003
 
-Previously we have shown that we can actually receive and process 1M player inputs with 20 bare metal "player servers".
+In this version I'm debugging why we're getting slow performance in google cloud for player input processing.
 
-The next step is to actually step 1M player simulations forward on the player servers.
+My theory is that by attempting to do significant work on the same cores that are processing packets with XDP we cause the CPU to context switch and interrupt itself a lot between userspace player simulation and XDP packet processing.
 
-To do this we must:
+What we really want is n cores dedicated to XDP, and m cores dedicated to player simulation.
 
-1. load the most recent player state at time t by session id (random uint64 per-client assigned on connect)
-2. step the player state forward with input and for the amount of time dt, eg. position += velocity * dt
-3. store the updated player state post-simulation at the new time t += dt
+Since google cloud only uses 16 receive queues per-NIC, and these are the first 16 cores on the machine, the idea that we should try to have the first 16 cores dedicated to XDP only, and then use the next 16 cores exclusively for player simulation.
 
-We also need to send the player state down to the client that owns it 100 times per-second. This is important because the server *must* be authoritative over the player simulation. 
+So we need a way to deliver inputs from the XDP program running on CPUs [0,15] -> CPUs [16,31]
 
-When the client receives the player state it rolls back in the past and applies that state and then invisibly resimulates back up to present time with stored local player inputs. 
+We can't do this with bpf perf buffers, because they always deliver data to the same core that the XDP program processed the packet on.
 
-This way the server correction can be applied RTT in the past, and the client can accept that update without being pulled back in time whenever the server corrects it.
+But, if we use the newer bpf ring buffers and manually have one bpf ring buffer per-CPU, I think we could set up so that each ring buffer is polled on a thread pinned to the CPUs we want.
 
-To send player state we'll piggy back on the input packets. For each input packet we receive, we'll respond with the most recent player state for the client that sent the input packet, again looking it up via session id.
+More information on perf buffers vs. ring buffers here.
 
-All of this points to bpf hash maps being a good fit for what we need to do. 
+https://nakryiko.com/posts/bpf-ringbuf/#bpf-ringbuf-vs-bpf-perfbuf
 
-https://docs.kernel.org/bpf/map_hash.html
-
-We can access bpf hash maps from inside the XDP program, and we can also read and write to them from the userspace server application. We can even use an LRU hashmap variant so we don't have to do any work to clean it up when players disconnect from the server.
-
-Let's assume that player state is around 1300 bytes. This gives us a nice symmetric protocol between the client and the player server: around 1mbit/sec for inputs, and ~1mbit/sec is sent back down to the client for player state.
-
-We're going to have 50k players per-player server, so we need around 1200 * 50000 = 65GB for store player state. 
-
-Assume there is some overhead with the bpf hash map and conservatively we'll need 100GB for player state.
-
-All signs are pointing towards player servers needing a good amount of memory for the perf buffers for processing inputs, as well as to store the player state. 
-
-But consider, the sort of high powered bare metal machine that could drive a 100G NIC at line rate would mean that we probably already have 256GB of memory already. So this should be fine.
-
-## Results:
-
-...
+As a bonus, we can eliminate a copy per-input that need to do in XDP with perf buffers.
