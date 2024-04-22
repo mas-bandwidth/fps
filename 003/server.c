@@ -52,6 +52,9 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
     assert( cpu >= 0 );
     assert( cpu < XDP_MAX_CPUS );
 
+    printf( "process input on CPU %d\n", cpu );
+
+    /*
     struct bpf_t * bpf = (struct bpf_t*) ctx;
 
     int player_state_fd = bpf->player_state_inner_fd[cpu];
@@ -85,8 +88,14 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
         printf( "error: failed to update player state: %s\n", strerror(errno) );
         return;
     }
+    */
 
     __sync_fetch_and_add( &inputs_processed[cpu], 1 );
+}
+
+void input_lost( void * ctx, int cpu, __u64 count )
+{
+    printf( "%" PRId64 " inputs lost on cpu %d\n", (uint64_t) count, cpu );
 }
 
 static double time_start;
@@ -258,7 +267,10 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // create the input perf buffer
 
-    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, NULL, bpf, NULL );
+    perf_buffer_opts opts;
+    opts.size = sizeof( opts );
+    opts.sample_period = 1000;
+    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, lost_input, bpf, &opts );
     if ( libbpf_get_error( bpf->input_buffer ) ) 
     {
         printf( "\nerror: could not create input buffer\n\n" );
@@ -351,7 +363,7 @@ int main( int argc, char *argv[] )
 
     while ( !quit )
     {
-        int err = perf_buffer__poll( bpf.input_buffer, 1000 );
+        int err = perf_buffer__poll( bpf.input_buffer, 1 );
         if ( err == -4 )
         {
             // ctrl-c
@@ -366,6 +378,7 @@ int main( int argc, char *argv[] )
         }
 
         double current_time = platform_time();
+
         if ( last_print_time + 1.0 <= current_time )
         {
             uint64_t current_inputs = 0;

@@ -1,5 +1,5 @@
 [Unit]
-Description=UDP Server Service
+Description=Player Server Service
 
 [Service]
 ExecStart=/app/server ens3
