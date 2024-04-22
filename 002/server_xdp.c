@@ -215,6 +215,7 @@ struct {
     __uint( max_entries, MAX_CPUS );
     __type( key, __u32 );
     __array( values, struct inner_player_state_map );
+    __uint( pinning, LIBBPF_PIN_BY_NAME );
 } player_state_map SEC(".maps") = {
     .values = { 
         &player_state_0,
