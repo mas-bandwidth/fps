@@ -21,8 +21,6 @@
 #include <inttypes.h>
 #include <time.h>
 
-#define MAX_CPUS 1024
-
 #include "shared.h"
 
 static uint64_t inputs_processed[MAX_CPUS];
@@ -42,6 +40,7 @@ struct bpf_t
     bool attached_skb;
     int input_buffer_fd;
     int server_stats_fd;
+    int player_state_fd[MAX_CPUS];
     struct perf_buffer * input_buffer;
 };
 
@@ -185,6 +184,20 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     {
         printf( "\nerror: could not get server stats: %s\n\n", strerror(errno) );
         return 1;
+    }
+
+    // get the file handle to the player state maps (one per-CPU)
+
+    for ( int i = 0; i < MAX_CPUS; i++ )
+    {
+        char map_name[1024];
+        sprintf( map_name, "/sys/fs/bpf/player_state_%d", i );
+        bpf->player_state_fd[i] = bpf_obj_get( map_name );
+        if ( bpf->player_state_fd[i] <= 0 )
+        {
+            printf( "\nerror: could not get player state: %s\n\n", strerror(errno) );
+            return 1;
+        }
     }
 
     // create the input perf buffer
