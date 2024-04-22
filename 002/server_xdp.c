@@ -169,14 +169,6 @@ struct {
     __type( value, struct player_state );
     __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_10 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
 } player_state_11 SEC(".maps");
 
 struct {
