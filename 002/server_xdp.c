@@ -75,6 +75,52 @@ struct {
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } server_stats SEC(".maps");
 
+struct {
+    __uint( type, BPF_MAP_TYPE_LRU_HASH );
+    __type( key, __u64 );
+    __type( value, struct player_state );
+    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
+    __uint( pinning, LIBBPF_PIN_BY_NAME );
+} 
+player_state_0 SEC(".maps"),
+player_state_1 SEC(".maps"),
+player_state_2 SEC(".maps");
+
+struct {
+    __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
+    __uint( max_entries, MAX_CPUS );
+    __type( key, __u32 );
+    __array( values, struct player_state );
+} player_state SEC(".maps") = {
+    .values = { 
+        &player_state_0,
+        &player_state_1,
+        &player_state_2,
+    }
+}
+
+/*
+struct inner_map {
+        __uint(type, BPF_MAP_TYPE_DEVMAP);
+        __uint(max_entries, 10);
+        __type(key, __u32);
+        __type(value, __u32);
+} 
+inner_map1 SEC(".maps"), 
+inner_map2 SEC(".maps");
+
+struct {
+        __uint(type, BPF_MAP_TYPE_ARRAY_OF_MAPS);
+        __uint(max_entries, 2);
+        __type(key, __u32);
+        __array(values, struct inner_map);
+} outer_map SEC(".maps") = {
+        .values = { &inner_map1,
+                    &inner_map2 }
+};
+*/
+
+/*
 #define PLAYER_STATE_MAP(n)                                                 \
 struct {                                                                    \
     __uint( type, BPF_MAP_TYPE_LRU_HASH );                                  \
@@ -212,7 +258,9 @@ PLAYER_STATE_MAP(124)
 PLAYER_STATE_MAP(125)
 PLAYER_STATE_MAP(126)
 PLAYER_STATE_MAP(127)
+*/
 
+/*
 struct {
     __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
     __uint( max_entries, MAX_CPUS );
@@ -350,6 +398,7 @@ struct {
         &player_state_127,
     }
 };
+*/
 
 static void reflect_packet( void * data, int payload_bytes )
 {
