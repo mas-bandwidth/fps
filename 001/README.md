@@ -44,7 +44,7 @@ How much bandwidth is being sent?
 
 Each client sends 100 packets per-second, and each packet is around 1300 bytes (10 inputs @ 100 bytes + overhead).
 
-Per-client this gives 100*1300 bytes per-second -> 130,000 bytes/sec, or around 130 kilobytes/sec.
+Per-client this gives 100 * 1300 bytes per-second -> 130,000 bytes/sec, or around 130 kilobytes/sec.
 
 Converting to megabits, each client sends just under 1mbit/sec for player inputs.
 
