@@ -291,6 +291,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         int deliver_to_cpu = ( XDP_MAX_CPUS + ( session_id % XDP_MAX_CPUS ) ) & BPF_F_INDEX_MASK;
 
+                                        debug_printf( "deliver to cpu %d", deliver_to_cpu );
+
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ); i++ )
