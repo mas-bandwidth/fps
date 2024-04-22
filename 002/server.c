@@ -49,7 +49,7 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
     struct player_state state;
 
     uint64_t value;
-    int result = bpf_map_lookup_elem( player_state_fd, &header->session_id, &player_state );
+    int result = bpf_map_lookup_elem( player_state_fd, &header->session_id, &state );
     if ( result != 0 )
     {
         printf( "error: failed to lookup player state: %s\n", strerror(errno) );
@@ -64,7 +64,7 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
         state.data[i] = (uint8_t) state.t + (uint8_t) i;
     }
 
-    int err = bpf_map_update_elem( player_state_fd, &header->session_id, &player_state, BPF_ANY );
+    int err = bpf_map_update_elem( player_state_fd, &header->session_id, &state, BPF_ANY );
     if ( err != 0 )
     {
         printf( "error: failed to update player state: %s\n", strerror(errno) );
