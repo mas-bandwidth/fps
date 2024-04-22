@@ -217,7 +217,7 @@ struct {
     __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
     __uint( max_entries, MAX_CPUS );
     __type( key, __u32 );
-    __array( values, struct inner_map );
+    __array( values, struct player_state );
 } outer_map SEC(".maps") = {
     .values = { 
         &player_state_0,
