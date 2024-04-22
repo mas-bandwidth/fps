@@ -237,7 +237,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         if ( result != 0 )
         {
             printf( "\nerror: failed lookup player state inner map: %s\n\n", strerror(errno) );
-            return;        
+            return 1;
         }
     }
 
