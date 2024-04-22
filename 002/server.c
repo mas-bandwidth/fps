@@ -233,7 +233,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     for ( int i = 0; i < MAX_CPUS; i++ )
     {
         uint32_t key = i;
-        int result = bpf_map_lookup_elem(, &key, &bpf->player_state_inner_fd[i] );
+        int result = bpf_map_lookup_elem( bpf->player_state_outer_fd, &key, &bpf->player_state_inner_fd[i] );
         if ( result != 0 )
         {
             printf( "\nerror: failed lookup player state inner map: %s\n\n", strerror(errno) );
