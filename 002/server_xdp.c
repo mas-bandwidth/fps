@@ -85,6 +85,131 @@ struct inner_player_state_map {
 player_state_0 SEC(".maps"),
 player_state_1 SEC(".maps"),
 player_state_2 SEC(".maps");
+player_state_3 SEC(".maps");
+player_state_4 SEC(".maps");
+player_state_5 SEC(".maps");
+player_state_6 SEC(".maps");
+player_state_7 SEC(".maps");
+player_state_8 SEC(".maps");
+player_state_9 SEC(".maps");
+player_state_10 SEC(".maps"),
+player_state_11 SEC(".maps"),
+player_state_12 SEC(".maps");
+player_state_13 SEC(".maps");
+player_state_14 SEC(".maps");
+player_state_15 SEC(".maps");
+player_state_16 SEC(".maps");
+player_state_17 SEC(".maps");
+player_state_18 SEC(".maps");
+player_state_19 SEC(".maps");
+player_state_20 SEC(".maps"),
+player_state_21 SEC(".maps"),
+player_state_22 SEC(".maps");
+player_state_23 SEC(".maps");
+player_state_24 SEC(".maps");
+player_state_25 SEC(".maps");
+player_state_26 SEC(".maps");
+player_state_27 SEC(".maps");
+player_state_28 SEC(".maps");
+player_state_29 SEC(".maps");
+player_state_30 SEC(".maps"),
+player_state_31 SEC(".maps"),
+player_state_32 SEC(".maps");
+player_state_33 SEC(".maps");
+player_state_34 SEC(".maps");
+player_state_35 SEC(".maps");
+player_state_36 SEC(".maps");
+player_state_37 SEC(".maps");
+player_state_38 SEC(".maps");
+player_state_39 SEC(".maps");
+player_state_40 SEC(".maps"),
+player_state_41 SEC(".maps"),
+player_state_42 SEC(".maps");
+player_state_43 SEC(".maps");
+player_state_44 SEC(".maps");
+player_state_45 SEC(".maps");
+player_state_46 SEC(".maps");
+player_state_47 SEC(".maps");
+player_state_48 SEC(".maps");
+player_state_49 SEC(".maps");
+player_state_50 SEC(".maps"),
+player_state_51 SEC(".maps"),
+player_state_52 SEC(".maps");
+player_state_53 SEC(".maps");
+player_state_54 SEC(".maps");
+player_state_55 SEC(".maps");
+player_state_56 SEC(".maps");
+player_state_57 SEC(".maps");
+player_state_58 SEC(".maps");
+player_state_59 SEC(".maps");
+player_state_60 SEC(".maps"),
+player_state_61 SEC(".maps"),
+player_state_62 SEC(".maps");
+player_state_63 SEC(".maps");
+player_state_64 SEC(".maps");
+player_state_65 SEC(".maps");
+player_state_66 SEC(".maps");
+player_state_67 SEC(".maps");
+player_state_68 SEC(".maps");
+player_state_69 SEC(".maps");
+player_state_70 SEC(".maps"),
+player_state_71 SEC(".maps"),
+player_state_72 SEC(".maps");
+player_state_73 SEC(".maps");
+player_state_74 SEC(".maps");
+player_state_75 SEC(".maps");
+player_state_76 SEC(".maps");
+player_state_77 SEC(".maps");
+player_state_78 SEC(".maps");
+player_state_79 SEC(".maps");
+player_state_80 SEC(".maps"),
+player_state_81 SEC(".maps"),
+player_state_82 SEC(".maps");
+player_state_83 SEC(".maps");
+player_state_84 SEC(".maps");
+player_state_85 SEC(".maps");
+player_state_86 SEC(".maps");
+player_state_87 SEC(".maps");
+player_state_88 SEC(".maps");
+player_state_89 SEC(".maps");
+player_state_90 SEC(".maps"),
+player_state_91 SEC(".maps"),
+player_state_92 SEC(".maps");
+player_state_93 SEC(".maps");
+player_state_94 SEC(".maps");
+player_state_95 SEC(".maps");
+player_state_96 SEC(".maps");
+player_state_97 SEC(".maps");
+player_state_98 SEC(".maps");
+player_state_99 SEC(".maps");
+player_state_100 SEC(".maps"),
+player_state_101 SEC(".maps"),
+player_state_102 SEC(".maps");
+player_state_103 SEC(".maps");
+player_state_104 SEC(".maps");
+player_state_105 SEC(".maps");
+player_state_106 SEC(".maps");
+player_state_107 SEC(".maps");
+player_state_108 SEC(".maps");
+player_state_109 SEC(".maps");
+player_state_110 SEC(".maps"),
+player_state_111 SEC(".maps"),
+player_state_112 SEC(".maps");
+player_state_113 SEC(".maps");
+player_state_114 SEC(".maps");
+player_state_115 SEC(".maps");
+player_state_116 SEC(".maps");
+player_state_117 SEC(".maps");
+player_state_118 SEC(".maps");
+player_state_119 SEC(".maps");
+player_state_120 SEC(".maps"),
+player_state_121 SEC(".maps"),
+player_state_122 SEC(".maps");
+player_state_123 SEC(".maps");
+player_state_124 SEC(".maps");
+player_state_125 SEC(".maps");
+player_state_126 SEC(".maps");
+player_state_127 SEC(".maps");
 
 struct {
     __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
@@ -92,181 +217,6 @@ struct {
     __type( key, __u32 );
     __array( values, struct inner_player_state_map );
 } player_state_map SEC(".maps") = {
-    .values = { 
-        &player_state_0,
-        &player_state_1,
-        &player_state_2,
-    }
-};
-
-/*
-struct inner_map {
-        __uint(type, BPF_MAP_TYPE_DEVMAP);
-        __uint(max_entries, 10);
-        __type(key, __u32);
-        __type(value, __u32);
-} 
-inner_map1 SEC(".maps"), 
-inner_map2 SEC(".maps");
-
-struct {
-        __uint(type, BPF_MAP_TYPE_ARRAY_OF_MAPS);
-        __uint(max_entries, 2);
-        __type(key, __u32);
-        __array(values, struct inner_map);
-} outer_map SEC(".maps") = {
-        .values = { &inner_map1,
-                    &inner_map2 }
-};
-*/
-
-/*
-#define PLAYER_STATE_MAP(n)                                                 \
-struct {                                                                    \
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );                                  \
-    __type( key, __u64 );                                                   \
-    __type( value, struct player_state );                                   \
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );                         \
-    __uint( pinning, LIBBPF_PIN_BY_NAME );                                  \
-} player_state_##n SEC(".maps");                                            \
-
-PLAYER_STATE_MAP(0)
-PLAYER_STATE_MAP(1)
-PLAYER_STATE_MAP(2)
-PLAYER_STATE_MAP(3)
-PLAYER_STATE_MAP(4)
-PLAYER_STATE_MAP(5)
-PLAYER_STATE_MAP(6)
-PLAYER_STATE_MAP(7)
-PLAYER_STATE_MAP(8)
-PLAYER_STATE_MAP(9)
-PLAYER_STATE_MAP(10)
-PLAYER_STATE_MAP(11)
-PLAYER_STATE_MAP(12)
-PLAYER_STATE_MAP(13)
-PLAYER_STATE_MAP(14)
-PLAYER_STATE_MAP(15)
-PLAYER_STATE_MAP(16)
-PLAYER_STATE_MAP(17)
-PLAYER_STATE_MAP(18)
-PLAYER_STATE_MAP(19)
-PLAYER_STATE_MAP(20)
-PLAYER_STATE_MAP(21)
-PLAYER_STATE_MAP(22)
-PLAYER_STATE_MAP(23)
-PLAYER_STATE_MAP(24)
-PLAYER_STATE_MAP(25)
-PLAYER_STATE_MAP(26)
-PLAYER_STATE_MAP(27)
-PLAYER_STATE_MAP(28)
-PLAYER_STATE_MAP(29)
-PLAYER_STATE_MAP(30)
-PLAYER_STATE_MAP(31)
-PLAYER_STATE_MAP(32)
-PLAYER_STATE_MAP(33)
-PLAYER_STATE_MAP(34)
-PLAYER_STATE_MAP(35)
-PLAYER_STATE_MAP(36)
-PLAYER_STATE_MAP(37)
-PLAYER_STATE_MAP(38)
-PLAYER_STATE_MAP(39)
-PLAYER_STATE_MAP(40)
-PLAYER_STATE_MAP(41)
-PLAYER_STATE_MAP(42)
-PLAYER_STATE_MAP(43)
-PLAYER_STATE_MAP(44)
-PLAYER_STATE_MAP(45)
-PLAYER_STATE_MAP(46)
-PLAYER_STATE_MAP(47)
-PLAYER_STATE_MAP(48)
-PLAYER_STATE_MAP(49)
-PLAYER_STATE_MAP(50)
-PLAYER_STATE_MAP(51)
-PLAYER_STATE_MAP(52)
-PLAYER_STATE_MAP(53)
-PLAYER_STATE_MAP(54)
-PLAYER_STATE_MAP(55)
-PLAYER_STATE_MAP(56)
-PLAYER_STATE_MAP(57)
-PLAYER_STATE_MAP(58)
-PLAYER_STATE_MAP(59)
-PLAYER_STATE_MAP(60)
-PLAYER_STATE_MAP(61)
-PLAYER_STATE_MAP(62)
-PLAYER_STATE_MAP(63)
-PLAYER_STATE_MAP(64)
-PLAYER_STATE_MAP(65)
-PLAYER_STATE_MAP(66)
-PLAYER_STATE_MAP(67)
-PLAYER_STATE_MAP(68)
-PLAYER_STATE_MAP(69)
-PLAYER_STATE_MAP(70)
-PLAYER_STATE_MAP(71)
-PLAYER_STATE_MAP(72)
-PLAYER_STATE_MAP(73)
-PLAYER_STATE_MAP(74)
-PLAYER_STATE_MAP(75)
-PLAYER_STATE_MAP(76)
-PLAYER_STATE_MAP(77)
-PLAYER_STATE_MAP(78)
-PLAYER_STATE_MAP(79)
-PLAYER_STATE_MAP(80)
-PLAYER_STATE_MAP(81)
-PLAYER_STATE_MAP(82)
-PLAYER_STATE_MAP(83)
-PLAYER_STATE_MAP(84)
-PLAYER_STATE_MAP(85)
-PLAYER_STATE_MAP(86)
-PLAYER_STATE_MAP(87)
-PLAYER_STATE_MAP(88)
-PLAYER_STATE_MAP(89)
-PLAYER_STATE_MAP(90)
-PLAYER_STATE_MAP(91)
-PLAYER_STATE_MAP(92)
-PLAYER_STATE_MAP(93)
-PLAYER_STATE_MAP(94)
-PLAYER_STATE_MAP(95)
-PLAYER_STATE_MAP(96)
-PLAYER_STATE_MAP(97)
-PLAYER_STATE_MAP(98)
-PLAYER_STATE_MAP(99)
-PLAYER_STATE_MAP(100)
-PLAYER_STATE_MAP(101)
-PLAYER_STATE_MAP(102)
-PLAYER_STATE_MAP(103)
-PLAYER_STATE_MAP(104)
-PLAYER_STATE_MAP(105)
-PLAYER_STATE_MAP(106)
-PLAYER_STATE_MAP(107)
-PLAYER_STATE_MAP(108)
-PLAYER_STATE_MAP(109)
-PLAYER_STATE_MAP(110)
-PLAYER_STATE_MAP(111)
-PLAYER_STATE_MAP(112)
-PLAYER_STATE_MAP(113)
-PLAYER_STATE_MAP(114)
-PLAYER_STATE_MAP(115)
-PLAYER_STATE_MAP(116)
-PLAYER_STATE_MAP(117)
-PLAYER_STATE_MAP(118)
-PLAYER_STATE_MAP(119)
-PLAYER_STATE_MAP(120)
-PLAYER_STATE_MAP(121)
-PLAYER_STATE_MAP(122)
-PLAYER_STATE_MAP(123)
-PLAYER_STATE_MAP(124)
-PLAYER_STATE_MAP(125)
-PLAYER_STATE_MAP(126)
-PLAYER_STATE_MAP(127)
-*/
-
-/*
-struct {
-    __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
-    __uint( max_entries, MAX_CPUS );
-    __type( key, __u32 );
-    __array( values, struct player_state );
-} outer_map SEC(".maps") = {
     .values = { 
         &player_state_0,
         &player_state_1,
@@ -398,7 +348,6 @@ struct {
         &player_state_127,
     }
 };
-*/
 
 static void reflect_packet( void * data, int payload_bytes )
 {
