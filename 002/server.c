@@ -349,7 +349,7 @@ int main( int argc, char *argv[] )
 
     uint64_t last_inputs = 0;
 
-    pin_thread_to_core( 63 );       // IMPORTANT: keep the main thread out of the way of the XDP threads and the worker threads!
+    pin_thread_to_core( 16 );       // IMPORTANT: keep the main thread out of the way of the XDP cpus on google cloud [0,15]
 
     while ( !quit )
     {
@@ -373,7 +373,7 @@ int main( int argc, char *argv[] )
         {
             uint64_t current_inputs = 0;
             uint64_t lost_inputs = 0;
-            for ( int i = 0; i < XDP_MAX_CPUS; i++ )
+            for ( int i = 0; i < MAX_CPUS; i++ )
             {
                 current_inputs += inputs_processed[i];
                 lost_inputs = inputs_lost[i];
