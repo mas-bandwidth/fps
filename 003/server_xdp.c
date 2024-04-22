@@ -289,6 +289,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                             return XDP_DROP; // can't happen
                                         }
 
+                                        int deliver_to_cpu = ( XDP_MAX_CPUS + ( session_id % XDP_MAX_CPUS ) ) & BPF_F_INDEX_MASK;
+
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ); i++ )
@@ -296,7 +298,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) );
+                                            bpf_perf_event_output( ctx, &input_buffer, deliver_to_cpu, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) );
                                         }
                                         else if ( n == 2 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2 <= data_end )
                                         {
@@ -305,7 +307,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2 );
+                                            bpf_perf_event_output( ctx, &input_buffer, deliver_to_cpu, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2 );
                                         }
                                         else if ( n == 3 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 3 <= data_end )
                                         {
@@ -314,7 +316,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 3 );
+                                            bpf_perf_event_output( ctx, &input_buffer, deliver_to_cpu, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 3 );
                                         }
                                         else if ( n == 4 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 4 <= data_end )
                                         {
@@ -323,7 +325,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 4 );
+                                            bpf_perf_event_output( ctx, &input_buffer, deliver_to_cpu, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 4 );
                                         }
                                         else if ( n == 5 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 5 <= data_end )
                                         {
@@ -332,7 +334,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 5 );
+                                            bpf_perf_event_output( ctx, &input_buffer, deliver_to_cpu, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 5 );
                                         }
                                         else if ( n == 6 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 6 <= data_end )
                                         {
@@ -341,7 +343,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 6 );
+                                            bpf_perf_event_output( ctx, &input_buffer, deliver_to_cpu, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 6 );
                                         }
                                         else if ( n == 7 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 7 <= data_end )
                                         {
@@ -350,7 +352,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 7 );
+                                            bpf_perf_event_output( ctx, &input_buffer, deliver_to_cpu, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 7 );
                                         }
                                         else if ( n == 8 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 8 <= data_end )
                                         {
@@ -359,7 +361,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 8 );
+                                            bpf_perf_event_output( ctx, &input_buffer, deliver_to_cpu, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 8 );
                                         }
                                         else if ( n == 9 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 9 <= data_end )
                                         {
@@ -368,7 +370,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 9 );
+                                            bpf_perf_event_output( ctx, &input_buffer, deliver_to_cpu, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 9 );
                                         }
                                         else if ( n == 10 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10 <= data_end )
                                         {
@@ -377,7 +379,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10 );
+                                            bpf_perf_event_output( ctx, &input_buffer, deliver_to_cpu, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10 );
                                         }
                                     }
                                     else
