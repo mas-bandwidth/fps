@@ -39,6 +39,8 @@
 
 #define HEAP_SIZE                                                                        2048
 
+#define PLAYER_STATE_SIZE                                                                1200
+
 #if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && \
     __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define bpf_ntohs(x)        __builtin_bswap16(x)
@@ -95,9 +97,15 @@ struct session_data
     __u64 next_input_sequence;
 };
 
+struct player_state
+{
+    __u64 t;
+    __u8 data[PLAYER_STATE_SIZE];
+};
+
 struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __uint( flags, BPF_F_NO_COMMON_LRU );
+    __uint( type, BPF_MAP_TYPE_LRU_PERCPU_HASH );
+    __uint( map_flags, BPF_F_NO_COMMON_LRU );
     __type( key, __u64 );
     __type( value, __u64 );
     __uint( max_entries, MAX_SESSIONS );
@@ -129,6 +137,15 @@ struct {
     __type( value, struct server_stats );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } server_stats SEC(".maps");
+
+struct {
+    __uint( type, BPF_MAP_TYPE_LRU_PERCPU_HASH );
+    __uint( map_flags, BPF_F_NO_COMMON_LRU );
+    __type( key, __u64 );
+    __type( value, struct player_state );
+    __uint( max_entries, MAX_SESSIONS );
+    __uint( pinning, LIBBPF_PIN_BY_NAME );
+} player_state SEC(".maps");
 
 static void reflect_packet( void * data, int payload_bytes )
 {
