@@ -45,7 +45,7 @@ struct {
     __uint( map_flags, BPF_F_NO_COMMON_LRU );
     __type( key, __u64 );
     __type( value, struct session_data );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
+    __uint( max_entries, MAX_SESSIONS / XDP_MAX_CPUS );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } session_map SEC(".maps");
 
@@ -79,7 +79,7 @@ struct inner_player_state_map {
     __uint( type, BPF_MAP_TYPE_LRU_HASH );
     __type( key, __u64 );
     __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
+    __uint( max_entries, MAX_SESSIONS / XDP_MAX_CPUS );
 } 
 player_state_0 SEC(".maps"),
 player_state_1 SEC(".maps"),
@@ -96,123 +96,12 @@ player_state_11 SEC(".maps"),
 player_state_12 SEC(".maps"),
 player_state_13 SEC(".maps"),
 player_state_14 SEC(".maps"),
-player_state_15 SEC(".maps");
-player_state_16 SEC(".maps"),
-player_state_17 SEC(".maps"),
-player_state_18 SEC(".maps"),
-player_state_19 SEC(".maps"),
-player_state_20 SEC(".maps"),
-player_state_21 SEC(".maps"),
-player_state_22 SEC(".maps"),
-player_state_23 SEC(".maps"),
-player_state_24 SEC(".maps"),
-player_state_25 SEC(".maps"),
-player_state_26 SEC(".maps"),
-player_state_27 SEC(".maps"),
-player_state_28 SEC(".maps"),
-player_state_29 SEC(".maps"),
-player_state_30 SEC(".maps"),
-player_state_31 SEC(".maps"),
-player_state_32 SEC(".maps"),
-player_state_33 SEC(".maps"),
-player_state_34 SEC(".maps"),
-player_state_35 SEC(".maps"),
-player_state_36 SEC(".maps"),
-player_state_37 SEC(".maps"),
-player_state_38 SEC(".maps"),
-player_state_39 SEC(".maps"),
-player_state_40 SEC(".maps"),
-player_state_41 SEC(".maps"),
-player_state_42 SEC(".maps"),
-player_state_43 SEC(".maps"),
-player_state_44 SEC(".maps"),
-player_state_45 SEC(".maps"),
-player_state_46 SEC(".maps"),
-player_state_47 SEC(".maps"),
-player_state_48 SEC(".maps"),
-player_state_49 SEC(".maps"),
-player_state_50 SEC(".maps"),
-player_state_51 SEC(".maps"),
-player_state_52 SEC(".maps"),
-player_state_53 SEC(".maps"),
-player_state_54 SEC(".maps"),
-player_state_55 SEC(".maps"),
-player_state_56 SEC(".maps"),
-player_state_57 SEC(".maps"),
-player_state_58 SEC(".maps"),
-player_state_59 SEC(".maps"),
-player_state_60 SEC(".maps"),
-player_state_61 SEC(".maps"),
-player_state_62 SEC(".maps"),
-player_state_63 SEC(".maps"),
-player_state_64 SEC(".maps"),
-player_state_65 SEC(".maps"),
-player_state_66 SEC(".maps"),
-player_state_67 SEC(".maps"),
-player_state_68 SEC(".maps"),
-player_state_69 SEC(".maps"),
-player_state_70 SEC(".maps"),
-player_state_71 SEC(".maps"),
-player_state_72 SEC(".maps"),
-player_state_73 SEC(".maps"),
-player_state_74 SEC(".maps"),
-player_state_75 SEC(".maps"),
-player_state_76 SEC(".maps"),
-player_state_77 SEC(".maps"),
-player_state_78 SEC(".maps"),
-player_state_79 SEC(".maps"),
-player_state_80 SEC(".maps"),
-player_state_81 SEC(".maps"),
-player_state_82 SEC(".maps"),
-player_state_83 SEC(".maps"),
-player_state_84 SEC(".maps"),
-player_state_85 SEC(".maps"),
-player_state_86 SEC(".maps"),
-player_state_87 SEC(".maps"),
-player_state_88 SEC(".maps"),
-player_state_89 SEC(".maps"),
-player_state_90 SEC(".maps"),
-player_state_91 SEC(".maps"),
-player_state_92 SEC(".maps"),
-player_state_93 SEC(".maps"),
-player_state_94 SEC(".maps"),
-player_state_95 SEC(".maps"),
-player_state_96 SEC(".maps"),
-player_state_97 SEC(".maps"),
-player_state_98 SEC(".maps"),
-player_state_99 SEC(".maps"),
-player_state_100 SEC(".maps"),
-player_state_101 SEC(".maps"),
-player_state_102 SEC(".maps"),
-player_state_103 SEC(".maps"),
-player_state_104 SEC(".maps"),
-player_state_105 SEC(".maps"),
-player_state_106 SEC(".maps"),
-player_state_107 SEC(".maps"),
-player_state_108 SEC(".maps"),
-player_state_109 SEC(".maps"),
-player_state_110 SEC(".maps"),
-player_state_111 SEC(".maps"),
-player_state_112 SEC(".maps"),
-player_state_113 SEC(".maps"),
-player_state_114 SEC(".maps"),
-player_state_115 SEC(".maps"),
-player_state_116 SEC(".maps"),
-player_state_117 SEC(".maps"),
-player_state_118 SEC(".maps"),
-player_state_119 SEC(".maps"),
-player_state_120 SEC(".maps"),
-player_state_121 SEC(".maps"),
-player_state_122 SEC(".maps"),
-player_state_123 SEC(".maps"),
-player_state_124 SEC(".maps"),
-player_state_125 SEC(".maps"),
-player_state_126 SEC(".maps"),
-player_state_127 SEC(".maps");
+player_state_15 SEC(".maps"),
+player_state_16 SEC(".maps");
 
 struct {
     __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
-    __uint( max_entries, MAX_CPUS );
+    __uint( max_entries, XDP_MAX_CPUS );
     __type( key, __u32 );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
     __array( values, struct inner_player_state_map );
@@ -234,118 +123,6 @@ struct {
         &player_state_13,
         &player_state_14,
         &player_state_15,
-        &player_state_16,
-        &player_state_17,
-        &player_state_18,
-        &player_state_19,
-        &player_state_20,
-        &player_state_21,
-        &player_state_22,
-        &player_state_23,
-        &player_state_24,
-        &player_state_25,
-        &player_state_26,
-        &player_state_27,
-        &player_state_28,
-        &player_state_29,
-        &player_state_30,
-        &player_state_31,
-        &player_state_32,
-        &player_state_33,
-        &player_state_34,
-        &player_state_35,
-        &player_state_36,
-        &player_state_37,
-        &player_state_38,
-        &player_state_39,
-        &player_state_40,
-        &player_state_41,
-        &player_state_42,
-        &player_state_43,
-        &player_state_44,
-        &player_state_45,
-        &player_state_46,
-        &player_state_47,
-        &player_state_48,
-        &player_state_49,
-        &player_state_50,
-        &player_state_51,
-        &player_state_52,
-        &player_state_53,
-        &player_state_54,
-        &player_state_55,
-        &player_state_56,
-        &player_state_57,
-        &player_state_58,
-        &player_state_59,
-        &player_state_60,
-        &player_state_61,
-        &player_state_62,
-        &player_state_63,
-        &player_state_64,
-        &player_state_65,
-        &player_state_66,
-        &player_state_67,
-        &player_state_68,
-        &player_state_69,
-        &player_state_70,
-        &player_state_71,
-        &player_state_72,
-        &player_state_73,
-        &player_state_74,
-        &player_state_75,
-        &player_state_76,
-        &player_state_77,
-        &player_state_78,
-        &player_state_79,
-        &player_state_80,
-        &player_state_81,
-        &player_state_82,
-        &player_state_83,
-        &player_state_84,
-        &player_state_85,
-        &player_state_86,
-        &player_state_87,
-        &player_state_88,
-        &player_state_89,
-        &player_state_90,
-        &player_state_91,
-        &player_state_92,
-        &player_state_93,
-        &player_state_94,
-        &player_state_95,
-        &player_state_96,
-        &player_state_97,
-        &player_state_98,
-        &player_state_99,
-        &player_state_100,
-        &player_state_101,
-        &player_state_102,
-        &player_state_103,
-        &player_state_104,
-        &player_state_105,
-        &player_state_106,
-        &player_state_107,
-        &player_state_108,
-        &player_state_109,
-        &player_state_110,
-        &player_state_111,
-        &player_state_112,
-        &player_state_113,
-        &player_state_114,
-        &player_state_115,
-        &player_state_116,
-        &player_state_117,
-        &player_state_118,
-        &player_state_119,
-        &player_state_120,
-        &player_state_121,
-        &player_state_122,
-        &player_state_123,
-        &player_state_124,
-        &player_state_125,
-        &player_state_126,
-        &player_state_127,
     }
 };
 
@@ -519,7 +296,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) );
                                         }
                                         else if ( n == 2 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2 <= data_end )
                                         {
@@ -528,7 +305,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2 );
                                         }
                                         else if ( n == 3 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 3 <= data_end )
                                         {
@@ -537,7 +314,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 3 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 3 );
                                         }
                                         else if ( n == 4 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 4 <= data_end )
                                         {
@@ -546,7 +323,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 4 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 4 );
                                         }
                                         else if ( n == 5 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 5 <= data_end )
                                         {
@@ -555,7 +332,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 5 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 5 );
                                         }
                                         else if ( n == 6 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 6 <= data_end )
                                         {
@@ -564,7 +341,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 6 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 6 );
                                         }
                                         else if ( n == 7 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 7 <= data_end )
                                         {
@@ -573,7 +350,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 7 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 7 );
                                         }
                                         else if ( n == 8 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 8 <= data_end )
                                         {
@@ -582,7 +359,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 8 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 8 );
                                         }
                                         else if ( n == 9 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 9 <= data_end )
                                         {
@@ -591,7 +368,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 9 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 9 );
                                         }
                                         else if ( n == 10 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10 <= data_end )
                                         {
@@ -600,7 +377,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU + XDP_MAX_CPUS, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10 );
                                         }
                                     }
                                     else

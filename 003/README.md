@@ -18,4 +18,4 @@ More information on perf buffers vs. ring buffers here.
 
 https://nakryiko.com/posts/bpf-ringbuf/#bpf-ringbuf-vs-bpf-perfbuf
 
-As a bonus, we can eliminate a copy per-input that need to do in XDP with perf buffers.
+As a bonus, we can eliminate an extra copy per-input packet that we needed to do with perf buffers.

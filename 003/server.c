@@ -23,7 +23,7 @@
 
 #include "shared.h"
 
-static uint64_t inputs_processed[MAX_CPUS];
+static uint64_t inputs_processed[XDP_MAX_CPUS];
 
 struct bpf_t
 {
@@ -34,12 +34,14 @@ struct bpf_t
     int input_buffer_fd;
     int server_stats_fd;
     int player_state_outer_fd;
-    int player_state_inner_fd[MAX_CPUS];
+    int player_state_inner_fd[XDP_MAX_CPUS];
     struct perf_buffer * input_buffer;
 };
 
 void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
+    cpu -= XDP_MAX_CPU; // [0,XDP_MAX_CPU-1] = XDP cores, [XDP_MAX_CPU, XDP_MAX_CPU*2-1] = worker cores
+
     struct bpf_t * bpf = (struct bpf_t*) ctx;
 
     int player_state_fd = bpf->player_state_inner_fd[cpu];
@@ -297,6 +299,20 @@ static void cleanup()
     fflush( stdout );
 }
 
+int pin_thread_to_core( int core_id ) 
+{
+   int num_cores = sysconf(_SC_NPROCESSORS_ONLN );
+   if ( core_id < 0 || core_id >= num_cores  )
+      return EINVAL;
+
+   cpu_set_t cpuset;
+   CPU_ZERO( &cpuset );
+   CPU_SET( core_id, &cpuset );
+
+   pthread_t current_thread = pthread_self();    
+
+   return pthread_setaffinity_np( current_thread, sizeof(cpu_set_t), &cpuset );
+}
 int main( int argc, char *argv[] )
 {
     signal( SIGINT,  interrupt_handler );
@@ -320,6 +336,8 @@ int main( int argc, char *argv[] )
     double last_print_time = platform_time();
 
     uint64_t last_inputs = 0;
+
+    pin_thread_to_core( XDP_MAX_THREADS * 2 );       // IMPORTANT: keep the main thread out of the way of the XDP threads and the worker threads!
 
     while ( !quit )
     {
