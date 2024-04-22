@@ -4,6 +4,8 @@
     Runs on Ubuntu 22.04 LTS 64bit with Linux Kernel 6.5+ *ONLY*
 */
 
+#define _GNU_SOURCE
+
 #include <memory.h>
 #include <stdio.h>
 #include <signal.h>
@@ -21,8 +23,6 @@
 #include <inttypes.h>
 #include <time.h>
 #include <pthread.h>
-
-#define _GNU_SOURCE
 #include <sched.h>
 
 #include "shared.h"
