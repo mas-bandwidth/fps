@@ -25,6 +25,8 @@
 
 #define PLAYER_STATE_SIZE                                                                1200
 
+#define MAX_CPUS                                                                          128
+
 #pragma pack(push, 1)
 
 struct join_request_packet

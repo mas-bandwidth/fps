@@ -45,7 +45,7 @@ struct {
     __uint( map_flags, BPF_F_NO_COMMON_LRU );
     __type( key, __u64 );
     __type( value, __u64 );
-    __uint( max_entries, MAX_SESSIONS / MAX_THREADS );
+    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } session_map SEC(".maps");
 
@@ -80,7 +80,7 @@ struct {
     __uint( map_flags, BPF_F_NO_COMMON_LRU );
     __type( key, __u64 );
     __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_THREADS );
+    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } player_state SEC(".maps");
 
