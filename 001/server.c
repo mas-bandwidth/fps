@@ -289,8 +289,9 @@ int main( int argc, char *argv[] )
     while ( !quit )
     {
         int err = perf_buffer__poll( bpf.input_buffer, 1 );
-        if ( err == -EAGAIN )
+        if ( err == -4 )
         {
+            // ctrl-c
             quit = true;
             break;
         }
