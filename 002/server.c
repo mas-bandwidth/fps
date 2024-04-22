@@ -27,8 +27,8 @@
 
 #include "shared.h"
 
-static uint64_t inputs_processed[XDP_MAX_CPUS];
-static uint64_t inputs_lost[XDP_MAX_CPUS];
+static uint64_t inputs_processed[MAX_CPUS];
+static uint64_t inputs_lost[MAX_CPUS];
 
 struct bpf_t
 {
@@ -39,7 +39,7 @@ struct bpf_t
     int input_buffer_fd;
     int server_stats_fd;
     int player_state_outer_fd;
-    int player_state_inner_fd[XDP_MAX_CPUS];
+    int player_state_inner_fd[MAX_CPUS];
     struct perf_buffer * input_buffer;
 };
 
@@ -240,7 +240,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // get the file handle to the inner player state maps
 
-    for ( int i = 0; i < XDP_MAX_CPUS; i++ )
+    for ( int i = 0; i < MAX_CPUS; i++ )
     {
         uint32_t key = i;
         uint32_t inner_map_id = 0;
@@ -349,7 +349,7 @@ int main( int argc, char *argv[] )
 
     uint64_t last_inputs = 0;
 
-    pin_thread_to_core( XDP_MAX_CPUS * 2 );       // IMPORTANT: keep the main thread out of the way of the XDP threads and the worker threads!
+    pin_thread_to_core( 63 );       // IMPORTANT: keep the main thread out of the way of the XDP threads and the worker threads!
 
     while ( !quit )
     {
