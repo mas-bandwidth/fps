@@ -33,7 +33,8 @@ struct bpf_t
     bool attached_skb;
     int input_buffer_fd;
     int server_stats_fd;
-    int player_state_fd[MAX_CPUS];
+    int player_state_outer_fd;
+    int player_state_inner_fd[MAX_CPUS];
     struct perf_buffer * input_buffer;
 };
 
@@ -41,7 +42,7 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
     struct bpf_t * bpf = (struct bpf_t*) ctx;
 
-    int player_state_fd = bpf->player_state_fd[cpu];
+    int player_state_fd = bpf->player_state_inner_fd[cpu];
 
     struct input_header * header = (struct input_header*) data;
 
@@ -215,17 +216,25 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         return 1;
     }
 
-    // get the file handle to the player state maps (one per-CPU)
+    // get the file handle to the outer player state map
+
+    bpf->player_state_outer_fd[i] = bpf_obj_get( "/sys/fs/bpf/player_state" );
+    if ( bpf->player_state_outer_fd[i] <= 0 )
+    {
+        printf( "\nerror: could not get outer player state map: %s\n\n", strerror(errno) );
+        return 1;
+    }
+
+    // get the file handle to the inner player state maps
 
     for ( int i = 0; i < MAX_CPUS; i++ )
     {
-        char map_name[1024];
-        sprintf( map_name, "/sys/fs/bpf/player_state_%d", i );
-        bpf->player_state_fd[i] = bpf_obj_get( map_name );
-        if ( bpf->player_state_fd[i] <= 0 )
+        uint32_t key = i;
+        int result = bpf_map_lookup_elem( debug->relay_map_fd, &key, &bpf->player_state_inner_fd[i] );
+        if ( result != 0 )
         {
-            printf( "\nerror: could not get player state: %s\n\n", strerror(errno) );
-            return 1;
+            printf( "\nerror: failed lookup player state inner map: %s\n\n", strerror(errno) );
+            return;        
         }
     }
 
