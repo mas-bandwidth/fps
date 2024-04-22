@@ -53,11 +53,11 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
     printf( "session id is %" PRIx64 "\n", (uint64_t) header->session_id );
 
     uint64_t value;
-    int result = bpf_map_lookup_elem( player_state_fd, &header->session_id, &state );
+    bpf_map_lookup_elem( player_state_fd, &header->session_id, &state );
     if ( result != 0 )
     {
-        printf( "error: failed to lookup player state: %s\n", strerror(errno) );
-        return;        
+        // first update
+        memset( &state, 0, sizeof(struct player_state) );
     }
 
     // todo: handle multiple inputs
