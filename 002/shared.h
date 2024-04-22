@@ -19,7 +19,7 @@
 #define STATS_REQUEST_PACKET_SIZE                                                   ( 1 + 8 )
 #define STATS_RESPONSE_PACKET_SIZE                                                  ( 1 + 8 )
 
-#define MAX_SESSIONS                                                                    50000
+#define MAX_SESSIONS                                                                  1000000
 
 #define HEAP_SIZE                                                                        2048
 

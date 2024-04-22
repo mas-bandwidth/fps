@@ -44,7 +44,7 @@ struct {
     __uint( type, BPF_MAP_TYPE_LRU_PERCPU_HASH );
     __uint( map_flags, BPF_F_NO_COMMON_LRU );
     __type( key, __u64 );
-    __type( value, __u64 );
+    __type( value, struct session_data );
     __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } session_map SEC(".maps");

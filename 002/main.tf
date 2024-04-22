@@ -334,7 +334,7 @@ resource "google_compute_instance" "server" {
 
   name         = "server-${var.tag}"
   project      = google_project.fps.project_id
-  machine_type = "c3-highmem-44"
+  machine_type = "c3-highmem-88"
   zone         = var.google_zone
   tags         = ["allow-ssh", "allow-udp"]
 
