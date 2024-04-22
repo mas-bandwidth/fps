@@ -67,4 +67,17 @@ struct player_state
     __u8 data[PLAYER_STATE_SIZE];
 };
 
+struct input_header
+{
+    __u64 session_id;
+    __u64 sequence;
+    __u64 t;
+};
+
+struct input_data
+{
+    __u64 dt;
+    __u8 input[INPUT_SIZE];
+};
+
 #pragma pack(pop)

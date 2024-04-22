@@ -25,13 +25,6 @@
 
 static uint64_t inputs_processed[MAX_CPUS];
 
-void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
-{
-    (void) ctx;
-    (void) data;
-    __sync_fetch_and_add( &inputs_processed[cpu], 1 );
-}
-
 struct bpf_t
 {
     int interface_index;
@@ -43,6 +36,42 @@ struct bpf_t
     int player_state_fd[MAX_CPUS];
     struct perf_buffer * input_buffer;
 };
+
+void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
+{
+    struct bpf_t * bpf = (struct bpf_t*) ctx;
+
+    int player_state_fd = bpf->player_state_fd[cpu];
+
+    struct input_header * header = (struct input_header*) data;
+
+    struct player_state state;
+
+    uint64_t value;
+    int result = bpf_map_lookup_elem( debug->relay_map_fd, &header->session_id, &player_state );
+    if ( result != 0 )
+    {
+        printf( "error: failed to update player state: %s\n", strerror(errno) );
+        return;        
+    }
+
+    // todo: handle multiple inputs
+    state.t += header->dt;
+
+    for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
+    {
+        state.data[i] = (uint8_t) state.t + (uint8_t) i;
+    }
+
+    int err = bpf_map_update_elem( bpf->config_fd, &header->session_id, &player_state, BPF_ANY );
+    if ( err != 0 )
+    {
+        printf( "error: failed to update player state: %s\n", strerror(errno) );
+        return;
+    }
+
+    __sync_fetch_and_add( &inputs_processed[cpu], 1 );
+}
 
 static double time_start;
 
@@ -202,7 +231,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // create the input perf buffer
 
-    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, NULL, NULL, NULL );
+    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, NULL, bpf, NULL );
     if ( libbpf_get_error( bpf->input_buffer ) ) 
     {
         printf( "\nerror: could not create input buffer\n\n" );
