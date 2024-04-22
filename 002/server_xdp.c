@@ -96,7 +96,7 @@ player_state_11 SEC(".maps"),
 player_state_12 SEC(".maps"),
 player_state_13 SEC(".maps"),
 player_state_14 SEC(".maps"),
-player_state_15 SEC(".maps");
+player_state_15 SEC(".maps"),
 player_state_16 SEC(".maps"),
 player_state_17 SEC(".maps"),
 player_state_18 SEC(".maps"),
