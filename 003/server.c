@@ -21,6 +21,7 @@
 #include <inttypes.h>
 #include <time.h>
 #include <pthread.h>
+#include <sched.h>
 
 #include "shared.h"
 
