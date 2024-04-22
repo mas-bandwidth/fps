@@ -112,7 +112,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
         if ( !found )
         {
-            printf( "\nerror: could not find any network interface matching '%s'", interface_name );
+            printf( "\nerror: could not find any network interface matching '%s'\n\n", interface_name );
             return 1;
         }
     }
@@ -276,9 +276,14 @@ int main( int argc, char *argv[] )
     while ( !quit )
     {
         int err = perf_buffer__poll( bpf.input_buffer, 1 );
+        if ( err == -EAGAIN )
+        {
+            quit = true;
+            break;
+        }
         if ( err < 0 ) 
         {
-            printf( "\nerror: could not poll input buffer: %d\n", err );
+            printf( "\nerror: could not poll input buffer: %d\n\n", err );
             quit = true;
             break;
         }
