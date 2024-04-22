@@ -75,254 +75,6 @@ struct {
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } server_stats SEC(".maps");
 
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_0 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_1 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_2 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_3 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_4 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_5 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_6 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_7 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_8 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_9 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_10 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_11 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_12 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_13 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_14 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_15 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_16 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_17 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_18 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_19 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_20 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_21 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_22 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_23 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_24 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_25 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_26 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_27 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_28 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_29 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-} player_state_30 SEC(".maps");
-
 #define PLAYER_STATE_MAP(n)                                                 \
 struct {                                                                    \
     __uint( type, BPF_MAP_TYPE_LRU_HASH );                                  \
@@ -332,7 +84,134 @@ struct {                                                                    \
     __uint( pinning, LIBBPF_PIN_BY_NAME );                                  \
 } player_state_##n SEC(".maps");                                            \
 
+PLAYER_STATE_MAP(0)
+PLAYER_STATE_MAP(1)
+PLAYER_STATE_MAP(2)
+PLAYER_STATE_MAP(3)
+PLAYER_STATE_MAP(4)
+PLAYER_STATE_MAP(5)
+PLAYER_STATE_MAP(6)
+PLAYER_STATE_MAP(7)
+PLAYER_STATE_MAP(8)
+PLAYER_STATE_MAP(9)
+PLAYER_STATE_MAP(10)
+PLAYER_STATE_MAP(11)
+PLAYER_STATE_MAP(12)
+PLAYER_STATE_MAP(13)
+PLAYER_STATE_MAP(14)
+PLAYER_STATE_MAP(15)
+PLAYER_STATE_MAP(16)
+PLAYER_STATE_MAP(17)
+PLAYER_STATE_MAP(18)
+PLAYER_STATE_MAP(19)
+PLAYER_STATE_MAP(20)
+PLAYER_STATE_MAP(21)
+PLAYER_STATE_MAP(22)
+PLAYER_STATE_MAP(23)
+PLAYER_STATE_MAP(24)
+PLAYER_STATE_MAP(25)
+PLAYER_STATE_MAP(26)
+PLAYER_STATE_MAP(27)
+PLAYER_STATE_MAP(28)
+PLAYER_STATE_MAP(29)
+PLAYER_STATE_MAP(30)
 PLAYER_STATE_MAP(31)
+PLAYER_STATE_MAP(32)
+PLAYER_STATE_MAP(33)
+PLAYER_STATE_MAP(34)
+PLAYER_STATE_MAP(35)
+PLAYER_STATE_MAP(36)
+PLAYER_STATE_MAP(37)
+PLAYER_STATE_MAP(38)
+PLAYER_STATE_MAP(39)
+PLAYER_STATE_MAP(40)
+PLAYER_STATE_MAP(41)
+PLAYER_STATE_MAP(42)
+PLAYER_STATE_MAP(43)
+PLAYER_STATE_MAP(44)
+PLAYER_STATE_MAP(45)
+PLAYER_STATE_MAP(46)
+PLAYER_STATE_MAP(47)
+PLAYER_STATE_MAP(48)
+PLAYER_STATE_MAP(49)
+PLAYER_STATE_MAP(50)
+PLAYER_STATE_MAP(51)
+PLAYER_STATE_MAP(52)
+PLAYER_STATE_MAP(53)
+PLAYER_STATE_MAP(54)
+PLAYER_STATE_MAP(55)
+PLAYER_STATE_MAP(56)
+PLAYER_STATE_MAP(57)
+PLAYER_STATE_MAP(58)
+PLAYER_STATE_MAP(59)
+PLAYER_STATE_MAP(60)
+PLAYER_STATE_MAP(61)
+PLAYER_STATE_MAP(62)
+PLAYER_STATE_MAP(63)
+PLAYER_STATE_MAP(64)
+PLAYER_STATE_MAP(65)
+PLAYER_STATE_MAP(66)
+PLAYER_STATE_MAP(67)
+PLAYER_STATE_MAP(68)
+PLAYER_STATE_MAP(69)
+PLAYER_STATE_MAP(70)
+PLAYER_STATE_MAP(71)
+PLAYER_STATE_MAP(72)
+PLAYER_STATE_MAP(73)
+PLAYER_STATE_MAP(74)
+PLAYER_STATE_MAP(75)
+PLAYER_STATE_MAP(76)
+PLAYER_STATE_MAP(77)
+PLAYER_STATE_MAP(78)
+PLAYER_STATE_MAP(79)
+PLAYER_STATE_MAP(80)
+PLAYER_STATE_MAP(81)
+PLAYER_STATE_MAP(82)
+PLAYER_STATE_MAP(83)
+PLAYER_STATE_MAP(84)
+PLAYER_STATE_MAP(85)
+PLAYER_STATE_MAP(86)
+PLAYER_STATE_MAP(87)
+PLAYER_STATE_MAP(88)
+PLAYER_STATE_MAP(89)
+PLAYER_STATE_MAP(90)
+PLAYER_STATE_MAP(91)
+PLAYER_STATE_MAP(92)
+PLAYER_STATE_MAP(93)
+PLAYER_STATE_MAP(94)
+PLAYER_STATE_MAP(95)
+PLAYER_STATE_MAP(96)
+PLAYER_STATE_MAP(97)
+PLAYER_STATE_MAP(98)
+PLAYER_STATE_MAP(99)
+PLAYER_STATE_MAP(100)
+PLAYER_STATE_MAP(101)
+PLAYER_STATE_MAP(102)
+PLAYER_STATE_MAP(103)
+PLAYER_STATE_MAP(104)
+PLAYER_STATE_MAP(105)
+PLAYER_STATE_MAP(106)
+PLAYER_STATE_MAP(107)
+PLAYER_STATE_MAP(108)
+PLAYER_STATE_MAP(109)
+PLAYER_STATE_MAP(110)
+PLAYER_STATE_MAP(111)
+PLAYER_STATE_MAP(112)
+PLAYER_STATE_MAP(113)
+PLAYER_STATE_MAP(114)
+PLAYER_STATE_MAP(115)
+PLAYER_STATE_MAP(116)
+PLAYER_STATE_MAP(117)
+PLAYER_STATE_MAP(118)
+PLAYER_STATE_MAP(119)
+PLAYER_STATE_MAP(120)
+PLAYER_STATE_MAP(121)
+PLAYER_STATE_MAP(122)
+PLAYER_STATE_MAP(123)
+PLAYER_STATE_MAP(124)
+PLAYER_STATE_MAP(125)
+PLAYER_STATE_MAP(126)
+PLAYER_STATE_MAP(127)
 
 static void reflect_packet( void * data, int payload_bytes )
 {
