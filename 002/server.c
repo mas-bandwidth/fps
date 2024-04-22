@@ -282,6 +282,11 @@ int main( int argc, char *argv[] )
     while ( !quit )
     {
         int err = perf_buffer__poll( bpf.input_buffer, 1 );
+        if ( err == -EAGAIN )
+        {
+            quit = true;
+            break;
+        }
         if ( err < 0 ) 
         {
             printf( "\nerror: could not poll input buffer: %d\n", err );
