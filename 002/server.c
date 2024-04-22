@@ -27,10 +27,10 @@ static uint64_t inputs_processed[MAX_CPUS];
 
 void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
-    // todo: we're going to need the session id here
+    __u64 session_id = *((__u64*)data);
 
     /*
-    void *bpf_map_lookup_percpu_elem(struct bpf_map *map, const void *key, u32 cpu)
+    void *bpf_map_lookup_elem(struct bpf_map *map, const void *key, u32 cpu)
     */
 
     (void) ctx;
