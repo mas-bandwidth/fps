@@ -246,7 +246,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // create the input perf buffer
 
-    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 524288, process_input, NULL, bpf, NULL );
+    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 262144, process_input, NULL, bpf, NULL );
     if ( libbpf_get_error( bpf->input_buffer ) ) 
     {
         printf( "\nerror: could not create input buffer\n\n" );
