@@ -284,8 +284,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
-                                            data = bpf_ringbuf_reserve( &input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
-                                            if ( !data )
+                                            __u8 * event = bpf_ringbuf_reserve( &input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
+                                            if ( !event )
                                             {
                                                 debug_printf( "dropped input" );
                                                 return XDP_DROP;
@@ -293,10 +293,10 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                             
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ); i++ )
                                             {
-                                                data[i] = payload[1+i];
+                                                event[i] = payload[1+i];
                                             }
 
-                                            bpf_ringbuf_submit( data, 0 );
+                                            bpf_ringbuf_submit( event, 0 );
                                         }
 
                                         // todo: get this working then bring this back77
