@@ -96,7 +96,7 @@ struct {
         &player_state_0,
         &player_state_1,
         &player_state_2,
-    }
+    };
 }
 
 /*
