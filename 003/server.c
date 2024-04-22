@@ -45,19 +45,6 @@ struct bpf_t
 
 void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
-    /*
-    assert( cpu >= XDP_MAX_CPUS );
-    assert( cpu <= XDP_MAX_CPUS*2 );
-
-    cpu -= XDP_MAX_CPUS; // [0,XDP_MAX_CPUS) -> XDP cores, [XDP_MAX_CPUS, XDP_MAX_CPU*2) -> worker cores
-
-    assert( cpu >= 0 );
-    assert( cpu < XDP_MAX_CPUS );
-    */
-
-    printf( "process input on CPU %d\n", cpu );
-
-    /*
     struct bpf_t * bpf = (struct bpf_t*) ctx;
 
     int player_state_fd = bpf->player_state_inner_fd[cpu];
@@ -91,14 +78,13 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
         printf( "error: failed to update player state: %s\n", strerror(errno) );
         return;
     }
-    */
 
-    // __sync_fetch_and_add( &inputs_processed[cpu], 1 );
+    __sync_fetch_and_add( &inputs_processed[cpu], 1 );
 }
 
 void lost_input( void * ctx, int cpu, __u64 count )
 {
-    // __sync_fetch_and_add( &inputs_lost[cpu], count );
+    __sync_fetch_and_add( &inputs_lost[cpu], count );
 }
 
 static double time_start;
@@ -272,7 +258,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     struct perf_buffer_opts opts;
     memset( &opts, 0, sizeof(opts) );
     opts.sz = sizeof(opts);
-    opts.sample_period = 1; // todo: investigate
+    opts.sample_period = 1000;
     bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, lost_input, bpf, &opts );
     if ( libbpf_get_error( bpf->input_buffer ) ) 
     {
@@ -338,6 +324,7 @@ int pin_thread_to_core( int core_id )
 
    return pthread_setaffinity_np( current_thread, sizeof(cpu_set_t), &cpuset );
 }
+
 int main( int argc, char *argv[] )
 {
     signal( SIGINT,  interrupt_handler );

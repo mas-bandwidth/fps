@@ -4,6 +4,8 @@
     Runs on Ubuntu 22.04 LTS 64bit with Linux Kernel 6.5+ *ONLY*
 */
 
+#define _GNU_SOURCE
+
 #include <memory.h>
 #include <stdio.h>
 #include <signal.h>
@@ -20,10 +22,13 @@
 #include <sys/types.h>
 #include <inttypes.h>
 #include <time.h>
+#include <pthread.h>
+#include <sched.h>
 
 #include "shared.h"
 
-static uint64_t inputs_processed[MAX_CPUS];
+static uint64_t inputs_processed[XDP_MAX_CPUS];
+static uint64_t inputs_lost[XDP_MAX_CPUS];
 
 struct bpf_t
 {
@@ -34,7 +39,7 @@ struct bpf_t
     int input_buffer_fd;
     int server_stats_fd;
     int player_state_outer_fd;
-    int player_state_inner_fd[MAX_CPUS];
+    int player_state_inner_fd[XDP_MAX_CPUS];
     struct perf_buffer * input_buffer;
 };
 
@@ -75,6 +80,11 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
     }
 
     __sync_fetch_and_add( &inputs_processed[cpu], 1 );
+}
+
+void lost_input( void * ctx, int cpu, __u64 count )
+{
+    __sync_fetch_and_add( &inputs_lost[cpu], count );
 }
 
 static double time_start;
@@ -230,7 +240,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // get the file handle to the inner player state maps
 
-    for ( int i = 0; i < MAX_CPUS; i++ )
+    for ( int i = 0; i < XDP_MAX_CPUS; i++ )
     {
         uint32_t key = i;
         uint32_t inner_map_id = 0;
@@ -241,12 +251,15 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
             return 1;
         }
         bpf->player_state_inner_fd[i] = bpf_map_get_fd_by_id( inner_map_id );
-        printf( "player state %d is %d\n", i, bpf->player_state_inner_fd[i] );
     }
 
     // create the input perf buffer
 
-    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, NULL, bpf, NULL );
+    struct perf_buffer_opts opts;
+    memset( &opts, 0, sizeof(opts) );
+    opts.sz = sizeof(opts);
+    opts.sample_period = 1000;
+    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, lost_input, bpf, &opts );
     if ( libbpf_get_error( bpf->input_buffer ) ) 
     {
         printf( "\nerror: could not create input buffer\n\n" );
@@ -297,6 +310,21 @@ static void cleanup()
     fflush( stdout );
 }
 
+int pin_thread_to_core( int core_id ) 
+{
+   int num_cores = sysconf(_SC_NPROCESSORS_ONLN );
+   if ( core_id < 0 || core_id >= num_cores  )
+      return EINVAL;
+
+   cpu_set_t cpuset;
+   CPU_ZERO( &cpuset );
+   CPU_SET( core_id, &cpuset );
+
+   pthread_t current_thread = pthread_self();    
+
+   return pthread_setaffinity_np( current_thread, sizeof(cpu_set_t), &cpuset );
+}
+
 int main( int argc, char *argv[] )
 {
     signal( SIGINT,  interrupt_handler );
@@ -321,9 +349,11 @@ int main( int argc, char *argv[] )
 
     uint64_t last_inputs = 0;
 
+    pin_thread_to_core( XDP_MAX_CPUS * 2 );       // IMPORTANT: keep the main thread out of the way of the XDP threads and the worker threads!
+
     while ( !quit )
     {
-        int err = perf_buffer__poll( bpf.input_buffer, 1000 );
+        int err = perf_buffer__poll( bpf.input_buffer, 1 );
         if ( err == -4 )
         {
             // ctrl-c
@@ -338,15 +368,18 @@ int main( int argc, char *argv[] )
         }
 
         double current_time = platform_time();
+
         if ( last_print_time + 1.0 <= current_time )
         {
             uint64_t current_inputs = 0;
-            for ( int i = 0; i < MAX_CPUS; i++ )
+            uint64_t lost_inputs = 0;
+            for ( int i = 0; i < XDP_MAX_CPUS; i++ )
             {
                 current_inputs += inputs_processed[i];
+                lost_inputs = inputs_lost[i];
             }
             uint64_t input_delta = current_inputs - last_inputs;
-            printf( "input delta: %" PRId64 "\n", input_delta );
+            printf( "input delta: %" PRId64 ", inputs lost: %" PRId64 "\n", input_delta, lost_inputs );
             last_inputs = current_inputs;
             last_print_time = current_time;
 
