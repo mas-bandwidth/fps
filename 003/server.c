@@ -41,7 +41,7 @@ struct bpf_t
 
 void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
-    cpu -= XDP_MAX_CPU; // [0,XDP_MAX_CPU-1] = XDP cores, [XDP_MAX_CPU, XDP_MAX_CPU*2-1] = worker cores
+    cpu -= XDP_MAX_CPUS; // [0,XDP_MAX_CPUS) -> XDP cores, [XDP_MAX_CPUS, XDP_MAX_CPU*2) -> worker cores
 
     struct bpf_t * bpf = (struct bpf_t*) ctx;
 
