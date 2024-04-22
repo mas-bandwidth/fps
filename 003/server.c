@@ -45,6 +45,7 @@ struct bpf_t
 
 void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
+    /*
     assert( cpu >= XDP_MAX_CPUS );
     assert( cpu <= XDP_MAX_CPUS*2 );
 
@@ -52,6 +53,7 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 
     assert( cpu >= 0 );
     assert( cpu < XDP_MAX_CPUS );
+    */
 
     printf( "process input on CPU %d\n", cpu );
 
@@ -91,12 +93,12 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
     }
     */
 
-    __sync_fetch_and_add( &inputs_processed[cpu], 1 );
+    // __sync_fetch_and_add( &inputs_processed[cpu], 1 );
 }
 
 void lost_input( void * ctx, int cpu, __u64 count )
 {
-    __sync_fetch_and_add( &inputs_processed[cpu], count );
+    // __sync_fetch_and_add( &inputs_lost[cpu], count );
 }
 
 static double time_start;
@@ -269,8 +271,9 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     // create the input perf buffer
 
     struct perf_buffer_opts opts;
-    opts.sz = sizeof( opts );
-    opts.sample_period = 1000;
+    memset( &opts, 0, sizeof(opts) );
+    opts.sz = sizeof(opts);
+    opts.sample_period = 1; // todo: investigate
     bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, lost_input, bpf, &opts );
     if ( libbpf_get_error( bpf->input_buffer ) ) 
     {
