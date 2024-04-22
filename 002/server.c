@@ -27,8 +27,25 @@ static uint64_t inputs_processed[MAX_CPUS];
 
 void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
+    // todo: we're going to need the session id here
+
+    /*
+    void *bpf_map_lookup_percpu_elem(struct bpf_map *map, const void *key, u32 cpu)
+    */
+
     (void) ctx;
     (void) data;
+
+    /*
+        __u32 key = 0;
+        int err = bpf_map_update_elem( debug->config_fd, &key, &relay_config, BPF_ANY );
+        if ( err != 0 )
+        {
+            printf( "\nerror: failed to set relay config: %s\n\n", strerror(errno) );
+            return RELAY_ERROR;
+        }
+    */
+
     __sync_fetch_and_add( &inputs_processed[cpu], 1 );
 }
 

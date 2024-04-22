@@ -249,93 +249,93 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
-                                            for ( int i = 0; i < 8 + 8 + INPUT_SIZE; i++ )
+                                            for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ); i++ )
                                             {
-                                                data[i] = payload[17+i];
+                                                data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + INPUT_SIZE );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) );
                                         }
                                         else if ( n == 2 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2 <= data_end )
                                         {
-                                            for ( int i = 0; i < 8 + ( 8 + INPUT_SIZE ) * 2; i++ )
+                                            for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2; i++ )
                                             {
-                                                data[i] = payload[17+i];
+                                                data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + ( 8 + INPUT_SIZE ) * 2 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2 );
                                         }
                                         else if ( n == 3 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 3 <= data_end )
                                         {
-                                            for ( int i = 0; i < 8 + ( 8 + INPUT_SIZE ) * 3; i++ )
+                                            for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 3; i++ )
                                             {
-                                                data[i] = payload[17+i];
+                                                data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + ( 8 + INPUT_SIZE ) * 3 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 3 );
                                         }
                                         else if ( n == 4 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 4 <= data_end )
                                         {
-                                            for ( int i = 0; i < 8 + ( 8 + INPUT_SIZE ) * 4; i++ )
+                                            for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 4; i++ )
                                             {
-                                                data[i] = payload[17+i];
+                                                data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + ( 8 + INPUT_SIZE ) * 4 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 4 );
                                         }
                                         else if ( n == 5 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 5 <= data_end )
                                         {
-                                            for ( int i = 0; i < 8 + ( 8 + INPUT_SIZE ) * 5; i++ )
+                                            for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 5; i++ )
                                             {
-                                                data[i] = payload[17+i];
+                                                data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + ( 8 + INPUT_SIZE ) * 5 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 5 );
                                         }
                                         else if ( n == 6 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 6 <= data_end )
                                         {
-                                            for ( int i = 0; i < 8 + ( 8 + INPUT_SIZE ) * 6; i++ )
+                                            for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 6; i++ )
                                             {
-                                                data[i] = payload[17+i];
+                                                data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + ( 8 + INPUT_SIZE ) * 6 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 6 );
                                         }
                                         else if ( n == 7 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 7 <= data_end )
                                         {
-                                            for ( int i = 0; i < 8 + ( 8 + INPUT_SIZE ) * 7; i++ )
+                                            for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 7; i++ )
                                             {
-                                                data[i] = payload[17+i];
+                                                data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + ( 8 + INPUT_SIZE ) * 7 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 7 );
                                         }
                                         else if ( n == 8 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 8 <= data_end )
                                         {
-                                            for ( int i = 0; i < 8 + ( 8 + INPUT_SIZE ) * 8; i++ )
+                                            for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 8; i++ )
                                             {
-                                                data[i] = payload[17+i];
+                                                data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + ( 8 + INPUT_SIZE ) * 8 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 8 );
                                         }
                                         else if ( n == 9 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 9 <= data_end )
                                         {
-                                            for ( int i = 0; i < 8 + ( 8 + INPUT_SIZE ) * 9; i++ )
+                                            for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 9; i++ )
                                             {
-                                                data[i] = payload[17+i];
+                                                data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + ( 8 + INPUT_SIZE ) * 9 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 9 );
                                         }
                                         else if ( n == 10 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10 <= data_end )
                                         {
-                                            for ( int i = 0; i < 8 + ( 8 + INPUT_SIZE ) * 10; i++ )
+                                            for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10; i++ )
                                             {
-                                                data[i] = payload[17+i];
+                                                data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + ( 8 + INPUT_SIZE ) * 10 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10 );
                                         }
                                     }
                                     else
