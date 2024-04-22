@@ -267,7 +267,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // create the input perf buffer
 
-    perf_buffer_opts opts;
+    struct perf_buffer_opts opts;
     opts.size = sizeof( opts );
     opts.sample_period = 1000;
     bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, lost_input, bpf, &opts );
