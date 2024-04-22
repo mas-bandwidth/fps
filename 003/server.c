@@ -338,7 +338,7 @@ int main( int argc, char *argv[] )
 
     uint64_t last_inputs = 0;
 
-    pin_thread_to_core( XDP_MAX_THREADS * 2 );       // IMPORTANT: keep the main thread out of the way of the XDP threads and the worker threads!
+    pin_thread_to_core( XDP_MAX_CPUS * 2 );       // IMPORTANT: keep the main thread out of the way of the XDP threads and the worker threads!
 
     while ( !quit )
     {
