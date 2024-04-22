@@ -323,7 +323,7 @@ int main( int argc, char *argv[] )
 
     while ( !quit )
     {
-        int err = perf_buffer__poll( bpf.input_buffer, 1 );
+        int err = perf_buffer__poll( bpf.input_buffer, 1000 );
         if ( err == -4 )
         {
             // ctrl-c
