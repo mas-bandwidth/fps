@@ -238,15 +238,6 @@ static void cleanup()
     fflush( stdout );
 }
 
-#pragma pack(push, 1)
-
-struct server_stats
-{
-    __u64 inputs_processed;
-};
-
-#pragma pack(pop)
-
 int main( int argc, char *argv[] )
 {
     signal( SIGINT,  interrupt_handler );
