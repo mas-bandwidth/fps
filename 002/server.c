@@ -46,6 +46,8 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 
     struct input_header * header = (struct input_header*) data;
 
+    struct input_data * input = (struct input_data*) data + sizeof(struct input_header);
+
     struct player_state state;
 
     uint64_t value;
@@ -57,7 +59,8 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
     }
 
     // todo: handle multiple inputs
-    state.t += header->dt;
+
+    state.t += input->dt;
 
     for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
     {
