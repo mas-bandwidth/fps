@@ -75,7 +75,7 @@ struct {
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } server_stats SEC(".maps");
 
-struct {
+struct inner_player_state_map {
     __uint( type, BPF_MAP_TYPE_LRU_HASH );
     __type( key, __u64 );
     __type( value, struct player_state );
@@ -90,8 +90,8 @@ struct {
     __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
     __uint( max_entries, MAX_CPUS );
     __type( key, __u32 );
-    __array( values, struct player_state );
-} player_state SEC(".maps") = {
+    __array( values, struct inner_player_state_map );
+} player_state_map SEC(".maps") = {
     .values = { 
         &player_state_0,
         &player_state_1,
