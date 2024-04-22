@@ -20,6 +20,7 @@
 #include <sys/types.h>
 #include <inttypes.h>
 #include <time.h>
+#include <pthread.h>
 
 #include "shared.h"
 
