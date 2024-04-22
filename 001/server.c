@@ -33,44 +33,14 @@ struct bpf_t
     bool attached_skb;
     int input_buffer_fd;
     int server_stats_fd;
-    int player_state_outer_fd;
-    int player_state_inner_fd[MAX_CPUS];
     struct perf_buffer * input_buffer;
 };
 
 void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
-    struct bpf_t * bpf = (struct bpf_t*) ctx;
-
-    int player_state_fd = bpf->player_state_inner_fd[cpu];
-
-    struct input_header * header = (struct input_header*) data;
-
-    struct player_state state;
-
-    uint64_t value;
-    int result = bpf_map_lookup_elem( player_state_fd, &header->session_id, &player_state );
-    if ( result != 0 )
-    {
-        printf( "error: failed to lookup player state: %s\n", strerror(errno) );
-        return;        
-    }
-
-    // todo: handle multiple inputs
-    state.t += header->dt;
-
-    for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
-    {
-        state.data[i] = (uint8_t) state.t + (uint8_t) i;
-    }
-
-    int err = bpf_map_update_elem( player_state_fd, &header->session_id, &player_state, BPF_ANY );
-    if ( err != 0 )
-    {
-        printf( "error: failed to update player state: %s\n", strerror(errno) );
-        return;
-    }
-
+    (void) ctx;
+    (void) data;
+    (void) data_sz;
     __sync_fetch_and_add( &inputs_processed[cpu], 1 );
 }
 
@@ -214,28 +184,6 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     {
         printf( "\nerror: could not get server stats: %s\n\n", strerror(errno) );
         return 1;
-    }
-
-    // get the file handle to the outer player state map
-
-    bpf->player_state_outer_fd[i] = bpf_obj_get( "/sys/fs/bpf/player_state" );
-    if ( bpf->player_state_outer_fd[i] <= 0 )
-    {
-        printf( "\nerror: could not get outer player state map: %s\n\n", strerror(errno) );
-        return 1;
-    }
-
-    // get the file handle to the inner player state maps
-
-    for ( int i = 0; i < MAX_CPUS; i++ )
-    {
-        uint32_t key = i;
-        int result = bpf_map_lookup_elem( debug->relay_map_fd, &key, &bpf->player_state_inner_fd[i] );
-        if ( result != 0 )
-        {
-            printf( "\nerror: failed lookup player state inner map: %s\n\n", strerror(errno) );
-            return;        
-        }
     }
 
     // create the input perf buffer

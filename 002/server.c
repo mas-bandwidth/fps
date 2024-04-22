@@ -25,30 +25,6 @@
 
 static uint64_t inputs_processed[MAX_CPUS];
 
-void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
-{
-    __u64 session_id = *((__u64*)data);
-
-    /*
-    void *bpf_map_lookup_elem(struct bpf_map *map, const void *key, u32 cpu)
-    */
-
-    (void) ctx;
-    (void) data;
-
-    /*
-        __u32 key = 0;
-        int err = bpf_map_update_elem( debug->config_fd, &key, &relay_config, BPF_ANY );
-        if ( err != 0 )
-        {
-            printf( "\nerror: failed to set relay config: %s\n\n", strerror(errno) );
-            return RELAY_ERROR;
-        }
-    */
-
-    __sync_fetch_and_add( &inputs_processed[cpu], 1 );
-}
-
 struct bpf_t
 {
     int interface_index;
@@ -57,8 +33,46 @@ struct bpf_t
     bool attached_skb;
     int input_buffer_fd;
     int server_stats_fd;
+    int player_state_outer_fd;
+    int player_state_inner_fd[MAX_CPUS];
     struct perf_buffer * input_buffer;
 };
+
+void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
+{
+    struct bpf_t * bpf = (struct bpf_t*) ctx;
+
+    int player_state_fd = bpf->player_state_inner_fd[cpu];
+
+    struct input_header * header = (struct input_header*) data;
+
+    struct player_state state;
+
+    uint64_t value;
+    int result = bpf_map_lookup_elem( player_state_fd, &header->session_id, &player_state );
+    if ( result != 0 )
+    {
+        printf( "error: failed to lookup player state: %s\n", strerror(errno) );
+        return;        
+    }
+
+    // todo: handle multiple inputs
+    state.t += header->dt;
+
+    for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
+    {
+        state.data[i] = (uint8_t) state.t + (uint8_t) i;
+    }
+
+    int err = bpf_map_update_elem( player_state_fd, &header->session_id, &player_state, BPF_ANY );
+    if ( err != 0 )
+    {
+        printf( "error: failed to update player state: %s\n", strerror(errno) );
+        return;
+    }
+
+    __sync_fetch_and_add( &inputs_processed[cpu], 1 );
+}
 
 static double time_start;
 
@@ -127,7 +141,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
         if ( !found )
         {
-            printf( "\nerror: could not find any network interface matching '%s'", interface_name );
+            printf( "\nerror: could not find any network interface matching '%s'\n\n", interface_name );
             return 1;
         }
     }
@@ -202,9 +216,31 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         return 1;
     }
 
+    // get the file handle to the outer player state map
+
+    bpf->player_state_outer_fd[i] = bpf_obj_get( "/sys/fs/bpf/player_state" );
+    if ( bpf->player_state_outer_fd[i] <= 0 )
+    {
+        printf( "\nerror: could not get outer player state map: %s\n\n", strerror(errno) );
+        return 1;
+    }
+
+    // get the file handle to the inner player state maps
+
+    for ( int i = 0; i < MAX_CPUS; i++ )
+    {
+        uint32_t key = i;
+        int result = bpf_map_lookup_elem(, &key, &bpf->player_state_inner_fd[i] );
+        if ( result != 0 )
+        {
+            printf( "\nerror: failed lookup player state inner map: %s\n\n", strerror(errno) );
+            return;        
+        }
+    }
+
     // create the input perf buffer
 
-    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, NULL, NULL, NULL );
+    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 524288, process_input, NULL, bpf, NULL );
     if ( libbpf_get_error( bpf->input_buffer ) ) 
     {
         printf( "\nerror: could not create input buffer\n\n" );
@@ -255,6 +291,15 @@ static void cleanup()
     fflush( stdout );
 }
 
+#pragma pack(push, 1)
+
+struct server_stats
+{
+    __u64 inputs_processed;
+};
+
+#pragma pack(pop)
+
 int main( int argc, char *argv[] )
 {
     signal( SIGINT,  interrupt_handler );
@@ -282,14 +327,15 @@ int main( int argc, char *argv[] )
     while ( !quit )
     {
         int err = perf_buffer__poll( bpf.input_buffer, 1 );
-        if ( err == -EAGAIN )
+        if ( err == -4 )
         {
+            // ctrl-c
             quit = true;
             break;
         }
         if ( err < 0 ) 
         {
-            printf( "\nerror: could not poll input buffer: %d\n", err );
+            printf( "\nerror: could not poll input buffer: %d\n\n", err );
             quit = true;
             break;
         }
