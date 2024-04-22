@@ -233,7 +233,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // get the file handle to the inner player state maps
 
-    for ( int i = 0; i < MAX_CPUS; i++ )
+    for ( int i = 0; i < XDP_MAX_CPUS; i++ )
     {
         uint32_t key = i;
         uint32_t inner_map_id = 0;
@@ -360,7 +360,7 @@ int main( int argc, char *argv[] )
         if ( last_print_time + 1.0 <= current_time )
         {
             uint64_t current_inputs = 0;
-            for ( int i = 0; i < MAX_CPUS; i++ )
+            for ( int i = 0; i < XDP_MAX_CPUS; i++ )
             {
                 current_inputs += inputs_processed[i];
             }
