@@ -233,14 +233,14 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     for ( int i = 0; i < MAX_CPUS; i++ )
     {
         uint32_t key = i;
-        uint32_t value = 0;
-        int result = bpf_map_lookup_elem( bpf->player_state_outer_fd, &key, &id );
+        uint32_t inner_map_id = 0;
+        int result = bpf_map_lookup_elem( bpf->player_state_outer_fd, &key, &inner_map_id );
         if ( result != 0 )
         {
             printf( "\nerror: failed lookup player state inner map: %s\n\n", strerror(errno) );
             return 1;
         }
-        bpf->player_state_inner_fd[i] = bpf_map_get_fd_by_id( value );
+        bpf->player_state_inner_fd[i] = bpf_map_get_fd_by_id( inner_map_id );
     }
 
     // create the input perf buffer
