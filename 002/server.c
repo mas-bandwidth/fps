@@ -221,7 +221,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // get the file handle to the outer player state map
 
-    bpf->player_state_outer_fd = bpf_obj_get( "/sys/fs/bpf/player_state" );
+    bpf->player_state_outer_fd = bpf_obj_get( "/sys/fs/bpf/player_state_map" );
     if ( bpf->player_state_outer_fd <= 0 )
     {
         printf( "\nerror: could not get outer player state map: %s\n\n", strerror(errno) );
