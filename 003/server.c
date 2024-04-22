@@ -27,8 +27,8 @@
 
 #include "shared.h"
 
-static uint64_t inputs_processed[XDP_MAX_CPUS];
-static uint64_t inputs_lost[XDP_MAX_CPUS];
+static uint64_t inputs_processed;
+static uint64_t inputs_lost;
 
 struct bpf_t
 {
@@ -40,11 +40,12 @@ struct bpf_t
     int server_stats_fd;
     int player_state_outer_fd;
     int player_state_inner_fd[XDP_MAX_CPUS];
-    struct perf_buffer * input_buffer;
+    struct ring_buffer * input_buffer;
 };
 
-void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
+void process_input( void * ctx, void * data, size_t data_sz )
 {
+    /*
     struct bpf_t * bpf = (struct bpf_t*) ctx;
 
     int player_state_fd = bpf->player_state_inner_fd[cpu];
@@ -78,13 +79,9 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
         printf( "error: failed to update player state: %s\n", strerror(errno) );
         return;
     }
+    */
 
-    __sync_fetch_and_add( &inputs_processed[cpu], 1 );
-}
-
-void lost_input( void * ctx, int cpu, __u64 count )
-{
-    __sync_fetch_and_add( &inputs_lost[cpu], count );
+    __sync_fetch_and_add( &inputs_processed, 1 );
 }
 
 static double time_start;
@@ -255,11 +252,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // create the input perf buffer
 
-    struct perf_buffer_opts opts;
-    memset( &opts, 0, sizeof(opts) );
-    opts.sz = sizeof(opts);
-    opts.sample_period = 1000;
-    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, lost_input, bpf, &opts );
+    bpf->input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, NULL, NULL );
     if ( libbpf_get_error( bpf->input_buffer ) ) 
     {
         printf( "\nerror: could not create input buffer\n\n" );
@@ -347,13 +340,13 @@ int main( int argc, char *argv[] )
 
     double last_print_time = platform_time();
 
-    uint64_t last_inputs = 0;
+    uint64_t previous_inputs = 0;
 
-    pin_thread_to_core( XDP_MAX_CPUS * 2 );       // IMPORTANT: keep the main thread out of the way of the XDP threads and the worker threads!
+    pin_thread_to_core( XDP_MAX_CPUS );       // IMPORTANT: keep the main thread out of the way of the XDP threads on google cloud
 
     while ( !quit )
     {
-        int err = perf_buffer__poll( bpf.input_buffer, 1 );
+        int err = ring_buffer__poll( bpf.input_buffer, 1 );
         if ( err == -4 )
         {
             // ctrl-c
@@ -371,16 +364,10 @@ int main( int argc, char *argv[] )
 
         if ( last_print_time + 1.0 <= current_time )
         {
-            uint64_t current_inputs = 0;
-            uint64_t lost_inputs = 0;
-            for ( int i = 0; i < XDP_MAX_CPUS; i++ )
-            {
-                current_inputs += inputs_processed[i];
-                lost_inputs = inputs_lost[i];
-            }
-            uint64_t input_delta = current_inputs - last_inputs;
-            printf( "input delta: %" PRId64 ", inputs lost: %" PRId64 "\n", input_delta, lost_inputs );
-            last_inputs = current_inputs;
+            uint64_t current_inputs = inputs_processed[i];
+            uint64_t input_delta = current_inputs - previous_inputs;
+            printf( "input delta: %" PRId64 "\n", input_delta );
+            previous_inputs = current_inputs;
             last_print_time = current_time;
 
             struct server_stats stats;

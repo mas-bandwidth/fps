@@ -50,15 +50,10 @@ struct {
 } session_map SEC(".maps");
 
 struct {
-    __uint( type, BPF_MAP_TYPE_PERF_EVENT_ARRAY );
-    __uint( key_size, sizeof(int) );
-    __uint( value_size, sizeof(int) );
+    __uint( type, BPF_MAP_TYPE_RINGBUF );
+    __uint( max_entries, 1024 * 1024 * 1024 /* 1GB */ );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } input_buffer SEC(".maps");
-
-struct heap {
-    __u8 data[HEAP_SIZE];
-};
 
 struct {
     __uint( type, BPF_MAP_TYPE_PERCPU_ARRAY );
@@ -282,27 +277,30 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         session->next_input_sequence = sequence + 1;
 
-                                        int zero = 0;
-                                        __u8 * data = (__u8*) bpf_map_lookup_elem( &heap, &zero );
-                                        if ( !data ) 
-                                        {
-                                            return XDP_DROP; // can't happen
-                                        }
-
                                         // todo: need to switch to ring buffer, perf buffer only lets you deliver to current cpu
-                                        int deliver_to_cpu = BPF_F_CURRENT_CPU; // ==( XDP_MAX_CPUS + ( session_id % XDP_MAX_CPUS ) ) & BPF_F_INDEX_MASK;
+                                        // int deliver_to_cpu = BPF_F_CURRENT_CPU; // ==( XDP_MAX_CPUS + ( session_id % XDP_MAX_CPUS ) ) & BPF_F_INDEX_MASK;
 
                                         // debug_printf( "deliver to cpu %d", deliver_to_cpu );
 
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
+                                            data = bpf_ringbuf_reserve( &input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
+                                            if ( !data )
+                                            {
+                                                debug_printf( "dropped input" );
+                                                return XDP_DROP;
+                                            }
+                                            
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ); i++ )
                                             {
                                                 data[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, deliver_to_cpu, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) );
+                                            bpf_ringbuf_submit( data, 0 );
                                         }
+
+                                        // todo: get this working then bring this back77
+                                        /*
                                         else if ( n == 2 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2 <= data_end )
                                         {
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2; i++ )
@@ -384,6 +382,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                             bpf_perf_event_output( ctx, &input_buffer, deliver_to_cpu, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10 );
                                         }
+                                        */
                                     }
                                     else
                                     {
