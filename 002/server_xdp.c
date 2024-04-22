@@ -81,10 +81,9 @@ struct {
     __type( value, struct player_state );
     __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
-} 
-player_state_0 SEC(".maps"),
-player_state_1 SEC(".maps"),
-player_state_2 SEC(".maps");
+} player_state_0 SEC(".maps"),
+  player_state_1 SEC(".maps"),
+  player_state_2 SEC(".maps");
 
 struct {
     __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
