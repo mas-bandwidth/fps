@@ -23,6 +23,8 @@
 
 #define MAX_CPUS 1024
 
+#include "shared.h"
+
 static uint64_t inputs_processed[MAX_CPUS];
 
 void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
