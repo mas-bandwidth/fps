@@ -21,9 +21,16 @@
 #include <inttypes.h>
 #include <time.h>
 
-#include "shared.h"
+#define MAX_CPUS 1024
 
 static uint64_t inputs_processed[MAX_CPUS];
+
+void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
+{
+    (void) ctx;
+    (void) data;
+    __sync_fetch_and_add( &inputs_processed[cpu], 1 );
+}
 
 struct bpf_t
 {
@@ -35,14 +42,6 @@ struct bpf_t
     int server_stats_fd;
     struct perf_buffer * input_buffer;
 };
-
-void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
-{
-    (void) ctx;
-    (void) data;
-    (void) data_sz;
-    __sync_fetch_and_add( &inputs_processed[cpu], 1 );
-}
 
 static double time_start;
 
@@ -111,7 +110,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
         if ( !found )
         {
-            printf( "\nerror: could not find any network interface matching '%s'\n\n", interface_name );
+            printf( "\nerror: could not find any network interface matching '%s'", interface_name );
             return 1;
         }
     }
@@ -188,7 +187,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // create the input perf buffer
 
-    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, NULL, bpf, NULL );
+    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, NULL, NULL, NULL );
     if ( libbpf_get_error( bpf->input_buffer ) ) 
     {
         printf( "\nerror: could not create input buffer\n\n" );
@@ -275,15 +274,9 @@ int main( int argc, char *argv[] )
     while ( !quit )
     {
         int err = perf_buffer__poll( bpf.input_buffer, 1 );
-        if ( err == -4 )
-        {
-            // ctrl-c
-            quit = true;
-            break;
-        }
         if ( err < 0 ) 
         {
-            printf( "\nerror: could not poll input buffer: %d\n\n", err );
+            printf( "\nerror: could not poll input buffer: %d\n", err );
             quit = true;
             break;
         }

@@ -11,7 +11,7 @@ Player servers take the player input + delta time (dt) and step the player state
 The assumptions made here are: 
 
 1. the world is static
-2. each player server has a representation of this world in some form that allows for collision detection to be performed
+2. each player has a representation of this world in some form that allows for collision detection to be performed
 3. players do not physically collide with each other (common in MMOs)
 
 These assumptions together let us simulate player state forward completely independently of each other. This is how we can unlock 1M player performance.
@@ -44,7 +44,7 @@ How much bandwidth is being sent?
 
 Each client sends 100 packets per-second, and each packet is around 1300 bytes (10 inputs @ 100 bytes + overhead).
 
-Per-client this gives 100 * 1300 bytes per-second -> 130,000 bytes/sec, or around 130 kilobytes/sec.
+Per-client this gives 100*1300 bytes per-second -> 130,000 bytes/sec, or around 130 kilobytes/sec.
 
 Converting to megabits, each client sends just under 1mbit/sec for player inputs.
 
