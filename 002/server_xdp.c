@@ -96,7 +96,8 @@ player_state_11 SEC(".maps"),
 player_state_12 SEC(".maps"),
 player_state_13 SEC(".maps"),
 player_state_14 SEC(".maps"),
-player_state_15 SEC(".maps"),
+player_state_15 SEC(".maps");
+/*
 player_state_16 SEC(".maps"),
 player_state_17 SEC(".maps"),
 player_state_18 SEC(".maps"),
@@ -209,6 +210,7 @@ player_state_124 SEC(".maps"),
 player_state_125 SEC(".maps"),
 player_state_126 SEC(".maps"),
 player_state_127 SEC(".maps");
+*/
 
 struct {
     __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
@@ -234,6 +236,7 @@ struct {
         &player_state_13,
         &player_state_14,
         &player_state_15,
+        /*
         &player_state_16,
         &player_state_17,
         &player_state_18,
@@ -346,6 +349,7 @@ struct {
         &player_state_125,
         &player_state_126,
         &player_state_127,
+        */
     }
 };
 
