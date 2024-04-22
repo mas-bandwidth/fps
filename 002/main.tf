@@ -68,6 +68,10 @@ data "local_file" "client_service" {
   filename = "client.service"
 }
 
+data "local_file" "shared_h" {
+  filename = "shared.h"
+}
+
 data "local_file" "server_c" {
   filename = "server.c"
 }
@@ -98,6 +102,10 @@ data "archive_file" "source_zip" {
   source {
     filename = "client.service"
     content  = data.local_file.client_service.content
+  }
+  source {
+    filename = "shared.h"
+    content  = data.local_file.shared_h.content
   }
   source {
     filename = "server.c"
