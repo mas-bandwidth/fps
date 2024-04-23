@@ -39,7 +39,7 @@ struct bpf_t
     int server_stats_fd;
     int player_state_outer_fd;
     int player_state_inner_fd[XDP_MAX_CPUS];
-    struct perf_buffer * input_buffer;
+    struct ring_buffer * input_buffer;
 };
 
 int process_input( void * ctx, void * data, unsigned int data_sz )
@@ -197,7 +197,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         }
     }
 
-    // bump rlimit for the perf buffer
+    // bump rlimit
 
     struct rlimit rlim_new = {
         .rlim_cur   = RLIM_INFINITY,
@@ -252,6 +252,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         bpf->player_state_inner_fd[i] = bpf_map_get_fd_by_id( inner_map_id );
     }
 
+    /*
     // create the input perf buffer
 
     struct perf_buffer_opts opts;
@@ -264,6 +265,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         printf( "\nerror: could not create input buffer\n\n" );
         return 1;
     }
+    */
 
     printf( "ready\n" );
 
@@ -352,6 +354,7 @@ int main( int argc, char *argv[] )
 
     while ( !quit )
     {
+        /*
         int err = perf_buffer__poll( bpf.input_buffer, 1 );
         if ( err == -4 )
         {
@@ -365,6 +368,7 @@ int main( int argc, char *argv[] )
             quit = true;
             break;
         }
+        */
 
         double current_time = platform_time();
 
