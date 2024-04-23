@@ -258,7 +258,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     memset( &opts, 0, sizeof(opts) );
     opts.sz = sizeof(opts);
     opts.sample_period = 1000;
-    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, lost_input, bpf, &opts );
+    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, NULL, bpf, &opts );
     if ( libbpf_get_error( bpf->input_buffer ) ) 
     {
         printf( "\nerror: could not create input buffer\n\n" );
