@@ -36,4 +36,8 @@ But consider, the sort of high powered bare metal machine that could drive a 100
 
 ## Results:
 
-...
+There is some bottleneck and throughput drops from 50k players to ~5k players per-player server.
+
+I believe this is the result of the google cloud NIC only having 16 receive queues max, and the cpus [0,15] getting thrashed between running the XDP program in kernel space, and running player simulations in userspace.
+
+Alternatively, it could be that reading and updating player state in bpf hash maps is the bottleneck.
