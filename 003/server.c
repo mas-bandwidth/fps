@@ -221,6 +221,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         return 1;
     }
 
+/*
     // get the file handle to the server stats
 
     bpf->server_stats_fd = bpf_obj_get( "/sys/fs/bpf/server_stats" );
@@ -253,7 +254,8 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         }
         bpf->player_state_inner_fd[i] = bpf_map_get_fd_by_id( inner_map_id );
     }
-
+*/
+    
     // create the input ring buffer
 
 /*
