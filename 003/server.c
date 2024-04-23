@@ -166,19 +166,6 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     platform_init();
 
-    // bump rlimit
-
-    struct rlimit rlim_new = {
-        .rlim_cur   = RLIM_INFINITY,
-        .rlim_max   = RLIM_INFINITY,
-    };
-
-    if ( setrlimit( RLIMIT_MEMLOCK, &rlim_new ) ) 
-    {
-        printf( "\nerror: could not increase RLIMIT_MEMLOCK limit!\n\n" );
-        return 1;
-    }
-
     // load the server_xdp program and attach it to the network interface
 
     printf( "loading server_xdp...\n" );
@@ -214,6 +201,19 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         }
     }
 
+    // bump rlimit
+
+    struct rlimit rlim_new = {
+        .rlim_cur   = RLIM_INFINITY,
+        .rlim_max   = RLIM_INFINITY,
+    };
+
+    if ( setrlimit( RLIMIT_MEMLOCK, &rlim_new ) ) 
+    {
+        printf( "\nerror: could not increase RLIMIT_MEMLOCK limit!\n\n" );
+        return 1;
+    }
+
     // get the file handle to the input buffer
 
     bpf->input_buffer_fd = bpf_obj_get( "/sys/fs/bpf/input_buffer" );
@@ -224,8 +224,6 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     }
 
     // create the input ring buffer
-
-    printf( "create the ring buffer\n" );
 
     bpf->input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, NULL, NULL );
     if ( !bpf->input_buffer )
@@ -326,29 +324,6 @@ int pin_thread_to_core( int core_id )
    pthread_t current_thread = pthread_self();    
 
    return pthread_setaffinity_np( current_thread, sizeof(cpu_set_t), &cpuset );
-}
-
-void bump_stack()
-{
-    const rlim_t kStackSize = 64 * 1024 * 1024;
-    struct rlimit rl;
-    int result;
-
-    result = getrlimit( RLIMIT_STACK, &rl );
-    if ( result == 0 )
-    {
-        printf( "current stack size is %d\n", rl.rlim_cur );
-
-        if ( rl.rlim_cur < kStackSize )
-        {
-            rl.rlim_cur = kStackSize;
-            result = setrlimit( RLIMIT_STACK, &rl );
-            if ( result != 0 )
-            {
-                printf( "error: errosetrlimit returned result = %d\n", result );
-            }
-        }
-    }    
 }
 
 int main( int argc, char *argv[] )
