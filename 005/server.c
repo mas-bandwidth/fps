@@ -248,7 +248,7 @@ int pin_thread_to_core( int core_id )
 
 void * worker_thread_function( void * context )
 {
-    int thread_index = *( (int*) context );
+    int cpu = *( (int*) context );
 
     // pin
 
