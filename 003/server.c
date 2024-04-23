@@ -197,6 +197,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         }
     }
 
+    /*
     // bump rlimit for the perf buffer
 
     struct rlimit rlim_new = {
@@ -209,6 +210,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         printf( "\nerror: could not increase RLIMIT_MEMLOCK limit!\n\n" );
         return 1;
     }
+    */
 
     // get the file handle to the input buffer
 
@@ -255,7 +257,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     // create the input perf buffer
 
     bpf->input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, NULL, NULL );
-    if ( libbpf_get_error( bpf->input_buffer ) ) 
+    if ( !bpf->input_buffer )
     {
         printf( "\nerror: could not create input buffer\n\n" );
         return 1;
