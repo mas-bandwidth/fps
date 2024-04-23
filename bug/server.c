@@ -45,13 +45,13 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
+    struct ring_buffer * input_buffer = ring_buffer__new( 0, process_input, NULL, NULL );
+
     if ( program != NULL )
     {
         xdp_program__detach( program, interface_index, XDP_MODE_NATIVE, 0 );
         xdp_program__close( program );
     }
-
-    struct ring_buffer * input_buffer = ring_buffer__new( 0, process_input, NULL, NULL );
 
     return 0;
 }
