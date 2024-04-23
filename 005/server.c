@@ -275,7 +275,7 @@ int main( int argc, char *argv[] )
 
     // run worker threads
 
-    for ( int i = 0; i < MAX_CPUS)
+    for ( int i = 0; i < MAX_CPUS; i++ )
     {
         run_worker_thread( i );
     }
