@@ -328,8 +328,6 @@ int pin_thread_to_core( int core_id )
 
 int main( int argc, char *argv[] )
 {
-    bump_stack();
-
     signal( SIGINT,  interrupt_handler );
     signal( SIGTERM, clean_shutdown_handler );
     signal( SIGHUP,  clean_shutdown_handler );
