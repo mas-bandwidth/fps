@@ -334,7 +334,7 @@ void bump_stack()
     struct rlimit rl;
     int result;
 
-    result = getrlimit(RLIMIT_STACK, &rl);
+    result = getrlimit( RLIMIT_STACK, &rl );
     if ( result == 0 )
     {
         printf( "current stack size is %d\n", rl.rlim_cur );
@@ -373,11 +373,11 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
-    double last_print_time = platform_time();
+    // double last_print_time = platform_time();
 
-    uint64_t last_inputs = 0;
+    // uint64_t last_inputs = 0;
 
-    pin_thread_to_core( 16 );       // IMPORTANT: keep the main thread out of the way of the XDP cpus on google cloud [0,15]
+    // pin_thread_to_core( 16 );       // IMPORTANT: keep the main thread out of the way of the XDP cpus on google cloud [0,15]
 
     while ( !quit )
     {
@@ -397,10 +397,11 @@ int main( int argc, char *argv[] )
         }
         */
 
-        double current_time = platform_time();
+        // double current_time = platform_time();
 
-        if ( last_print_time + 1.0 <= current_time )
+        // if ( last_print_time + 1.0 <= current_time )
         {
+            /*
             uint64_t current_inputs = 0;
             for ( int i = 0; i < XDP_MAX_CPUS; i++ )
             {
@@ -413,6 +414,7 @@ int main( int argc, char *argv[] )
 
             struct server_stats stats;
             stats.inputs_processed = current_inputs;
+            */
 
             /*
             __u32 key = 0;
