@@ -362,7 +362,7 @@ int main( int argc, char *argv[] )
             break;
         }
 
-        // double current_time = platform_time();
+        double current_time = platform_time();
 
         if ( last_print_time + 1.0 <= current_time )
         {
@@ -396,5 +396,3 @@ int main( int argc, char *argv[] )
 
     return 0;
 }
-
-#endif
