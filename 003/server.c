@@ -28,7 +28,6 @@
 #include "shared.h"
 
 static uint64_t inputs_processed[XDP_MAX_CPUS];
-static uint64_t inputs_lost[XDP_MAX_CPUS];
 
 struct bpf_t
 {
@@ -43,8 +42,11 @@ struct bpf_t
     struct perf_buffer * input_buffer;
 };
 
-void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
+int process_input( void * ctx, void * data, unsigned int data_sz )
 {
+    // todo: temporary
+    int cpu = 0;
+
     struct bpf_t * bpf = (struct bpf_t*) ctx;
 
     int player_state_fd = bpf->player_state_inner_fd[cpu];
@@ -80,11 +82,8 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
     }
 
     __sync_fetch_and_add( &inputs_processed[cpu], 1 );
-}
 
-void lost_input( void * ctx, int cpu, __u64 count )
-{
-    __sync_fetch_and_add( &inputs_lost[cpu], count );
+    return 0;
 }
 
 static double time_start;
@@ -372,14 +371,12 @@ int main( int argc, char *argv[] )
         if ( last_print_time + 1.0 <= current_time )
         {
             uint64_t current_inputs = 0;
-            uint64_t lost_inputs = 0;
             for ( int i = 0; i < XDP_MAX_CPUS; i++ )
             {
                 current_inputs += inputs_processed[i];
-                lost_inputs = inputs_lost[i];
             }
             uint64_t input_delta = current_inputs - last_inputs;
-            printf( "input delta: %" PRId64 ", inputs lost: %" PRId64 "\n", input_delta, lost_inputs );
+            printf( "input delta: %" PRId64 "\n", input_delta );
             last_inputs = current_inputs;
             last_print_time = current_time;
 
