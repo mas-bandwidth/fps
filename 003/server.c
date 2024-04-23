@@ -39,7 +39,7 @@ struct bpf_t
     int input_buffer_fd;
     int server_stats_fd;
     int player_state_outer_fd;
-    int player_state_inner_fd[MAX_CPUS];
+    int player_state_inner_fd[XDP_MAX_CPUS];
     struct perf_buffer * input_buffer;
 };
 
@@ -240,7 +240,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // get the file handle to the inner player state maps
 
-    for ( int i = 0; i < MAX_CPUS; i++ )
+    for ( int i = 0; i < XDP_MAX_CPUS; i++ )
     {
         uint32_t key = i;
         uint32_t inner_map_id = 0;
@@ -373,7 +373,7 @@ int main( int argc, char *argv[] )
         {
             uint64_t current_inputs = 0;
             uint64_t lost_inputs = 0;
-            for ( int i = 0; i < MAX_CPUS; i++ )
+            for ( int i = 0; i < XDP_MAX_CPUS; i++ )
             {
                 current_inputs += inputs_processed[i];
                 lost_inputs = inputs_lost[i];
