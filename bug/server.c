@@ -19,25 +19,17 @@ static int process_input( void * ctx, void * data, size_t data_sz )
     return 0;
 }
 
-void create_ring_buffer()
-{
-    struct ring_buffer * input_buffer = ring_buffer__new( 0, process_input, NULL, NULL );
-}
-
 int main( int argc, char *argv[] )
 {
-    int interface_index;
-    struct xdp_program * program;
-    bool attached_native;
-    bool attached_skb;
+    int interface_index = 1;
 
+    struct xdp_program * program = NULL;
+    
     if ( geteuid() != 0 ) 
     {
         printf( "\nerror: this program must be run as root\n\n" );
         return 1;
     }
-
-    interface_index = 1;
 
     program = xdp_program__open_file( "server_xdp.o", "server_xdp", NULL );
     if ( libxdp_get_error( program ) ) 
@@ -47,39 +39,19 @@ int main( int argc, char *argv[] )
     }
 
     int ret = xdp_program__attach( program, interface_index, XDP_MODE_NATIVE, 0 );
-    if ( ret == 0 )
+    if ( ret != 0 )
     {
-        attached_native = true;
-    } 
-    else
-    {
-        printf( "falling back to skb mode...\n" );
-        ret = xdp_program__attach( program, interface_index, XDP_MODE_SKB, 0 );
-        if ( ret == 0 )
-        {
-            attached_skb = true;
-        }
-        else
-        {
-            printf( "\nerror: failed to attach server_xdp program to interface\n\n" );
-            return 1;
-        }
+        printf( "\nerror: failed to attach server_xdp program to interface\n\n" );
+        return 1;
     }
 
     if ( program != NULL )
     {
-        if ( attached_native )
-        {
-            xdp_program__detach( program, interface_index, XDP_MODE_NATIVE, 0 );
-        }
-        if ( attached_skb )
-        {
-            xdp_program__detach( program, interface_index, XDP_MODE_SKB, 0 );
-        }
+        xdp_program__detach( program, interface_index, XDP_MODE_NATIVE, 0 );
         xdp_program__close( program );
     }
 
-    create_ring_buffer();
+    struct ring_buffer * input_buffer = ring_buffer__new( 0, process_input, NULL, NULL );
 
     return 0;
 }
