@@ -23,8 +23,6 @@
 #include <pthread.h>
 #include <sched.h>
 
-#include "shared.h"
-
 struct bpf_t
 {
     int interface_index;
@@ -77,16 +75,12 @@ int bpf_init( struct bpf_t * bpf )
         }
     }
 
-    // get the file handle to the input buffer
-
     bpf->input_buffer_fd = bpf_obj_get( "/sys/fs/bpf/input_buffer" );
     if ( bpf->input_buffer_fd <= 0 )
     {
         printf( "\nerror: could not get input buffer: %s\n\n", strerror(errno) );
         return 1;
     }
-
-    // create the input ring buffer
 
     bpf->input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, NULL, NULL );
     if ( !bpf->input_buffer )

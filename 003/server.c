@@ -21,6 +21,11 @@
 #include <sys/resource.h>
 #include <sys/types.h>
 #include <inttypes.h>
+#include <time.h>
+#include <pthread.h>
+#include <sched.h>
+
+#include "shared.h"
 
 struct bpf_t
 {
