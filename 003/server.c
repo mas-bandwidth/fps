@@ -272,7 +272,7 @@ void bpf_shutdown( struct bpf_t * bpf )
 
     if ( bpf->program != NULL )
     {
-        if ( bpg->input_buffer )
+        if ( bpf->input_buffer )
         {
             ring_buffer__free( bpf->input_buffer );
         }
