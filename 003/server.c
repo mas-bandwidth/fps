@@ -43,7 +43,7 @@ struct bpf_t
     struct ring_buffer * input_buffer;
 };
 
-void process_input( void * ctx, void * data, long unsigned int data_sz )
+int process_input( void * ctx, void * data, size_t data_sz )
 {
     /*
     struct bpf_t * bpf = (struct bpf_t*) ctx;
@@ -82,6 +82,8 @@ void process_input( void * ctx, void * data, long unsigned int data_sz )
     */
 
     __sync_fetch_and_add( &inputs_processed, 1 );
+
+    return 0;
 }
 
 static double time_start;
