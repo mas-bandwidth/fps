@@ -366,7 +366,7 @@ int main( int argc, char *argv[] )
 
         if ( last_print_time + 1.0 <= current_time )
         {
-            uint64_t current_inputs = inputs_processed[i];
+            uint64_t current_inputs = inputs_processed;
             uint64_t input_delta = current_inputs - previous_inputs;
             printf( "input delta: %" PRId64 "\n", input_delta );
             previous_inputs = current_inputs;
