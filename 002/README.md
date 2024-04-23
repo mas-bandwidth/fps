@@ -6,7 +6,7 @@ The next step is to actually step 1M player simulations forward on the player se
 
 To do this we must:
 
-1. load the most recent player state at time t by session id (random uint64 per-client assigned on connect)
+1. load the most recent player state session id (session id is a random uint64 per-client assigned on connect)
 2. step the player state forward with input and for the amount of time dt, eg. position += velocity * dt
 3. store the updated player state post-simulation at the new time t += dt
 
