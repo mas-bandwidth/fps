@@ -30,7 +30,6 @@ struct bpf_t
     bool attached_native;
     bool attached_skb;
     int input_buffer_fd;
-    struct ring_buffer * input_buffer;
 };
 
 static int process_input( void * ctx, void * data, size_t data_sz )
@@ -82,8 +81,8 @@ int bpf_init( struct bpf_t * bpf )
         return 1;
     }
 
-    bpf->input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, NULL, NULL );
-    if ( !bpf->input_buffer )
+    struct ring_buffer * input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, NULL, NULL );
+    if ( !input_buffer )
     {
         printf( "\nerror: could not create input buffer\n\n" );
         return 1;
