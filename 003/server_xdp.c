@@ -274,7 +274,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                             __u8 * event = bpf_ringbuf_reserve( &input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
                                             if ( !event )
                                             {
-                                                debug_printf( "dropped input" );
+                                                debug_printf( "dropped input :(" );
                                                 return XDP_DROP;
                                             }
                                             
