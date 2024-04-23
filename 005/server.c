@@ -246,11 +246,18 @@ int pin_thread_to_core( int core_id )
    return pthread_setaffinity_np( current_thread, sizeof(cpu_set_t), &cpuset );
 }
 
-// todo: worker thread function
-
-void run_worker_thread( int cpu )
+void * worker_thread_function( void * context )
 {
-    // todo
+    int thread_index = *( (int*) context );
+
+    // pin
+
+    while ( !quit )
+    {
+        // ...
+    }
+
+    return NULL;
 }
 
 int main( int argc, char *argv[] )
@@ -275,9 +282,14 @@ int main( int argc, char *argv[] )
 
     // run worker threads
 
+    int thread_cpu[MAX_CPUS];
+    pthread_t thread_id[MAX_CPUS];
+
     for ( int i = 0; i < MAX_CPUS; i++ )
     {
-        run_worker_thread( i );
+        printf( "starting worker thread %d\n", i );
+        thread_index[i] = i;
+        pthread_create( &thread_id[i], NULL, worker_thread_function, &thread_cpu ); 
     }
 
     // main loop
@@ -304,6 +316,11 @@ int main( int argc, char *argv[] )
             last_inputs = current_inputs;
             last_print_time = current_time;
         }
+    }
+
+    for ( int i = 0; i < MAX_CPUS; i++ )
+    {
+        pthread_join( thread_id[i], NULL );
     }
 
     cleanup();
