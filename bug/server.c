@@ -66,14 +66,9 @@ int main( int argc, char *argv[] )
         }
     }
 
-    input_buffer_fd = bpf_obj_get( "/sys/fs/bpf/input_buffer" );
-    if ( input_buffer_fd <= 0 )
-    {
-        printf( "\nerror: could not get input buffer: %s\n\n", strerror(errno) );
-        return 1;
-    }
+    input_buffer_fd = 0;
 
-    ring_buffer__new( input_buffer_fd, process_input, NULL, NULL );
+    struct ring_buffer * input_buffer = ring_buffer__new( input_buffer_fd, process_input, NULL, NULL );
 
     if ( program != NULL )
     {
