@@ -18,49 +18,46 @@
 #include <pthread.h>
 #include <sched.h>
 
-struct bpf_t
+static int process_input( void * ctx, void * data, size_t data_sz )
+{
+    return 0;
+}
+
+int main( int argc, char *argv[] )
 {
     int interface_index;
     struct xdp_program * program;
     bool attached_native;
     bool attached_skb;
     int input_buffer_fd;
-};
 
-static int process_input( void * ctx, void * data, size_t data_sz )
-{
-    return 0;
-}
-
-int bpf_init( struct bpf_t * bpf )
-{
     if ( geteuid() != 0 ) 
     {
         printf( "\nerror: this program must be run as root\n\n" );
         return 1;
     }
 
-    bpf->interface_index = 1;
+    interface_index = 1;
 
-    bpf->program = xdp_program__open_file( "server_xdp.o", "server_xdp", NULL );
-    if ( libxdp_get_error( bpf->program ) ) 
+    program = xdp_program__open_file( "server_xdp.o", "server_xdp", NULL );
+    if ( libxdp_get_error( program ) ) 
     {
         printf( "\nerror: could not load server_xdp program\n\n");
         return 1;
     }
 
-    int ret = xdp_program__attach( bpf->program, bpf->interface_index, XDP_MODE_NATIVE, 0 );
+    int ret = xdp_program__attach( program, interface_index, XDP_MODE_NATIVE, 0 );
     if ( ret == 0 )
     {
-        bpf->attached_native = true;
+        attached_native = true;
     } 
     else
     {
         printf( "falling back to skb mode...\n" );
-        ret = xdp_program__attach( bpf->program, bpf->interface_index, XDP_MODE_SKB, 0 );
+        ret = xdp_program__attach( program, interface_index, XDP_MODE_SKB, 0 );
         if ( ret == 0 )
         {
-            bpf->attached_skb = true;
+            attached_skb = true;
         }
         else
         {
@@ -69,43 +66,27 @@ int bpf_init( struct bpf_t * bpf )
         }
     }
 
-    bpf->input_buffer_fd = bpf_obj_get( "/sys/fs/bpf/input_buffer" );
-    if ( bpf->input_buffer_fd <= 0 )
+    input_buffer_fd = bpf_obj_get( "/sys/fs/bpf/input_buffer" );
+    if ( input_buffer_fd <= 0 )
     {
         printf( "\nerror: could not get input buffer: %s\n\n", strerror(errno) );
         return 1;
     }
 
-    ring_buffer__new( bpf->input_buffer_fd, process_input, NULL, NULL );
-    
-    return 0;
-}
+    ring_buffer__new( input_buffer_fd, process_input, NULL, NULL );
 
-void bpf_shutdown( struct bpf_t * bpf )
-{
-    assert( bpf );
-
-    if ( bpf->program != NULL )
+    if ( program != NULL )
     {
-        if ( bpf->attached_native )
+        if ( attached_native )
         {
-            xdp_program__detach( bpf->program, bpf->interface_index, XDP_MODE_NATIVE, 0 );
+            xdp_program__detach( program, interface_index, XDP_MODE_NATIVE, 0 );
         }
-        if ( bpf->attached_skb )
+        if ( attached_skb )
         {
-            xdp_program__detach( bpf->program, bpf->interface_index, XDP_MODE_SKB, 0 );
+            xdp_program__detach( program, interface_index, XDP_MODE_SKB, 0 );
         }
-        xdp_program__close( bpf->program );
+        xdp_program__close( program );
     }
-}
-
-static struct bpf_t bpf;
-
-int main( int argc, char *argv[] )
-{
-    bpf_init( &bpf );
-
-    bpf_shutdown( &bpf );
 
     return 0;
 }
