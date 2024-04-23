@@ -13,10 +13,6 @@
 #include <xdp/libxdp.h>
 #include <sys/resource.h>
 #include <sys/types.h>
-#include <inttypes.h>
-#include <time.h>
-#include <pthread.h>
-#include <sched.h>
 
 static int process_input( void * ctx, void * data, size_t data_sz )
 {
