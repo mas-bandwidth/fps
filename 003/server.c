@@ -52,6 +52,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         return 1;
     }
 
+    /*
     // find the network interface that matches the interface name
     {
         bool found = false;
@@ -92,6 +93,10 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
             return 1;
         }
     }
+    */
+
+    // todo: in case code above is trashing
+    bpf->interface_index = 1;
 
     // load the server_xdp program and attach it to the network interface
 
