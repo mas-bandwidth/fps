@@ -27,6 +27,8 @@
 
 #include "shared.h"
 
+#define PLAYERS_PER_CPU 10000
+
 static uint64_t inputs_processed[MAX_CPUS];
 
 struct bpf_t
@@ -250,12 +252,16 @@ void * worker_thread_function( void * context )
 {
     int cpu = *( (int*) context );
 
-    // pin
+    pin_thread_to_core( cpu );
+
+    int player_state_fd = bpf.player_state_inner_fd[cpu];
 
     while ( !quit )
     {
-        /*
-        int player_state_fd = bpf->player_state_inner_fd[cpu];
+        for ( int i = 0; i < PLAYERS_PER_CPU; i++ )
+        {
+
+        }
 
         struct player_state state;
 
@@ -267,13 +273,11 @@ void * worker_thread_function( void * context )
             memset( &state, 0, sizeof(struct player_state) );
         }
 
-        // todo: handle multiple inputs
-
         state.t += input->dt;
 
         for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
         {
-            state.data[i] = (uint8_t) state.t + (uint8_t) i;
+            state.data[i] ^= (uint8_t) state.t + (uint8_t) i;
         }
 
         int err = bpf_map_update_elem( player_state_fd, &header->session_id, &state, BPF_ANY );
@@ -282,7 +286,6 @@ void * worker_thread_function( void * context )
             printf( "error: failed to update player state: %s\n", strerror(errno) );
             return 0;
         }
-        */
 
         __sync_fetch_and_add( &inputs_processed[cpu], 1 );
     }
