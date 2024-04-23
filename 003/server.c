@@ -199,6 +199,8 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         }
     }
 
+    printf( "after attach\n" );
+
     // bump rlimit
 
     struct rlimit rlim_new = {
@@ -214,6 +216,8 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // get the file handle to the input buffer
 
+    printf( "get input buffer fd\n" );
+
     bpf->input_buffer_fd = bpf_obj_get( "/sys/fs/bpf/input_buffer" );
     if ( bpf->input_buffer_fd <= 0 )
     {
@@ -222,6 +226,8 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     }
 
     // get the file handle to the server stats
+
+    printf( "get server stats fd\n" );
 
     bpf->server_stats_fd = bpf_obj_get( "/sys/fs/bpf/server_stats" );
     if ( bpf->server_stats_fd <= 0 )
@@ -257,6 +263,8 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     */
 
     // create the input ring buffer
+
+    printf( "create the ring buffer\n" );
 
     bpf->input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, NULL, NULL );
     if ( !bpf->input_buffer )
