@@ -255,7 +255,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         bpf->player_state_inner_fd[i] = bpf_map_get_fd_by_id( inner_map_id );
     }
 */
-    
+
     // create the input ring buffer
 
 /*
@@ -389,6 +389,7 @@ int main( int argc, char *argv[] )
             struct server_stats stats;
             stats.inputs_processed = current_inputs;
 
+            /*
             __u32 key = 0;
             int err = bpf_map_update_elem( bpf.server_stats_fd, &key, &stats, BPF_ANY );
             if ( err != 0 )
@@ -397,6 +398,7 @@ int main( int argc, char *argv[] )
                 quit = true;
                 break;
             }
+            */
         }
     }
 
