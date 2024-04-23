@@ -277,6 +277,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         // debug_printf( "deliver to cpu %d", deliver_to_cpu );
 
+                                        // todo: what
+                                        /*
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
                                             __u8 * event = bpf_ringbuf_reserve( &input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
@@ -293,6 +295,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                             bpf_ringbuf_submit( event, 0 );
                                         }
+                                        */
 
                                         // todo: get this working then bring this back77
                                         /*
