@@ -330,7 +330,7 @@ int pin_thread_to_core( int core_id )
 
 void bump_stack()
 {
-    const rlim_t kStackSize = 16 * 1024 * 1024;   // min stack size = 16 MB
+    const rlim_t kStackSize = 64 * 1024 * 1024;
     struct rlimit rl;
     int result;
 
