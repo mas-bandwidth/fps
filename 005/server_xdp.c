@@ -10,6 +10,8 @@
 #include <linux/string.h>
 #include <bpf/bpf_helpers.h>
 
+#include "shared.h"
+
 #if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && \
     __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define bpf_ntohs(x)        __builtin_bswap16(x)

@@ -246,6 +246,13 @@ int pin_thread_to_core( int core_id )
    return pthread_setaffinity_np( current_thread, sizeof(cpu_set_t), &cpuset );
 }
 
+// todo: worker thread function
+
+void run_worker_thread( int cpu )
+{
+    // todo
+}
+
 int main( int argc, char *argv[] )
 {
     signal( SIGINT,  interrupt_handler );
@@ -269,7 +276,9 @@ int main( int argc, char *argv[] )
     // run worker threads
 
     for ( int i = 0; i < MAX_CPUS)
-
+    {
+        run_worker_thread( i );
+    }
 
     // main loop
 
