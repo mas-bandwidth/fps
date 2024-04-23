@@ -28,7 +28,6 @@
 #include "shared.h"
 
 static uint64_t inputs_processed;
-static uint64_t inputs_lost;
 
 struct bpf_t
 {
@@ -179,6 +178,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     printf( "attaching server_xdp to network interface\n" );
 
+    /*
     int ret = xdp_program__attach( bpf->program, bpf->interface_index, XDP_MODE_NATIVE, 0 );
     if ( ret == 0 )
     {
@@ -198,6 +198,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
             return 1;
         }
     }
+    */
 
     printf( "after attach\n" );
 
