@@ -24,7 +24,7 @@ https://docs.kernel.org/bpf/map_hash.html
 
 We can access bpf hash maps from inside the XDP program, and we can also read and write to them from the userspace server application. We can even use an LRU hashmap variant so we don't have to do any work to clean it up when players disconnect from the server.
 
-Let's assume that player state is around 1300 bytes. This gives us a nice symmetric protocol between the client and the player server: around 1mbit/sec for inputs, and ~1mbit/sec is sent back down to the client for player state.
+Let's assume that player state is around 1200 bytes. This gives us a nice symmetric protocol between the client and the player server: around 1mbit/sec for inputs, and ~1mbit/sec is sent back down to the client for player state.
 
 We're going to have 50k players per-player server, so we need around 1200 * 50000 = 65GB for store player state. 
 
