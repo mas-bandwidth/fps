@@ -328,8 +328,31 @@ int pin_thread_to_core( int core_id )
    return pthread_setaffinity_np( current_thread, sizeof(cpu_set_t), &cpuset );
 }
 
+void bump_stack()
+{
+    const rlim_t kStackSize = 16 * 1024 * 1024;   // min stack size = 16 MB
+    struct rlimit rl;
+    int result;
+
+    result = getrlimit(RLIMIT_STACK, &rl);
+    if ( result == 0 )
+    {
+        if ( rl.rlim_cur < kStackSize )
+        {
+            rl.rlim_cur = kStackSize;
+            result = setrlimit( RLIMIT_STACK, &rl );
+            if ( result != 0 )
+            {
+                printf( "error: errosetrlimit returned result = %d\n", result );
+            }
+        }
+    }    
+}
+
 int main( int argc, char *argv[] )
 {
+    bump_stack();
+
     signal( SIGINT,  interrupt_handler );
     signal( SIGTERM, clean_shutdown_handler );
     signal( SIGHUP,  clean_shutdown_handler );
