@@ -38,8 +38,10 @@ struct bpf_t
     bool attached_skb;
     int input_buffer_fd;
     int server_stats_fd;
+    /*
     int player_state_outer_fd;
     int player_state_inner_fd[XDP_MAX_CPUS];
+    */
     struct ring_buffer * input_buffer;
 };
 
@@ -228,6 +230,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         return 1;
     }
 
+    /*
     // get the file handle to the outer player state map
 
     bpf->player_state_outer_fd = bpf_obj_get( "/sys/fs/bpf/player_state_map" );
@@ -251,6 +254,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         }
         bpf->player_state_inner_fd[i] = bpf_map_get_fd_by_id( inner_map_id );
     }
+    */
 
     // create the input ring buffer
 

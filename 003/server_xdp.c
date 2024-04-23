@@ -63,6 +63,7 @@ struct {
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } server_stats SEC(".maps");
 
+/*
 struct inner_player_state_map {
     __uint( type, BPF_MAP_TYPE_LRU_HASH );
     __type( key, __u64 );
@@ -113,6 +114,7 @@ struct {
         &player_state_15,
     }
 };
+*/
 
 static void reflect_packet( void * data, int payload_bytes )
 {
