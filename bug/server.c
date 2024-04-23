@@ -42,65 +42,15 @@ static int process_input( void * ctx, void * data, size_t data_sz )
     return 0;
 }
 
-int bpf_init( struct bpf_t * bpf, const char * interface_name )
+int bpf_init( struct bpf_t * bpf )
 {
-    // we can only run xdp programs as root
-
     if ( geteuid() != 0 ) 
     {
         printf( "\nerror: this program must be run as root\n\n" );
         return 1;
     }
 
-    /*
-    // find the network interface that matches the interface name
-    {
-        bool found = false;
-
-        struct ifaddrs * addrs;
-        if ( getifaddrs( &addrs ) != 0 )
-        {
-            printf( "\nerror: getifaddrs failed\n\n" );
-            return 1;
-        }
-
-        for ( struct ifaddrs * iap = addrs; iap != NULL; iap = iap->ifa_next ) 
-        {
-            if ( iap->ifa_addr && ( iap->ifa_flags & IFF_UP ) && iap->ifa_addr->sa_family == AF_INET )
-            {
-                struct sockaddr_in * sa = (struct sockaddr_in*) iap->ifa_addr;
-                if ( strcmp( interface_name, iap->ifa_name ) == 0 )
-                {
-                    printf( "found network interface: '%s'\n", iap->ifa_name );
-                    bpf->interface_index = if_nametoindex( iap->ifa_name );
-                    printf( "index is %d\n", bpf->interface_index );
-                    if ( !bpf->interface_index ) 
-                    {
-                        printf( "\nerror: if_nametoindex failed\n\n" );
-                        return 1;
-                    }
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        freeifaddrs( addrs );
-
-        if ( !found )
-        {
-            printf( "\nerror: could not find any network interface matching '%s'\n\n", interface_name );
-            return 1;
-        }
-    }
-    */
-
-    // todo: in case code above is trashing
     bpf->interface_index = 1;
-
-    // load the server_xdp program and attach it to the network interface
-
-    printf( "loading server_xdp...\n" );
 
     bpf->program = xdp_program__open_file( "server_xdp.o", "server_xdp", NULL );
     if ( libxdp_get_error( bpf->program ) ) 
@@ -108,10 +58,6 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         printf( "\nerror: could not load server_xdp program\n\n");
         return 1;
     }
-
-    printf( "server_xdp loaded successfully.\n" );
-
-    printf( "attaching server_xdp to network interface\n" );
 
     int ret = xdp_program__attach( bpf->program, bpf->interface_index, XDP_MODE_NATIVE, 0 );
     if ( ret == 0 )
@@ -133,19 +79,6 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         }
     }
 
-    // bump rlimit
-
-    struct rlimit rlim_new = {
-        .rlim_cur   = RLIM_INFINITY,
-        .rlim_max   = RLIM_INFINITY,
-    };
-
-    if ( setrlimit( RLIMIT_MEMLOCK, &rlim_new ) ) 
-    {
-        printf( "\nerror: could not increase RLIMIT_MEMLOCK limit!\n\n" );
-        return 1;
-    }
-
     // get the file handle to the input buffer
 
     bpf->input_buffer_fd = bpf_obj_get( "/sys/fs/bpf/input_buffer" );
@@ -163,8 +96,6 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         printf( "\nerror: could not create input buffer\n\n" );
         return 1;
     }
-
-    printf( "ready\n" );
 
     return 0;
 }
@@ -214,15 +145,7 @@ int main( int argc, char *argv[] )
     signal( SIGTERM, clean_shutdown_handler );
     signal( SIGHUP,  clean_shutdown_handler );
 
-    if ( argc != 2 )
-    {
-        printf( "\nusage: server <interface name>\n\n" );
-        return 1;
-    }
-
-    const char * interface_name = argv[1];
-
-    if ( bpf_init( &bpf, interface_name ) != 0 )
+    if ( bpf_init( &bpf ) != 0 )
     {
         cleanup();
         return 1;
@@ -234,8 +157,6 @@ int main( int argc, char *argv[] )
     }
 
     cleanup();
-
-    printf( "\n" );
 
     return 0;
 }
