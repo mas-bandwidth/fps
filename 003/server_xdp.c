@@ -40,7 +40,6 @@
 #define debug_printf(...) do { } while (0)
 #endif // #if DEBUG
 
-/*
 struct {
     __uint( type, BPF_MAP_TYPE_LRU_PERCPU_HASH );
     __uint( map_flags, BPF_F_NO_COMMON_LRU );
@@ -49,17 +48,13 @@ struct {
     __uint( max_entries, MAX_SESSIONS / XDP_MAX_CPUS );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } session_map SEC(".maps");
-*/
 
-/*
 struct {
     __uint( type, BPF_MAP_TYPE_RINGBUF );
-    __uint( max_entries, 1024 * 1024 );
+    __uint( max_entries, 1024 * 1024 * 1024 );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } input_buffer SEC(".maps");
-*/
 
-/*
 struct {
     __uint( type, BPF_MAP_TYPE_ARRAY );
     __uint( max_entries, 1 );
@@ -117,7 +112,6 @@ struct {
         &player_state_15,
     }
 };
-*/
 
 static void reflect_packet( void * data, int payload_bytes )
 {
@@ -186,8 +180,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                     {
                         if ( udp->dest == __constant_htons(40000) )
                         {
-#if 0
-
                             __u8 * payload = (void*) udp + sizeof(struct udphdr);
                             int payload_bytes = data_end - (void*)payload;
                             if ( (void*)payload + 1 <= data_end )
@@ -409,8 +401,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     debug_printf( "packet is too small (%d bytes)", payload_bytes );
                                 }
                             }
-
-#endif
 
                             return XDP_DROP;
                         }
