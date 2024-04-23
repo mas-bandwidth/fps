@@ -22,6 +22,56 @@
 # error "Endianness detection needs to be set up for your compiler?!"
 #endif
 
+struct inner_player_state_map {
+    __uint( type, BPF_MAP_TYPE_LRU_HASH );
+    __type( key, __u64 );
+    __type( value, struct player_state );
+    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
+} 
+player_state_0 SEC(".maps"),
+player_state_1 SEC(".maps"),
+player_state_2 SEC(".maps"),
+player_state_3 SEC(".maps"),
+player_state_4 SEC(".maps"),
+player_state_5 SEC(".maps"),
+player_state_6 SEC(".maps"),
+player_state_7 SEC(".maps"),
+player_state_8 SEC(".maps"),
+player_state_9 SEC(".maps"),
+player_state_10 SEC(".maps"),
+player_state_11 SEC(".maps"),
+player_state_12 SEC(".maps"),
+player_state_13 SEC(".maps"),
+player_state_14 SEC(".maps"),
+player_state_15 SEC(".maps");
+
+struct {
+    __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
+    __uint( max_entries, MAX_CPUS );
+    __type( key, __u32 );
+    __uint( pinning, LIBBPF_PIN_BY_NAME );
+    __array( values, struct inner_player_state_map );
+} player_state_map SEC(".maps") = {
+    .values = { 
+        &player_state_0,
+        &player_state_1,
+        &player_state_2,
+        &player_state_3,
+        &player_state_4,
+        &player_state_5,
+        &player_state_6,
+        &player_state_7,
+        &player_state_8,
+        &player_state_9,
+        &player_state_10,
+        &player_state_11,
+        &player_state_12,
+        &player_state_13,
+        &player_state_14,
+        &player_state_15,
+    }
+};
+
 SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx ) 
 { 
     void * data = (void*) (long) ctx->data; 

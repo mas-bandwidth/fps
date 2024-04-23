@@ -25,7 +25,7 @@
 #include <pthread.h>
 #include <sched.h>
 
-#define MAX_CPUS 16
+#include "shared.h"
 
 static uint64_t inputs_processed[MAX_CPUS];
 
@@ -174,7 +174,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // get the file handle to the inner player state maps
 
-    for ( int i = 0; i < XDP_MAX_CPUS; i++ )
+    for ( int i = 0; i < MAX_CPUS; i++ )
     {
         uint32_t key = i;
         uint32_t inner_map_id = 0;
@@ -265,6 +265,13 @@ int main( int argc, char *argv[] )
         cleanup();
         return 1;
     }
+
+    // run worker threads
+
+    for ( int i = 0; i < MAX_CPUS)
+
+
+    // main loop
 
     double last_print_time = platform_time();
 
