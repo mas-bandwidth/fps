@@ -72,6 +72,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
                 {
                     printf( "found network interface: '%s'\n", iap->ifa_name );
                     bpf->interface_index = if_nametoindex( iap->ifa_name );
+                    printf( "index is %d\n", bpf->interface_index );
                     if ( !bpf->interface_index ) 
                     {
                         printf( "\nerror: if_nametoindex failed\n\n" );
