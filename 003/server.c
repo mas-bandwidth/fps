@@ -78,7 +78,7 @@ int process_input( void * ctx, void * data, unsigned int data_sz )
     if ( err != 0 )
     {
         printf( "error: failed to update player state: %s\n", strerror(errno) );
-        return;
+        return 0;
     }
 
     __sync_fetch_and_add( &inputs_processed[cpu], 1 );
