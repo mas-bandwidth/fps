@@ -1,8 +1,3 @@
-/*
-    FPS server XDP program (Userspace)
-
-    Runs on Ubuntu 22.04 LTS 64bit with Linux Kernel 6.5+ *ONLY*
-*/
 
 #include <memory.h>
 #include <stdio.h>
@@ -81,8 +76,8 @@ int bpf_init( struct bpf_t * bpf )
         return 1;
     }
 
-    struct ring_buffer * input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, NULL, NULL );
-    if ( !input_buffer )
+    bpf->input_buffer = bpf_ring_buffer__new( bpf->input_buffer_fd, process_input, NULL, NULL );
+    if ( !bpf->input_buffer )
     {
         printf( "\nerror: could not create input buffer\n\n" );
         return 1;
