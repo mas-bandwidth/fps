@@ -340,11 +340,11 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
-    // double last_print_time = platform_time();
+    double last_print_time = platform_time();
 
-    // uint64_t last_inputs = 0;
+    uint64_t last_inputs = 0;
 
-    // pin_thread_to_core( 16 );       // IMPORTANT: keep the main thread out of the way of the XDP cpus on google cloud [0,15]
+    pin_thread_to_core( 16 );       // IMPORTANT: keep the main thread out of the way of the XDP cpus on google cloud [0,15]
 
     while ( !quit )
     {
