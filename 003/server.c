@@ -166,6 +166,19 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     platform_init();
 
+    // bump rlimit
+
+    struct rlimit rlim_new = {
+        .rlim_cur   = RLIM_INFINITY,
+        .rlim_max   = RLIM_INFINITY,
+    };
+
+    if ( setrlimit( RLIMIT_MEMLOCK, &rlim_new ) ) 
+    {
+        printf( "\nerror: could not increase RLIMIT_MEMLOCK limit!\n\n" );
+        return 1;
+    }
+
     // load the server_xdp program and attach it to the network interface
 
     printf( "loading server_xdp...\n" );
@@ -199,19 +212,6 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
             printf( "\nerror: failed to attach server_xdp program to interface\n\n" );
             return 1;
         }
-    }
-
-    // bump rlimit
-
-    struct rlimit rlim_new = {
-        .rlim_cur   = RLIM_INFINITY,
-        .rlim_max   = RLIM_INFINITY,
-    };
-
-    if ( setrlimit( RLIMIT_MEMLOCK, &rlim_new ) ) 
-    {
-        printf( "\nerror: could not increase RLIMIT_MEMLOCK limit!\n\n" );
-        return 1;
     }
 
     // get the file handle to the input buffer
