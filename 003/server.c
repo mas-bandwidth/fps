@@ -330,6 +330,8 @@ int pin_thread_to_core( int core_id )
 
 void bump_stack()
 {
+    printf( "increasing stack size\n" );
+
     const rlim_t kStackSize = 64 * 1024 * 1024;
     struct rlimit rl;
     int result;
