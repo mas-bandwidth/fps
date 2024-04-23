@@ -288,7 +288,7 @@ int main( int argc, char *argv[] )
     for ( int i = 0; i < MAX_CPUS; i++ )
     {
         printf( "starting worker thread %d\n", i );
-        thread_index[i] = i;
+        thread_cpu[i] = i;
         pthread_create( &thread_id[i], NULL, worker_thread_function, &thread_cpu ); 
     }
 
