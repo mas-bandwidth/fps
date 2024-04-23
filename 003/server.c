@@ -37,6 +37,11 @@ struct bpf_t
     struct ring_buffer * input_buffer;
 };
 
+static int process_input( void * ctx, void * data, size_t data_sz )
+{
+    return 0;
+}
+
 int bpf_init( struct bpf_t * bpf, const char * interface_name )
 {
     // we can only run xdp programs as root
