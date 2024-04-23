@@ -39,7 +39,7 @@ int main( int argc, char *argv[] )
     }
 
     printf( "xdp_program__open_file\n" );
-    fflush( STDOUT );
+    fflush( stdout );
 
     int ret = xdp_program__attach( program, interface_index, XDP_MODE_NATIVE, 0 );
     if ( ret != 0 )
@@ -49,12 +49,12 @@ int main( int argc, char *argv[] )
     }
 
     printf( "xdp_program__attach\n" );
-    fflush( STDOUT );
+    fflush( stdout );
 
     struct ring_buffer * input_buffer = ring_buffer__new( 0, process_input, NULL, NULL );
 
     printf( "cleaning up\n" );
-    fflush( STDOUT );
+    fflush( stdout );
 
     if ( program != NULL )
     {
