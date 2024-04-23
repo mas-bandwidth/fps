@@ -2,7 +2,7 @@
 
 In this version I'm debugging why we're getting slow performance in google cloud for player input processing.
 
-My fisrt theory is that by attempting to do significant work on the same cores that are processing packets with XDP we cause the CPU to context switch and interrupt itself a lot between userspace player simulation and XDP packet processing.
+My first theory is that by attempting to do significant work on the same cores that are processing packets with XDP we cause the CPU to context switch and interrupt itself a lot between userspace player simulation and XDP packet processing.
 
 What we really want is n CPUs dedicated to XDP, and m CPUs dedicated to player simulation, and for these CPUs to be different.
 
