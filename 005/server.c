@@ -256,38 +256,40 @@ void * worker_thread_function( void * context )
 
     int player_state_fd = bpf.player_state_inner_fd[cpu];
 
+    const double dt = 1.0 / 100.0;
+
     while ( !quit )
     {
         for ( int i = 0; i < PLAYERS_PER_CPU; i++ )
         {
+            uint64_t session_id = cpu * PLAYERS_PER_CPU + i;
 
+            struct player_state state;
+
+            uint64_t value;
+            int result = bpf_map_lookup_elem( player_state_fd, &session_id, &state );
+            if ( result != 0 )
+            {
+                // first player update
+                memset( &state, 0, sizeof(struct player_state) );
+            }
+
+            state.t += dt;
+
+            for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
+            {
+                state.data[i] ^= (uint8_t) state.t + (uint8_t) i;
+            }
+
+            int err = bpf_map_update_elem( player_state_fd, &session_id, &state, BPF_ANY );
+            if ( err != 0 )
+            {
+                printf( "error: failed to update player state: %s\n", strerror(errno) );
+                return 0;
+            }
+
+            __sync_fetch_and_add( &inputs_processed[cpu], 1 );
         }
-
-        struct player_state state;
-
-        uint64_t value;
-        int result = bpf_map_lookup_elem( player_state_fd, &header->session_id, &state );
-        if ( result != 0 )
-        {
-            // first player update
-            memset( &state, 0, sizeof(struct player_state) );
-        }
-
-        state.t += input->dt;
-
-        for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
-        {
-            state.data[i] ^= (uint8_t) state.t + (uint8_t) i;
-        }
-
-        int err = bpf_map_update_elem( player_state_fd, &header->session_id, &state, BPF_ANY );
-        if ( err != 0 )
-        {
-            printf( "error: failed to update player state: %s\n", strerror(errno) );
-            return 0;
-        }
-
-        __sync_fetch_and_add( &inputs_processed[cpu], 1 );
     }
 
     return NULL;
