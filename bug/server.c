@@ -19,13 +19,17 @@ static int process_input( void * ctx, void * data, size_t data_sz )
     return 0;
 }
 
+void create_ring_buffer()
+{
+    struct ring_buffer * input_buffer = ring_buffer__new( 0, process_input, NULL, NULL );
+}
+
 int main( int argc, char *argv[] )
 {
     int interface_index;
     struct xdp_program * program;
     bool attached_native;
     bool attached_skb;
-    int input_buffer_fd;
 
     if ( geteuid() != 0 ) 
     {
@@ -62,10 +66,6 @@ int main( int argc, char *argv[] )
         }
     }
 
-    input_buffer_fd = 0;
-
-    struct ring_buffer * input_buffer = ring_buffer__new( input_buffer_fd, process_input, NULL, NULL );
-
     if ( program != NULL )
     {
         if ( attached_native )
@@ -78,6 +78,8 @@ int main( int argc, char *argv[] )
         }
         xdp_program__close( program );
     }
+
+    create_ring_buffer();
 
     return 0;
 }
