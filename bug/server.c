@@ -4,8 +4,6 @@
     Runs on Ubuntu 22.04 LTS 64bit with Linux Kernel 6.5+ *ONLY*
 */
 
-#define _GNU_SOURCE
-
 #include <memory.h>
 #include <stdio.h>
 #include <signal.h>
@@ -120,43 +118,11 @@ void bpf_shutdown( struct bpf_t * bpf )
 
 static struct bpf_t bpf;
 
-volatile bool quit;
-
-void interrupt_handler( int signal )
-{
-    (void) signal; quit = true;
-}
-
-void clean_shutdown_handler( int signal )
-{
-    (void) signal;
-    quit = true;
-}
-
-static void cleanup()
-{
-    bpf_shutdown( &bpf );
-    fflush( stdout );
-}
-
 int main( int argc, char *argv[] )
 {
-    signal( SIGINT,  interrupt_handler );
-    signal( SIGTERM, clean_shutdown_handler );
-    signal( SIGHUP,  clean_shutdown_handler );
+    bpf_init( &bpf );
 
-    if ( bpf_init( &bpf ) != 0 )
-    {
-        cleanup();
-        return 1;
-    }
-
-    while ( !quit )
-    {
-        // ...
-    }
-
-    cleanup();
+    bpf_shutdown( &bpf );
 
     return 0;
 }
