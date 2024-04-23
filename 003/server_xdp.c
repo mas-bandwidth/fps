@@ -214,8 +214,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                 }
                                 else if ( packet_type == INPUT_PACKET && (void*) payload + 1 + 8 + 8 + 8 + 8 + INPUT_SIZE <= data_end )
                                 {
-#if 0
-
                                     __u64 session_id = (__u64) payload[1];
                                     session_id |= ( (__u64) payload[2] ) << 8;
                                     session_id |= ( (__u64) payload[3] ) << 16;
@@ -273,13 +271,23 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
+                                            __u8 * event = bpf_ringbuf_reserve( &input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
+                                            if ( !event )
+                                            {
+                                                debug_printf( "dropped input" );
+                                                return XDP_DROP;
+                                            }
+                                            
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ); i++ )
                                             {
-                                                data[i] = payload[1+i];
+                                                event[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) );
+                                            bpf_ringbuf_submit( event, 0 );
                                         }
+
+                                        // todo: bring these back
+                                        /*
                                         else if ( n == 2 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2 <= data_end )
                                         {
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2; i++ )
@@ -361,13 +369,12 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                             bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10 );
                                         }
+                                        */
                                     }
                                     else
                                     {
                                         debug_printf( "input packet is old" );
                                     }
-
-#endif
                                 }
                                 else if ( packet_type == STATS_REQUEST_PACKET && (void*) payload + STATS_REQUEST_PACKET_SIZE <= data_end )
                                 {
