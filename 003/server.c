@@ -42,8 +42,9 @@ struct bpf_t
     struct ring_buffer * input_buffer;
 };
 
-int process_input( void * ctx, void * data, size_t data_sz )
+static int process_input( void * ctx, void * data, size_t data_sz )
 {
+    /*
     // todo: temporary
     int cpu = 0;
 
@@ -82,6 +83,7 @@ int process_input( void * ctx, void * data, size_t data_sz )
     }
 
     __sync_fetch_and_add( &inputs_processed[cpu], 1 );
+    */
 
     return 0;
 }
