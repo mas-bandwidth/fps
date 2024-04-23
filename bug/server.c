@@ -45,10 +45,7 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
-    if ( 0 )
-    {
-        struct ring_buffer * input_buffer = ring_buffer__new( 0, process_input, NULL, NULL );
-    }
+    struct ring_buffer * input_buffer = ring_buffer__new( 0, process_input, NULL, NULL );
 
     if ( program != NULL )
     {
