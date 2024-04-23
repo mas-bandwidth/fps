@@ -348,7 +348,6 @@ int main( int argc, char *argv[] )
 
     while ( !quit )
     {
-        /*
         int err = ring_buffer__poll( bpf.input_buffer, 1 );
         if ( err == -EINTR )
         {
@@ -362,13 +361,11 @@ int main( int argc, char *argv[] )
             quit = true;
             break;
         }
-        */
 
         // double current_time = platform_time();
 
-        // if ( last_print_time + 1.0 <= current_time )
+        if ( last_print_time + 1.0 <= current_time )
         {
-            /*
             uint64_t current_inputs = 0;
             for ( int i = 0; i < XDP_MAX_CPUS; i++ )
             {
@@ -381,9 +378,7 @@ int main( int argc, char *argv[] )
 
             struct server_stats stats;
             stats.inputs_processed = current_inputs;
-            */
 
-            /*
             __u32 key = 0;
             int err = bpf_map_update_elem( bpf.server_stats_fd, &key, &stats, BPF_ANY );
             if ( err != 0 )
@@ -392,7 +387,6 @@ int main( int argc, char *argv[] )
                 quit = true;
                 break;
             }
-            */
         }
     }
 
