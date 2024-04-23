@@ -51,7 +51,7 @@ struct {
 
 struct {
     __uint( type, BPF_MAP_TYPE_RINGBUF );
-    __uint( max_entries, 1024 * 1024 * 1024 /* 1GB */ );
+    __uint( max_entries, 1024 * 1024 /* 1MB */ );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } input_buffer SEC(".maps");
 

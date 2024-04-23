@@ -197,8 +197,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         }
     }
 
-    /*
-    // bump rlimit for the perf buffer
+    // bump rlimit
 
     struct rlimit rlim_new = {
         .rlim_cur   = RLIM_INFINITY,
@@ -210,7 +209,6 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         printf( "\nerror: could not increase RLIMIT_MEMLOCK limit!\n\n" );
         return 1;
     }
-    */
 
     // get the file handle to the input buffer
 
@@ -254,7 +252,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         bpf->player_state_inner_fd[i] = bpf_map_get_fd_by_id( inner_map_id );
     }
 
-    // create the input perf buffer
+    // create the input ring buffer
 
     bpf->input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, NULL, NULL );
     if ( !bpf->input_buffer )
@@ -274,6 +272,10 @@ void bpf_shutdown( struct bpf_t * bpf )
 
     if ( bpf->program != NULL )
     {
+        if ( bpg->input_buffer )
+        {
+            ring_buffer__free( bpf->input_buffer );
+        }
         if ( bpf->attached_native )
         {
             xdp_program__detach( bpf->program, bpf->interface_index, XDP_MODE_NATIVE, 0 );
@@ -351,7 +353,7 @@ int main( int argc, char *argv[] )
     while ( !quit )
     {
         int err = ring_buffer__poll( bpf.input_buffer, 1 );
-        if ( err == -4 )
+        if ( err == -EINTR )
         {
             // ctrl-c
             quit = true;
