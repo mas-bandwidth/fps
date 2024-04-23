@@ -38,7 +38,7 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
-    printf( "xdp_program__open_file\n" );
+    printf( "after xdp_program__open_file\n" );
     fflush( stdout );
 
     int ret = xdp_program__attach( program, interface_index, XDP_MODE_NATIVE, 0 );
@@ -48,7 +48,7 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
-    printf( "xdp_program__attach\n" );
+    printf( "after xdp_program__attach\n" );
     fflush( stdout );
 
     struct ring_buffer * input_buffer = ring_buffer__new( 0, process_input, NULL, NULL );
