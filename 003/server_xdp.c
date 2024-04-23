@@ -79,7 +79,7 @@ struct inner_player_state_map {
     __uint( type, BPF_MAP_TYPE_LRU_HASH );
     __type( key, __u64 );
     __type( value, struct player_state );
-    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
+    __uint( max_entries, MAX_SESSIONS / XDP_MAX_CPUS );
 } 
 player_state_0 SEC(".maps"),
 player_state_1 SEC(".maps"),
@@ -100,7 +100,7 @@ player_state_15 SEC(".maps");
 
 struct {
     __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
-    __uint( max_entries, MAX_CPUS );
+    __uint( max_entries, XDP_MAX_CPUS );
     __type( key, __u32 );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
     __array( values, struct inner_player_state_map );
