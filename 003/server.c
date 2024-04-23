@@ -27,8 +27,8 @@
 
 #include "shared.h"
 
-static uint64_t inputs_processed[MAX_CPUS];
-static uint64_t inputs_lost[MAX_CPUS];
+static uint64_t inputs_processed[XDP_MAX_CPUS];
+static uint64_t inputs_lost[XDP_MAX_CPUS];
 
 struct bpf_t
 {
