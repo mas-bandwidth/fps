@@ -237,6 +237,19 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     payload[0] = PLAYER_STATE_PACKET;
 
                                     payload[1] = player_state[0];
+                                    payload[2] = player_state[1];
+                                    payload[3] = player_state[2];
+                                    payload[4] = player_state[3];
+                                    payload[5] = player_state[4];
+                                    payload[6] = player_state[5];
+                                    payload[7] = player_state[6];
+                                    payload[8] = player_state[7];
+                                    payload[9] = player_state[8];
+                                    payload[10] = player_state[9];
+                                    payload[11] = player_state[10];
+                                    payload[12] = player_state[11];
+                                    payload[13] = player_state[12];
+                                    payload[14] = player_state[13];
 
                                     /*
                                     for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
