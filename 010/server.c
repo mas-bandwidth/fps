@@ -394,20 +394,20 @@ int main( int argc, char *argv[] )
             previous_processed_inputs = current_processed_inputs;
             previous_lost_inputs = current_lost_inputs;
             last_print_time = current_time;
-        }
 
-        // upload stats to the xdp program
+            // upload stats to the xdp program
 
-        struct server_stats stats;
-        stats.inputs_processed = current_processed_inputs;
+            struct server_stats stats;
+            stats.inputs_processed = current_processed_inputs;
 
-        __u32 key = 0;
-        int err = bpf_map_update_elem( bpf.server_stats_fd, &key, &stats, BPF_ANY );
-        if ( err != 0 )
-        {
-            printf( "\nerror: failed to update server stats: %s\n\n", strerror(errno) );
-            quit = true;
-            break;
+            __u32 key = 0;
+            int err = bpf_map_update_elem( bpf.server_stats_fd, &key, &stats, BPF_ANY );
+            if ( err != 0 )
+            {
+                printf( "\nerror: failed to update server stats: %s\n\n", strerror(errno) );
+                quit = true;
+                break;
+            }
         }
     }
 
