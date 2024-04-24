@@ -265,7 +265,7 @@ void * worker_thread_function( void * context )
     {
         for ( int i = 0; i < PLAYERS_PER_CPU; i++ )
         {
-            uint64_t session_id = uint64_t(i);
+            uint64_t session_id = (uint64_t) i;
 
             // IMPORTANT: do some whacky stuff to make sure memory accesses are pretty random
             int index = session_id % ( memory_size - sizeof(struct player_state) );
