@@ -42,7 +42,7 @@ Each server will cost $2,160 per-month on datapacket.com with 32 CPUs. Assume we
 
 Cost per-month for players servers is now 2160 * 166 = $358,560 USD per-month.
 
-Or ~36c per-player.
+Or ~36c per-player per-month.
 
 It actually got cheaper!
 
