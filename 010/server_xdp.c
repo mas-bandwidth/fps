@@ -275,13 +275,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         return XDP_DROP;
                                     }
 
-                                    struct session_data * session = (struct session_data*) bpf_map_lookup_elem( &session_map, &session_id );
-                                    if ( session == NULL )
-                                    {
-                                        debug_printf( "could not find session 0x%llx", session_id );
-                                        return XDP_DROP;
-                                    }
-
                                     __u64 sequence = (__u64) payload[9];
                                     sequence |= ( (__u64) payload[10] ) << 8;
                                     sequence |= ( (__u64) payload[11] ) << 16;
