@@ -25,7 +25,7 @@
 
 #define PLAYER_STATE_SIZE                                                                1200
 
-#define MAX_CPUS                                                                           32
+#define MAX_CPUS                                                                           16
 
 #pragma pack(push, 1)
 
