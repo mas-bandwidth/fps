@@ -238,13 +238,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     int cpu = session_id % MAX_CPUS;
 
-                                    void * cpu_input_buffer = bpf_map_lookup_elem( &input_buffer_map, &session_id );
-                                    if ( !cpu_input_buffer )
-                                    {
-                                        debug_printf( "could not find player state map for cpu %d", cpu );
-                                        return XDP_DROP;
-                                    }
-
                                     __u64 sequence = (__u64) payload[9];
                                     sequence |= ( (__u64) payload[10] ) << 8;
                                     sequence |= ( (__u64) payload[11] ) << 16;
