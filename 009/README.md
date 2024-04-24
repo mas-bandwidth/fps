@@ -46,4 +46,4 @@ Or ~36c per-player.
 
 It actually got cheaper!
 
-And now we can scale the system up and down in smaller increments of $6k instead of $50k. Much better!
+And now we can scale the system up and down in smaller increments of 6k players instead of 50k. Much better!
