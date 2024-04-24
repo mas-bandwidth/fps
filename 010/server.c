@@ -383,11 +383,6 @@ int main( int argc, char *argv[] )
         }
     }
 
-    for ( int i = 0; i < MAX_CPUS; i++ )
-    {
-        pthread_join( thread_id[i], NULL );
-    }
-
     cleanup();
 
     printf( "\n" );
