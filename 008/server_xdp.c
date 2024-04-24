@@ -236,10 +236,14 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     payload[0] = PLAYER_STATE_PACKET;
 
+                                    payload[1] = player_state[0];
+
+                                    /*
                                     for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
                                     {
                                         payload[1+i] = player_state[i];
                                     }
+                                    */
 
                                     bpf_xdp_adjust_tail( ctx, -( INPUT_PACKET_SIZE - PLAYER_STATE_PACKET_SIZE ) );
 
