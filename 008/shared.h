@@ -28,7 +28,7 @@
 
 #define PLAYERS_PER_CPU                                                                   340
 
-#define PLAYER_STATE_PACKET_SIZE                                         1 + PLAYER_DATA_SIZE
+#define PLAYER_STATE_PACKET_SIZE                                        1 + PLAYER_STATE_SIZE
 
 #pragma pack(push, 1)
 
