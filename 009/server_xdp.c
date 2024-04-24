@@ -71,6 +71,22 @@ player_state_12 SEC(".maps"),
 player_state_13 SEC(".maps"),
 player_state_14 SEC(".maps"),
 player_state_15 SEC(".maps");
+player_state_16 SEC(".maps");
+player_state_17 SEC(".maps");
+player_state_18 SEC(".maps");
+player_state_19 SEC(".maps");
+player_state_20 SEC(".maps");
+player_state_21 SEC(".maps");
+player_state_22 SEC(".maps");
+player_state_23 SEC(".maps");
+player_state_24 SEC(".maps");
+player_state_25 SEC(".maps");
+player_state_26 SEC(".maps");
+player_state_27 SEC(".maps");
+player_state_28 SEC(".maps");
+player_state_29 SEC(".maps");
+player_state_30 SEC(".maps");
+player_state_31 SEC(".maps");
 
 struct {
     __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
@@ -96,6 +112,22 @@ struct {
         &player_state_13,
         &player_state_14,
         &player_state_15,
+        &player_state_16,
+        &player_state_17,
+        &player_state_18,
+        &player_state_19,
+        &player_state_20,
+        &player_state_21,
+        &player_state_22,
+        &player_state_23,
+        &player_state_24,
+        &player_state_25,
+        &player_state_26,
+        &player_state_27,
+        &player_state_28,
+        &player_state_29,
+        &player_state_30,
+        &player_state_31,
     }
 };
 
