@@ -49,6 +49,54 @@ struct {
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } server_stats SEC(".maps");
 
+struct inner_input_buffer_map {
+    __uint( type, BPF_MAP_TYPE_RINGBUF );
+    __uint( max_entries, 256 * 1024 * 1024 );
+} 
+input_buffer_0 SEC(".maps"),
+input_buffer_1 SEC(".maps"),
+input_buffer_2 SEC(".maps"),
+input_buffer_3 SEC(".maps"),
+input_buffer_4 SEC(".maps"),
+input_buffer_5 SEC(".maps"),
+input_buffer_6 SEC(".maps"),
+input_buffer_7 SEC(".maps"),
+input_buffer_8 SEC(".maps"),
+input_buffer_9 SEC(".maps"),
+input_buffer_10 SEC(".maps"),
+input_buffer_11 SEC(".maps"),
+input_buffer_12 SEC(".maps"),
+input_buffer_13 SEC(".maps"),
+input_buffer_14 SEC(".maps"),
+input_buffer_15 SEC(".maps");
+
+struct {
+    __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
+    __uint( max_entries, MAX_CPUS );
+    __type( key, __u32 );
+    __uint( pinning, LIBBPF_PIN_BY_NAME );
+    __array( values, struct inner_input_buffer_map );
+} input_buffer_map SEC(".maps") = {
+    .values = { 
+        &input_buffer_0,
+        &input_buffer_1,
+        &input_buffer_2,
+        &input_buffer_3,
+        &input_buffer_4,
+        &input_buffer_5,
+        &input_buffer_6,
+        &input_buffer_7,
+        &input_buffer_8,
+        &input_buffer_9,
+        &input_buffer_10,
+        &input_buffer_11,
+        &input_buffer_12,
+        &input_buffer_13,
+        &input_buffer_14,
+        &input_buffer_15,
+    }
+};
+
 struct inner_player_state_map {
     __uint( type, BPF_MAP_TYPE_LRU_HASH );
     __type( key, __u64 );
@@ -70,23 +118,7 @@ player_state_11 SEC(".maps"),
 player_state_12 SEC(".maps"),
 player_state_13 SEC(".maps"),
 player_state_14 SEC(".maps"),
-player_state_15 SEC(".maps"),
-player_state_16 SEC(".maps"),
-player_state_17 SEC(".maps"),
-player_state_18 SEC(".maps"),
-player_state_19 SEC(".maps"),
-player_state_20 SEC(".maps"),
-player_state_21 SEC(".maps"),
-player_state_22 SEC(".maps"),
-player_state_23 SEC(".maps"),
-player_state_24 SEC(".maps"),
-player_state_25 SEC(".maps"),
-player_state_26 SEC(".maps"),
-player_state_27 SEC(".maps"),
-player_state_28 SEC(".maps"),
-player_state_29 SEC(".maps"),
-player_state_30 SEC(".maps"),
-player_state_31 SEC(".maps");
+player_state_15 SEC(".maps");
 
 struct {
     __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
@@ -112,22 +144,6 @@ struct {
         &player_state_13,
         &player_state_14,
         &player_state_15,
-        &player_state_16,
-        &player_state_17,
-        &player_state_18,
-        &player_state_19,
-        &player_state_20,
-        &player_state_21,
-        &player_state_22,
-        &player_state_23,
-        &player_state_24,
-        &player_state_25,
-        &player_state_26,
-        &player_state_27,
-        &player_state_28,
-        &player_state_29,
-        &player_state_30,
-        &player_state_31,
     }
 };
 
@@ -252,6 +268,13 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     int cpu = session_id % MAX_CPUS;
 
+                                    void * cpu_input_buffer = bpf_map_lookup_elem( &input_buffer_map, &session_id );
+                                    if ( !cpu_input_buffer )
+                                    {
+                                        debug_printf( "could not find player state map for cpu %d", cpu );
+                                        return XDP_DROP;
+                                    }
+
                                     __u64 session_id = (__u64) payload[1];
                                     session_id |= ( (__u64) payload[2] ) << 8;
                                     session_id |= ( (__u64) payload[3] ) << 16;
@@ -309,7 +332,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
-                                            __u8 * event = bpf_ringbuf_reserve( &input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
+                                            __u8 * event = bpf_ringbuf_reserve( cpu_input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
                                             if ( !event )
                                             {
                                                 debug_printf( "dropped input :(" );
