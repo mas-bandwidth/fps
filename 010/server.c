@@ -37,8 +37,10 @@ struct bpf_t
     struct xdp_program * program;
     bool attached_native;
     bool attached_skb;
+    int input_buffer_fd;
     int player_state_outer_fd;
     int player_state_inner_fd[MAX_CPUS];
+    struct perf_buffer * input_buffer;
 };
 
 static double time_start;
@@ -189,6 +191,28 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         bpf->player_state_inner_fd[i] = bpf_map_get_fd_by_id( inner_map_id );
     }
 
+    // get the file handle to the input buffer
+
+    bpf->input_buffer_fd = bpf_obj_get( "/sys/fs/bpf/input_buffer" );
+    if ( bpf->input_buffer_fd <= 0 )
+    {
+        printf( "\nerror: could not get input buffer: %s\n\n", strerror(errno) );
+        return 1;
+    }
+
+    // create the input perf buffer
+
+    struct perf_buffer_opts opts;
+    memset( &opts, 0, sizeof(opts) );
+    opts.sz = sizeof(opts);
+    opts.sample_period = 1000;
+    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, lost_input, bpf, &opts );
+    if ( libbpf_get_error( bpf->input_buffer ) ) 
+    {
+        printf( "\nerror: could not create input perf buffer\n\n" );
+        return 1;
+    }
+
     printf( "ready\n" );
 
     return 0;
@@ -222,7 +246,7 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 
     struct input_data * input = (struct input_data*) data + sizeof(struct input_header);
 
-    // todo: store state in userspace memory
+    // todo: store player state in thread local userspace memory
 
     struct player_state state;
 
@@ -299,38 +323,47 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
-    // run worker threads
-
-    int thread_cpu[MAX_CPUS];
-    pthread_t thread_id[MAX_CPUS];
-
-    for ( int i = 0; i < MAX_CPUS; i++ )
-    {
-        printf( "starting worker thread %d on cpu %d\n", i, i + MAX_CPUS );
-        thread_cpu[i] = i;
-        pthread_create( &thread_id[i], NULL, worker_thread_function, &thread_cpu ); 
-    }
-
     // main loop
+
+    pin_thread_to_core( XDP_MAX_THREADS );       // IMPORTANT: keep the main thread out of the way of the XDP cpus on google cloud [0,15]
 
     double last_print_time = platform_time();
 
-    uint64_t last_inputs = 0;
+    uint64_t previous_processed_inputs = 0;
+    uint64_t previous_lost_inputs = 0;
 
     while ( !quit )
     {
+        int err = perf_buffer__poll( bpf.input_buffer, 1 );
+        if ( err == -4 )
+        {
+            // ctrl-c
+            quit = true;
+            break;
+        }
+        if ( err < 0 ) 
+        {
+            printf( "\nerror: could not poll input buffer: %d\n\n", err );
+            quit = true;
+            break;
+        }
+
         double current_time = platform_time();
 
         if ( last_print_time + 1.0 <= current_time )
         {
-            uint64_t current_inputs = 0;
+            uint64_t current_processed_inputs = 0;
+            uint64_t current_lost_inputs = 0;
             for ( int i = 0; i < MAX_CPUS; i++ )
             {
-                current_inputs += inputs_processed[i];
+                current_processed_inputs += inputs_processed[i];
+                current_lost_inputs += inputs_lost[i];
             }
-            uint64_t input_delta = current_inputs - last_inputs;
-            printf( "input delta: %" PRId64 "\n", input_delta );
-            last_inputs = current_inputs;
+            uint64_t input_delta = current_processed_inputs - previous_processed_inputs;
+            uint64_t lost_delta = current_lost_inputs - previous_lost_inputs;
+            printf( "input delta: %" PRId64 ", lost delta: %" PRId64 "\n", input_delta, lost_delta );
+            previous_processed_inputs = current_processed_inputs;
+            previous_lost_inputs = current_lost_inputs;
             last_print_time = current_time;
         }
     }
