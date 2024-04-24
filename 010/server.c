@@ -28,6 +28,18 @@
 
 #include "shared.h"
 
+struct bpf_t
+{
+    int interface_index;
+    struct xdp_program * program;
+    bool attached_native;
+    bool attached_skb;
+    int input_buffer_fd;
+    int player_state_outer_fd;
+    int player_state_inner_fd[MAX_CPUS];
+    struct perf_buffer * input_buffer;
+};
+
 static uint64_t inputs_processed[MAX_CPUS];
 static uint64_t inputs_lost[MAX_CPUS];
 
@@ -76,18 +88,6 @@ void lost_input( void * ctx, int cpu, __u64 count )
 {
     __sync_fetch_and_add( &inputs_lost[cpu], count );
 }
-
-struct bpf_t
-{
-    int interface_index;
-    struct xdp_program * program;
-    bool attached_native;
-    bool attached_skb;
-    int input_buffer_fd;
-    int player_state_outer_fd;
-    int player_state_inner_fd[MAX_CPUS];
-    struct perf_buffer * input_buffer;
-};
 
 static double time_start;
 
