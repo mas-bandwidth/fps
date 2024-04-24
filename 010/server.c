@@ -34,6 +34,7 @@ struct bpf_t
     struct xdp_program * program;
     bool attached_native;
     bool attached_skb;
+    int server_stats_fd;
     int input_buffer_fd;
     int player_state_outer_fd;
     int player_state_inner_fd[MAX_CPUS];
@@ -213,6 +214,15 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         return 1;
     }
 
+    // get the file handle to the server stats
+
+    bpf->server_stats_fd = bpf_obj_get( "/sys/fs/bpf/server_stats" );
+    if ( bpf->server_stats_fd <= 0 )
+    {
+        printf( "\nerror: could not get server stats: %s\n\n", strerror(errno) );
+        return 1;
+    }
+
     // get the file handle to the outer player state map
 
     bpf->player_state_outer_fd = bpf_obj_get( "/sys/fs/bpf/player_state_map" );
@@ -349,6 +359,8 @@ int main( int argc, char *argv[] )
 
     while ( !quit )
     {
+        // poll perf buffer to drive input processing
+
         int err = perf_buffer__poll( bpf.input_buffer, 1 );
         if ( err == -4 )
         {
@@ -362,6 +374,8 @@ int main( int argc, char *argv[] )
             quit = true;
             break;
         }
+
+        // print out stats every second
 
         double current_time = platform_time();
 
@@ -380,6 +394,20 @@ int main( int argc, char *argv[] )
             previous_processed_inputs = current_processed_inputs;
             previous_lost_inputs = current_lost_inputs;
             last_print_time = current_time;
+        }
+
+        // upload stats to the xdp program
+
+        struct server_stats stats;
+        stats.inputs_processed = current_processed_inputs;
+
+        __u32 key = 0;
+        int err = bpf_map_update_elem( bpf.server_stats_fd, &key, &stats, BPF_ANY );
+        if ( err != 0 )
+        {
+            printf( "\nerror: failed to update server stats: %s\n\n", strerror(errno) );
+            quit = true;
+            break;
         }
     }
 
