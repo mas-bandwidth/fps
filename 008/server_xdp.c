@@ -24,6 +24,14 @@
 # error "Endianness detection needs to be set up for your compiler?!"
 #endif
 
+#define DEBUG 1
+
+#if DEBUG
+#define debug_printf bpf_printk
+#else // #if DEBUG
+#define debug_printf(...) do { } while (0)
+#endif // #if DEBUG
+
 struct {
     __uint( type, BPF_MAP_TYPE_LRU_PERCPU_HASH );
     __uint( map_flags, BPF_F_NO_COMMON_LRU );
