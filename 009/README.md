@@ -38,6 +38,8 @@ But now we would need 166 player servers, each with 10G NIC.
 
 Each server will cost $2,160 per-month on datapacket.com with 32 cores. Assume we need the extra 16 cores for player simulation and/or XDP work. 
 
+<img width="1347" alt="image" src="https://github.com/mas-bandwidth/fps/assets/696656/9718bd1d-478a-433f-a023-a32d5186a452">
+
 Cost per-month for players servers is now 2160 * 166 = $358,560 USD per-month.
 
 Or ~36c per-player.
