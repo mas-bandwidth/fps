@@ -22,8 +22,6 @@
 
 #define MAX_SESSIONS                                                                  1000000
 
-#define HEAP_SIZE                                                                        2048
-
 #define MAX_CPUS                                                                           32
 
 #define PLAYERS_PER_CPU                                                                   380
