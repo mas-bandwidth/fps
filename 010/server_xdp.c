@@ -275,15 +275,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         return XDP_DROP;
                                     }
 
-                                    __u64 session_id = (__u64) payload[1];
-                                    session_id |= ( (__u64) payload[2] ) << 8;
-                                    session_id |= ( (__u64) payload[3] ) << 16;
-                                    session_id |= ( (__u64) payload[4] ) << 24;
-                                    session_id |= ( (__u64) payload[5] ) << 32;
-                                    session_id |= ( (__u64) payload[6] ) << 40;
-                                    session_id |= ( (__u64) payload[7] ) << 48;
-                                    session_id |= ( (__u64) payload[8] ) << 56;
-
                                     struct session_data * session = (struct session_data*) bpf_map_lookup_elem( &session_map, &session_id );
                                     if ( session == NULL )
                                     {
