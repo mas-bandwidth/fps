@@ -7,6 +7,7 @@
 #define INPUT_PACKET                                                                        3
 #define STATS_REQUEST_PACKET                                                                4
 #define STATS_RESPONSE_PACKET                                                               5
+#define PLAYER_STATE_PACKET                                                                 6
 
 #define INPUT_SIZE                                                                        100
 #define INPUTS_PER_PACKET                                                                  10
