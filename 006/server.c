@@ -24,6 +24,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <sched.h>
+#include <stdlib.h>
 
 #include "shared.h"
 
