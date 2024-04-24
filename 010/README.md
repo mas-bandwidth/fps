@@ -4,9 +4,9 @@ Let's bring it all together.
 
 6000 players per-player server implemented via 6 n1-standard-8 machines in google cloud, with 1k players each.
 
-One player server in google cloud with c3-highcpu-88, reduced to 44 CPUs by disabling hyperthreading. We're only going to use 32 CPUs on this.
+One player server in google cloud with c3-highcpu-44, reduced to 22 CPUs by disabling hyperthreading. We're only going to use 16 CPUs on this.
 
-16 CPUs for the first NIC for XDP processing, 16 different CPUs for player simulation processing. A ring buffer forwards player inputs from CPUs [0,15] -> [16,31].
+Still blocked on the ring buffer, so aperf buffer forwards player inputs from XDP to userspace.
 
 Player state lives in userspace and is copied to a bpf hash map after each player simulation step. 
 

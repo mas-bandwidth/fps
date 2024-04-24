@@ -147,6 +147,17 @@ struct {
     }
 };
 
+struct heap {
+    __u8 data[HEAP_SIZE];
+};
+
+struct {
+    __uint( type, BPF_MAP_TYPE_PERCPU_ARRAY );
+    __uint( max_entries, 1 );
+    __type( key, int );
+    __type( value, struct heap );
+} heap_map SEC(".maps");
+
 static void reflect_packet( void * data, int payload_bytes )
 {
     struct ethhdr * eth = data;
@@ -314,107 +325,103 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         session->next_input_sequence = sequence + 1;
 
-                                        if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
+                                        int zero = 0;
+                                        __u8 * heap = (__u8*) bpf_map_lookup_elem( &heap_map, &zero );
+                                        if ( !heap ) 
                                         {
-                                            __u8 * event = bpf_ringbuf_reserve( cpu_input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
-                                            if ( !event )
-                                            {
-                                                debug_printf( "dropped input :(" );
-                                                return XDP_DROP;
-                                            }
-                                            
-                                            for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ); i++ )
-                                            {
-                                                event[i] = payload[1+i];
-                                            }
-
-                                            bpf_ringbuf_submit( event, 0 );
+                                            return XDP_DROP; // can't happen
                                         }
 
-                                        // todo: bring these back
-                                        /*
+                                        if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
+                                        {
+                                            for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ); i++ )
+                                            {
+                                                heap[i] = payload[1+i];
+                                            }
+
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, heap, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) );
+                                        }
                                         else if ( n == 2 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2 <= data_end )
                                         {
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2; i++ )
                                             {
-                                                data[i] = payload[1+i];
+                                                heap[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, heap, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2 );
                                         }
                                         else if ( n == 3 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 3 <= data_end )
                                         {
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 3; i++ )
                                             {
-                                                data[i] = payload[1+i];
+                                                heap[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 3 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, heap, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 3 );
                                         }
                                         else if ( n == 4 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 4 <= data_end )
                                         {
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 4; i++ )
                                             {
-                                                data[i] = payload[1+i];
+                                                heap[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 4 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, heap, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 4 );
                                         }
                                         else if ( n == 5 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 5 <= data_end )
                                         {
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 5; i++ )
                                             {
-                                                data[i] = payload[1+i];
+                                                heap[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 5 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, heap, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 5 );
                                         }
                                         else if ( n == 6 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 6 <= data_end )
                                         {
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 6; i++ )
                                             {
-                                                data[i] = payload[1+i];
+                                                heap[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 6 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, heap, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 6 );
                                         }
                                         else if ( n == 7 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 7 <= data_end )
                                         {
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 7; i++ )
                                             {
-                                                data[i] = payload[1+i];
+                                                heap[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 7 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, heap, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 7 );
                                         }
                                         else if ( n == 8 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 8 <= data_end )
                                         {
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 8; i++ )
                                             {
-                                                data[i] = payload[1+i];
+                                                heap[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 8 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, heap, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 8 );
                                         }
                                         else if ( n == 9 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 9 <= data_end )
                                         {
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 9; i++ )
                                             {
-                                                data[i] = payload[1+i];
+                                                heap[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 9 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, heap, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 9 );
                                         }
                                         else if ( n == 10 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10 <= data_end )
                                         {
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10; i++ )
                                             {
-                                                data[i] = payload[1+i];
+                                                heap[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, data, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10 );
+                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, heap, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10 );
                                         }
-                                        */
                                     }
                                     else
                                     {
