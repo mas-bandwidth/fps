@@ -13,7 +13,9 @@
 #define INPUTS_PER_PACKET                                                                  10
 #define INPUT_PACKET_SIZE            ( 1 + 8 + 8 + 8 + (INPUT_SIZE + 8) * INPUTS_PER_PACKET )
 
-#define JOIN_REQUEST_PACKET_SIZE                             ( 1 + 8 + 8 + PLAYER_DATA_SIZE )
+#define PLAYER_STATE_SIZE                                                                1000
+
+#define JOIN_REQUEST_PACKET_SIZE                            ( 1 + 8 + 8 + PLAYER_STATE_SIZE )
 #define JOIN_RESPONSE_PACKET_SIZE                                           ( 1 + 8 + 8 + 8 )
 #define STATS_REQUEST_PACKET_SIZE                                                   ( 1 + 8 )
 #define STATS_RESPONSE_PACKET_SIZE                                                  ( 1 + 8 )
@@ -21,8 +23,6 @@
 #define MAX_SESSIONS                                                                  1000000
 
 #define HEAP_SIZE                                                                        2048
-
-#define PLAYER_STATE_SIZE                                                                1000
 
 #define MAX_CPUS                                                                           32
 
