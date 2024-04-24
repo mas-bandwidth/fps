@@ -333,8 +333,6 @@ int main( int argc, char *argv[] )
 
     uint64_t last_inputs = 0;
 
-    pin_thread_to_cpu( MAX_CPUS );       // IMPORTANT: keep the main thread out of the way of the player simulation threads
-
     while ( !quit )
     {
         double current_time = platform_time();

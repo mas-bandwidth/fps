@@ -1,17 +1,11 @@
-# 008
+# 009
 
-Just so we don't fool ourselves, actually send the most recent player state from the player state bpf hash map down to the client in response to each input packet received.
+If memory is the bottleneck, can we scale linearly from 16 CPUs up to 32 CPUs on a bare metal machine?
 
-This way we verify that not only can we get the player state up to the kernel, but we can also use it and send out.
+Increase the MAX_CPUS to 32 and see if we can still process 380 players per-CPU on a 32 core machine.
 
-Decrease player state to 1000 bytes, so it fits into the input packet to be send as a response.
+If we can process fewer players, the memory bottleneck is significant, and calculations should be done to verify that we can even theoretically transfer the player state for @ 50k players.
 
 # Results
 
-We can now send 610000 player states per-second on 16 cpus.
-
-This gives us ~380 players per-CPU, so 50k players would take 131 CPUs.
-
-1200 bytes down to 1000 bytes gave a clear speed up, this seems to indicate we are primarily bound by memory speeds.
-
-To verify that we can really hit the 50k number, it's quite possible that memory will become the bottleneck. Perhaps NUMA will be required to hit 50k.
+...

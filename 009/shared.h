@@ -24,7 +24,7 @@
 
 #define PLAYER_STATE_SIZE                                                                1000
 
-#define MAX_CPUS                                                                           16
+#define MAX_CPUS                                                                           32
 
 #define PLAYERS_PER_CPU                                                                   380
 
