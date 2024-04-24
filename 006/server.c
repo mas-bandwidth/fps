@@ -261,7 +261,7 @@ void * worker_thread_function( void * context )
 
     int memory_size = sizeof(struct player_state) * PLAYERS_PER_CPU;
 
-    uint8_t * memory = (uint8_t*) malloc( player_data_size );
+    uint8_t * memory = (uint8_t*) malloc( memory_size );
 
     while ( !quit )
     {
