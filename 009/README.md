@@ -45,5 +45,3 @@ Cost per-month for players servers is now 2160 * 166 = $358,560 USD per-month.
 Or ~36c per-player per-month.
 
 It actually got cheaper!
-
-And now we can scale the system up and down in smaller increments of 6k players instead of 50k. Much better!
