@@ -7,6 +7,7 @@
 #define INPUT_PACKET                                                                        3
 #define STATS_REQUEST_PACKET                                                                4
 #define STATS_RESPONSE_PACKET                                                               5
+#define PLAYER_STATE_PACKET                                                                 6
 
 #define INPUT_SIZE                                                                        100
 #define INPUTS_PER_PACKET                                                                  10
@@ -26,6 +27,10 @@
 #define PLAYER_STATE_SIZE                                                                1200
 
 #define XDP_MAX_CPUS                                                                       16
+
+#define PLAYERS_PER_CPU                                                                   340
+
+#define PLAYER_STATE_PACKET_SIZE                                         1 + PLAYER_DATA_SIZE
 
 #pragma pack(push, 1)
 

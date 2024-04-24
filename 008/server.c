@@ -28,8 +28,6 @@
 
 #include "shared.h"
 
-#define PLAYERS_PER_CPU 10000
-
 static uint64_t inputs_processed[MAX_CPUS];
 
 struct bpf_t
@@ -267,7 +265,7 @@ void * worker_thread_function( void * context )
     {
         for ( int i = 0; i < PLAYERS_PER_CPU; i++ )
         {
-            uint64_t session_id = cpu * PLAYERS_PER_CPU + i;
+            uint64_t session_id = uint64_t(i);
 
             // IMPORTANT: do some whacky stuff to make sure memory accesses are pretty random
             int index = session_id % ( memory_size - sizeof(struct player_state) );
