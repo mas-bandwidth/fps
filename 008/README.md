@@ -1,11 +1,9 @@
-# 006
+# 008
 
-In this version I move the player state to live in user memory.
+Just so we don't fool ourselves, actually send the most recent player state from the player state bpf hash map down to the client in response to each input packet received.
 
-This should make player updates maybe twice as fast, because we don't have to copy down from kernel memory -> user memory, nad then upload user memory -> kernel memory per-update, we only have to copy into kernel memory once.
+This way we verify that not only can we get the player state up to the kernel, but we can also use it and send out.
 
 # Results
 
-I can now do around 550k updates per-second with 16 cpus.
-
-This means that we should be able to theoretically do 50k players with 144 cpus.
+...
