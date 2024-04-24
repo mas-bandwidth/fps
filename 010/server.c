@@ -325,7 +325,7 @@ int main( int argc, char *argv[] )
 
     // main loop
 
-    pin_thread_to_core( XDP_MAX_THREADS );       // IMPORTANT: keep the main thread out of the way of the XDP cpus on google cloud [0,15]
+    pin_thread_to_core( MAX_THREADS );       // IMPORTANT: keep the main thread out of the way of the XDP cpus on google cloud [0,15]
 
     double last_print_time = platform_time();
 
