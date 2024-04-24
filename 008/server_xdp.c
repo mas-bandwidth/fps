@@ -234,10 +234,12 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         return XDP_DROP;
                                     }
 
-                                    #pragma GCC unroll PLAYER_STATE_SIZE
-                                    for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
+                                    if ( (void*) payload + 1 + PLAYER_STATE_SIZE < data_end ) // IMPORTANT: for verifier
                                     {
-                                        payload[1+i] = player_state[i];
+                                        for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
+                                        {
+                                            payload[1+i] = player_state[i];
+                                        }
                                     }
 
                                     bpf_xdp_adjust_tail( ctx, -( INPUT_PACKET_SIZE - PLAYER_STATE_PACKET_SIZE ) );
