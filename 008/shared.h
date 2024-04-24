@@ -27,6 +27,10 @@
 
 #define MAX_CPUS                                                                           16
 
+#define PLAYERS_PER_CPU                                                                   340
+
+#define PLAYER_STATE_PACKET_SIZE                                         1 + PLAYER_DATA_SIZE
+
 #pragma pack(push, 1)
 
 struct join_request_packet

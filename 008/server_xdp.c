@@ -29,7 +29,7 @@ struct {
     __uint( map_flags, BPF_F_NO_COMMON_LRU );
     __type( key, __u64 );
     __type( value, struct session_data );
-    __uint( max_entries, MAX_SESSIONS / XDP_MAX_CPUS );
+    __uint( max_entries, MAX_SESSIONS / MAX_CPUS );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } session_map SEC(".maps");
 
@@ -208,7 +208,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         return XDP_DROP;
                                     }
 
-                                    int cpu = ( session_id >> 16 ) % XDP_MAX_CPUS;
+                                    int cpu = ( session_id >> 16 ) % MAX_CPUS;
 
                                     void * cpu_player_state_map = bpf_map_lookup_elem( &player_state_map, &session_id );
                                     if ( !cpu_player_state_map )
