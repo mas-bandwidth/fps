@@ -31,6 +31,52 @@
 static uint64_t inputs_processed[MAX_CPUS];
 static uint64_t inputs_lost[MAX_CPUS];
 
+void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
+{
+    struct bpf_t * bpf = (struct bpf_t*) ctx;
+
+    int player_state_fd = bpf->player_state_inner_fd[cpu];
+
+    struct input_header * header = (struct input_header*) data;
+
+    struct input_data * input = (struct input_data*) data + sizeof(struct input_header);
+
+    // todo: store player state in thread local userspace memory
+
+    struct player_state state;
+
+    uint64_t value;
+    int result = bpf_map_lookup_elem( player_state_fd, &header->session_id, &state );
+    if ( result != 0 )
+    {
+        // first player update
+        memset( &state, 0, sizeof(struct player_state) );
+    }
+
+    // todo: handle multiple inputs
+
+    state.t += input->dt;
+
+    for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
+    {
+        state.data[i] = (uint8_t) state.t + (uint8_t) i;
+    }
+
+    int err = bpf_map_update_elem( player_state_fd, &header->session_id, &state, BPF_ANY );
+    if ( err != 0 )
+    {
+        printf( "error: failed to update player state: %s\n", strerror(errno) );
+        return;
+    }
+
+    __sync_fetch_and_add( &inputs_processed[cpu], 1 );
+}
+
+void lost_input( void * ctx, int cpu, __u64 count )
+{
+    __sync_fetch_and_add( &inputs_lost[cpu], count );
+}
+
 struct bpf_t
 {
     int interface_index;
@@ -234,52 +280,6 @@ void bpf_shutdown( struct bpf_t * bpf )
         }
         xdp_program__close( bpf->program );
     }
-}
-
-void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
-{
-    struct bpf_t * bpf = (struct bpf_t*) ctx;
-
-    int player_state_fd = bpf->player_state_inner_fd[cpu];
-
-    struct input_header * header = (struct input_header*) data;
-
-    struct input_data * input = (struct input_data*) data + sizeof(struct input_header);
-
-    // todo: store player state in thread local userspace memory
-
-    struct player_state state;
-
-    uint64_t value;
-    int result = bpf_map_lookup_elem( player_state_fd, &header->session_id, &state );
-    if ( result != 0 )
-    {
-        // first player update
-        memset( &state, 0, sizeof(struct player_state) );
-    }
-
-    // todo: handle multiple inputs
-
-    state.t += input->dt;
-
-    for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
-    {
-        state.data[i] = (uint8_t) state.t + (uint8_t) i;
-    }
-
-    int err = bpf_map_update_elem( player_state_fd, &header->session_id, &state, BPF_ANY );
-    if ( err != 0 )
-    {
-        printf( "error: failed to update player state: %s\n", strerror(errno) );
-        return;
-    }
-
-    __sync_fetch_and_add( &inputs_processed[cpu], 1 );
-}
-
-void lost_input( void * ctx, int cpu, __u64 count )
-{
-    __sync_fetch_and_add( &inputs_lost[cpu], count );
 }
 
 static struct bpf_t bpf;
