@@ -37,7 +37,7 @@ struct join_request_packet
     __u8 packet_type;
     __u64 session_id;
     __u64 send_time;
-    __u8 player_data[PLAYER_DATA_SIZE];
+    __u8 player_data[PLAYER_STATE_SIZE];
 };
 
 struct join_response_packet
