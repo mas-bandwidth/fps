@@ -36,7 +36,7 @@ This can be handled on a 10G NIC, rather than a 100G NIC.
 
 But now we would need 166 player servers, each with 10G NIC.
 
-Each server will cost $2,160 per-month on datapacket.com with 32 cores. Assume we need the extra 16 cores for player simulation and/or XDP work. 
+Each server will cost $2,160 per-month on datapacket.com with 32 CPUs. Assume we need 16 CPUs for XDP and 16 CPUs for player simulation.
 
 <img width="1347" alt="image" src="https://github.com/mas-bandwidth/fps/assets/696656/9718bd1d-478a-433f-a023-a32d5186a452">
 
