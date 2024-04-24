@@ -259,9 +259,9 @@ void * worker_thread_function( void * context )
 
     const double dt = 1.0 / 100.0;
 
-    int player_data_size = sizeof(struct player_state) * PLAYERS_PER_CPU;
+    int memory_size = sizeof(struct player_state) * PLAYERS_PER_CPU;
 
-    uint8_t * player_data = (uint8_t*) malloc( player_data_size );
+    uint8_t * memory = (uint8_t*) malloc( player_data_size );
 
     while ( !quit )
     {
@@ -272,7 +272,7 @@ void * worker_thread_function( void * context )
             // IMPORTANT: do some whacky stuff to make sure memory accesses are pretty random
             int index = session_id % ( player_data_size - sizeof(struct player_state) );
 
-            struct player_state * state = (struct player_state*) data[index];
+            struct player_state * state = (struct player_state*) &memory[index];
 
             state->t += dt;
 
@@ -292,7 +292,7 @@ void * worker_thread_function( void * context )
         }
     }
 
-    free( player_data );
+    free( memory );
 
     return NULL;
 }
