@@ -108,8 +108,8 @@ static void * map_get( struct map_t * map, uint64_t session_id )
 static int map_delete( struct map_t * map, uint64_t session_id )
 {
     int bucket_index = session_id % MAP_NUM_BUCKETS;
-    struct netcode_address_map_bucket_t * bucket = map->buckets + bucket_index;
-    struct netcode_address_map_element_t * element = map_bucket_find( bucket, session_id );
+    struct map_bucket_t * bucket = map->buckets + bucket_index;
+    struct map_element_t * element = map_bucket_find( bucket, session_id );
     if ( !element )
     {
         return 0;
