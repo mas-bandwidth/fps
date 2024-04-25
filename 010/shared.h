@@ -88,6 +88,11 @@ struct input_data
     __u8 input[INPUT_SIZE];
 };
 
+struct counters
+{
+    __u64 player_state_packets_sent;
+};
+
 #pragma pack(pop)
 
 #endif // #ifndef SHARED_H

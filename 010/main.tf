@@ -310,7 +310,7 @@ resource "google_compute_instance_template" "client" {
 }
 
 resource "google_compute_region_instance_group_manager" "client" {
-  target_size               = 6
+  target_size               = 4
   name                      = "client"
   project                   = google_project.fps.project_id
   region                    = var.google_region

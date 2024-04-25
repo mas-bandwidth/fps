@@ -32,7 +32,7 @@
 # error "Endianness detection needs to be set up for your compiler?!"
 #endif
 
-#define DEBUG 1
+// #define DEBUG 1
 
 #if DEBUG
 #define debug_printf bpf_printk
@@ -124,6 +124,14 @@ struct {
     __type( key, int );
     __type( value, struct heap );
 } heap_map SEC(".maps");
+
+struct {
+    __uint( type, BPF_MAP_TYPE_PERCPU_ARRAY );
+    __uint( max_entries, 1 );
+    __type( key, int );
+    __type( value, struct counters );
+    __uint( pinning, LIBBPF_PIN_BY_NAME );
+} counters SEC(".maps");
 
 static void reflect_packet( void * data, int payload_bytes )
 {
@@ -412,6 +420,15 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         payload[1+i] = player_state[i];
                                     }
 
+                                    int zero = 0;
+                                    struct counters * counters = (struct counters*) bpf_map_lookup_elem( &counters, &zero );
+                                    if ( !counters ) 
+                                    {
+                                        return XDP_DROP; // can't happen
+                                    }
+
+                                    __sync_fetch_and_add( &counters->player_state_packets_sent, 1 );
+
                                     bpf_xdp_adjust_tail( ctx, -( INPUT_PACKET_SIZE - PLAYER_STATE_PACKET_SIZE ) );
 
                                     return XDP_TX;
@@ -430,8 +447,15 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         return XDP_DROP; // can't happen
                                     }
 
+                                    struct counters * counters = (struct counters*) bpf_map_lookup_elem( &counters, &zero );
+                                    if ( !counters ) 
+                                    {
+                                        return XDP_DROP; // can't happen
+                                    }
+
                                     packet->packet_type = STATS_RESPONSE_PACKET;
                                     packet->inputs_processed = stats->inputs_processed;
+                                    packet->player_state_packets_sent = counters->player_state_packets_sent;
 
                                     reflect_packet( data, sizeof(struct stats_request_packet) );
 
