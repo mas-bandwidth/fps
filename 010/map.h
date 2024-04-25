@@ -41,7 +41,7 @@ static void map_destroy( struct map_t * map )
 
 static void map_bucket_reset( struct map_bucket_t * bucket )
 {
-    assert( map );
+    assert( bucket );
     int i;
     bucket->size = 0;
     for ( i = 0; i < MAP_NUM_BUCKETS; i++ )
