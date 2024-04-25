@@ -89,7 +89,7 @@ static struct map_element_t * map_bucket_find( struct map_bucket_t * bucket, uin
 {
     for ( int i = 0; i < bucket->size; i++ )
     {
-        if ( bucket->elements[i]->session_id == session_id )
+        if ( bucket->elements[i].session_id == session_id )
         {
             return &bucket->elements[i];
         }
