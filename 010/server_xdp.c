@@ -1,3 +1,11 @@
+/*
+    FPS server XDP program
+
+    USAGE:
+
+        clang -Ilibbpf/src -g -O2 -target bpf -c server_xdp.c -o server_xdp.o
+        sudo cat /sys/kernel/debug/tracing/trace_pipe
+*/
 
 #include <linux/in.h>
 #include <linux/if_ether.h>
@@ -234,7 +242,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         return XDP_DROP;
                                     }
 
-                                    // send the input(s) down to userspace via ring buffer
+                                    // send the input(s) down to userspace via perf buffer
 
                                     int cpu = session_id % MAX_CPUS;
 
@@ -383,7 +391,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     // respond with a player state packet for the client's local player
 
-                                    void * cpu_player_state_map = bpf_map_lookup_elem( &player_state_map, &session_id );
+                                    void * cpu_player_state_map = bpf_map_lookup_elem( &player_state_map, &cpu );
                                     if ( !cpu_player_state_map )
                                     {
                                         debug_printf( "could not find player state map for cpu %d", cpu );
