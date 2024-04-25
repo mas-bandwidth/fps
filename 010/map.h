@@ -105,26 +105,27 @@ static void * map_get( struct map_t * map, uint64_t session_id )
     return element ? element->player_data : NULL;
 }
 
-/*
-static int netcode_address_map_delete( struct netcode_address_map_t * map,
-                                       struct netcode_address_t * address )
+static int map_delete( struct map_t * map, uint64_t session_id )
 {
-    int bucket_index = netcode_address_hash( address );
+    int bucket_index = session_id % MAP_NUM_BUCKETS;
     struct netcode_address_map_bucket_t * bucket = map->buckets + bucket_index;
-    struct netcode_address_map_element_t * element = netcode_address_map_bucket_find( bucket, address );
-
+    struct netcode_address_map_element_t * element = map_bucket_find( bucket, session_id );
     if ( !element )
     {
         return 0;
     }
 
-    struct netcode_address_map_element_t * last = bucket->elements + (bucket->size - 1);
+    struct map_element_t * last = bucket->elements + ( bucket->size - 1 );
     *element = *last;
-    netcode_address_map_element_reset(last);
-
+    last->session_id = 0;
+    if ( last->player_data )
+    {
+        free( last->player_data );
+        last->player_data = NULL;    
+    }
+    
     --bucket->size;
     --map->size;
 
     return 1;
 }
-*/
