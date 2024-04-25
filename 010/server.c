@@ -44,6 +44,8 @@ struct bpf_t
 static uint64_t inputs_processed[MAX_CPUS];
 static uint64_t inputs_lost[MAX_CPUS];
 
+static map_t * cpu_player_map[MAX_CPUS];
+
 void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
     struct bpf_t * bpf = (struct bpf_t*) ctx;
@@ -315,17 +317,17 @@ static void cleanup()
 
 int pin_thread_to_cpu( int cpu ) 
 {
-   int num_cpus = sysconf(_SC_NPROCESSORS_ONLN );
-   if ( cpu < 0 || cpu >= num_cpus  )
-      return EINVAL;
+    int num_cpus = sysconf(_SC_NPROCESSORS_ONLN );
+    if ( cpu < 0 || cpu >= num_cpus  )
+        return EINVAL;
 
-   cpu_set_t cpuset;
-   CPU_ZERO( &cpuset );
-   CPU_SET( cpu, &cpuset );
+    cpu_set_t cpuset;
+    CPU_ZERO( &cpuset );
+    CPU_SET( cpu, &cpuset );
 
-   pthread_t current_thread = pthread_self();    
+    pthread_t current_thread = pthread_self();    
 
-   return pthread_setaffinity_np( current_thread, sizeof(cpu_set_t), &cpuset );
+    return pthread_setaffinity_np( current_thread, sizeof(cpu_set_t), &cpuset );
 }
 
 int main( int argc, char *argv[] )
@@ -351,6 +353,11 @@ int main( int argc, char *argv[] )
     // main loop
 
     pin_thread_to_cpu( MAX_CPUS );       // IMPORTANT: keep the main thread out of the way of the XDP cpus on google cloud [0,15]
+
+    for ( int i = 0; i < MAX_CPUS; i++ )
+    {
+        cpu_player_map[i] = map_create();
+    }
 
     double last_print_time = platform_time();
 
