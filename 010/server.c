@@ -58,12 +58,12 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 
     // todo: store player state in thread local userspace memory
 
-    struct player_state * state = map_get( cpu_player_map[cpu], input_header->session_id );
+    struct player_state * state = map_get( cpu_player_map[cpu], header->session_id );
     if ( !state )
     {
         // first player update
         state = malloc( PLAYER_STATE_SIZE );
-        map_set( cpu_player_map[cpu], input_header->session_id, state );
+        map_set( cpu_player_map[cpu], header->session_id, state );
     }
 
     // todo: handle multiple inputs
