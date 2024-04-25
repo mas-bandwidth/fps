@@ -101,7 +101,7 @@ static void * map_get( struct map_t * map, uint64_t session_id )
 {
     int bucket_index = session_id % MAP_NUM_BUCKETS;
     struct map_bucket_t * bucket = map->buckets + bucket_index;
-    struct map_element_t * element = map_bucket_find( bucket, address );
+    struct map_element_t * element = map_bucket_find( bucket, session_id );
     return element ? element->player_data : NULL;
 }
 
