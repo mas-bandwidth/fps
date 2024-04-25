@@ -63,7 +63,7 @@ static void map_reset( struct map_t * map )
     map->size = 0;
     for ( i = 0; i < MAP_NUM_BUCKETS; i++ )
     {
-        struct netcode_address_map_bucket_t * bucket = map->buckets + i;
+        struct map_bucket_t * bucket = map->buckets + i;
         netcode_address_map_bucket_reset( bucket );
     }
 }
