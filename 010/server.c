@@ -418,7 +418,7 @@ int main( int argc, char *argv[] )
             struct counters values[num_cpus];
 
             int key = 0;
-            if ( bpf_map_lookup_elem( bpf->counters_fd, &key, values ) != 0 ) 
+            if ( bpf_map_lookup_elem( bpf.counters_fd, &key, values ) != 0 ) 
             {
                 printf( "\nerror: could not look up counters: %s\n\n", strerror( errno ) );
                 quit = true;
@@ -438,7 +438,6 @@ int main( int argc, char *argv[] )
             stats.inputs_processed = current_processed_inputs;
             stats.player_state_packets_sent = player_state_packets_sent;
 
-            __u32 key = 0;
             int err = bpf_map_update_elem( bpf.server_stats_fd, &key, &stats, BPF_ANY );
             if ( err != 0 )
             {
