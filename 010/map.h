@@ -68,21 +68,18 @@ static void map_reset( struct map_t * map )
     }
 }
 
-/*
-static int netcode_address_map_set( struct netcode_address_map_t * map,
-                                    struct netcode_address_t * address,
-                                    int client_index )
+static int map_set( struct map_t * map, uint64_t session_id, void * player_data )
 {
-    int bucket_index = netcode_address_hash( address );
-    struct netcode_address_map_bucket_t * bucket = map->buckets + bucket_index;
-    if ( bucket->size == NETCODE_MAX_CLIENTS )
+    int bucket_index = session_id % MAP_NUM_BUCKETS;
+    struct map_bucket_t * bucket = map->buckets + bucket_index;
+    if ( bucket->size == MAP_BUCKET_SIZE )
     {
         return 0;
     }
 
-    struct netcode_address_map_element_t * element = bucket->elements + bucket->size;
-    element->client_index = client_index;
-    element->address = *address;
+    struct map_element_t * element = bucket->elements + bucket->size;
+    element->session_id = session_id;
+    element->player_data = player_data;
 
     ++bucket->size;
     ++map->size;
@@ -90,6 +87,7 @@ static int netcode_address_map_set( struct netcode_address_map_t * map,
     return 1;
 }
 
+/*
 static struct netcode_address_map_element_t * netcode_address_map_bucket_find(
     struct netcode_address_map_bucket_t * bucket,
     struct netcode_address_t * address )
