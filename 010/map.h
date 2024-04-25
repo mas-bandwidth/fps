@@ -28,6 +28,7 @@ struct map_t * map_create()
 {
     struct map_t * map = (struct map_t*) malloc( sizeof( struct map_t ) );
     assert( map );
+    memset( map, 0, sizeof(map) );
     map_reset( map );
     return map;
 }
@@ -38,35 +39,36 @@ static void map_destroy( struct map_t * map )
     free( map );
 }
 
-/*
-static void netcode_address_map_element_reset( struct netcode_address_map_element_t * element )
+static void map_bucket_reset( struct map_bucket_t * bucket )
 {
-    element->client_index = -1;
-    memset( &element->address, 0, sizeof( element->address ) );
-}
-
-static void map_bucket_reset( struct netcode_address_map_bucket_t * bucket )
-{
+    assert( map );
     int i;
     bucket->size = 0;
-    for ( i = 0; i < NETCODE_MAX_CLIENTS; i++ )
+    for ( i = 0; i < MAP_NUM_BUCKETS; i++ )
     {
-        struct netcode_address_map_element_t * element = bucket->elements + i;
-        netcode_address_map_element_reset( element );
+        struct map_element_t * element = bucket->elements + i;
+        element->session_id = 0;
+        if ( element->player_data )
+        {
+            free( element->player_data );
+            element->player_data = NULL;
+        }
     }
 }
 
-static void netcode_address_map_reset( struct netcode_address_map_t * map )
+static void map_reset( struct map_t * map )
 {
+    assert( map );
     int i;
     map->size = 0;
-    for ( i = 0; i < NETCODE_ADDRESS_MAP_BUCKETS; i++ )
+    for ( i = 0; i < MAP_NUM_BUCKETS; i++ )
     {
         struct netcode_address_map_bucket_t * bucket = map->buckets + i;
-        netcode_address_map_bucket_reset(bucket);
+        netcode_address_map_bucket_reset( bucket );
     }
 }
 
+/*
 static int netcode_address_map_set( struct netcode_address_map_t * map,
                                     struct netcode_address_t * address,
                                     int client_index )
