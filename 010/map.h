@@ -42,9 +42,8 @@ static void map_destroy( struct map_t * map )
 static void map_bucket_reset( struct map_bucket_t * bucket )
 {
     assert( bucket );
-    int i;
     bucket->size = 0;
-    for ( i = 0; i < MAP_NUM_BUCKETS; i++ )
+    for ( int i = 0; i < MAP_NUM_BUCKETS; i++ )
     {
         struct map_element_t * element = bucket->elements + i;
         element->session_id = 0;
@@ -59,9 +58,8 @@ static void map_bucket_reset( struct map_bucket_t * bucket )
 static void map_reset( struct map_t * map )
 {
     assert( map );
-    int i;
     map->size = 0;
-    for ( i = 0; i < MAP_NUM_BUCKETS; i++ )
+    for ( int i = 0; i < MAP_NUM_BUCKETS; i++ )
     {
         struct map_bucket_t * bucket = map->buckets + i;
         map_bucket_reset( bucket );
@@ -87,21 +85,15 @@ static int map_set( struct map_t * map, uint64_t session_id, void * player_data 
     return 1;
 }
 
-/*
-static struct netcode_address_map_element_t * netcode_address_map_bucket_find(
-    struct netcode_address_map_bucket_t * bucket,
-    struct netcode_address_t * address )
+static struct map_element_t * map_bucket_find( struct map_bucket_t * bucket, uint64_t session_id )
 {
-    int i;
-    for ( i = 0; i < bucket->size; i++ )
+    for ( int i = 0; i < bucket->size; i++ )
     {
-        struct netcode_address_map_element_t * element = bucket->elements + i;
-        if ( netcode_address_equal( address, &element->address ) )
+        if ( bucket->elements[i]->session_id == session_id )
         {
-            return element;
+            return &bucket->elements[i];
         }
     }
-
     return NULL;
 }
 

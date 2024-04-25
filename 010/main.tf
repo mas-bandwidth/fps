@@ -72,6 +72,10 @@ data "local_file" "shared_h" {
   filename = "shared.h"
 }
 
+data "local_file" "map_h" {
+  filename = "map.h"
+}
+
 data "local_file" "server_c" {
   filename = "server.c"
 }
@@ -106,6 +110,10 @@ data "archive_file" "source_zip" {
   source {
     filename = "shared.h"
     content  = data.local_file.shared_h.content
+  }
+  source {
+    filename = "map.h"
+    content  = data.local_file.map_h.content
   }
   source {
     filename = "server.c"
