@@ -43,7 +43,7 @@ static void map_bucket_reset( struct map_bucket_t * bucket )
 {
     assert( bucket );
     bucket->size = 0;
-    for ( int i = 0; i < MAP_NUM_BUCKETS; i++ )
+    for ( int i = 0; i < MAP_BUCKET_SIZE; i++ )
     {
         struct map_element_t * element = bucket->elements + i;
         element->session_id = 0;
