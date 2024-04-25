@@ -62,17 +62,17 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
     if ( !state )
     {
         // first player update
-        state = malloc( PLAYER_STATE_SIZE );
+        state = malloc( sizeof(struct player_state) );
         map_set( cpu_player_map[cpu], header->session_id, state );
     }
 
     // todo: handle multiple inputs
 
-    state.t += input->dt;
+    state->t += input->dt;
 
     for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
     {
-        state.data[i] = (uint8_t) state.t + (uint8_t) i;
+        state->data[i] = (uint8_t) state->t + (uint8_t) i;
     }
 
     int err = bpf_map_update_elem( player_state_fd, &header->session_id, state, BPF_ANY );
