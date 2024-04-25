@@ -63,7 +63,7 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
     {
         // first player update
         state = malloc( PLAYER_STATE_SIZE );
-        map_set( cpu_player_map[cpu], input_header->session_id );
+        map_set( cpu_player_map[cpu], input_header->session_id, state );
     }
 
     // todo: handle multiple inputs
