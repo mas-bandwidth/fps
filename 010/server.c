@@ -58,14 +58,12 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 
     // todo: store player state in thread local userspace memory
 
-    struct player_state state;
-
-    uint64_t value;
-    int result = bpf_map_lookup_elem( player_state_fd, &header->session_id, &state );
-    if ( result != 0 )
+    struct player_state * state = map_get( cpu_player_map[cpu], input_header->session_id );
+    if ( !state )
     {
         // first player update
-        memset( &state, 0, sizeof(struct player_state) );
+        state = malloc( PLAYER_STATE_SIZE );
+        map_set( cpu_player_map[cpu], input_header->session_id );
     }
 
     // todo: handle multiple inputs
@@ -77,7 +75,7 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
         state.data[i] = (uint8_t) state.t + (uint8_t) i;
     }
 
-    int err = bpf_map_update_elem( player_state_fd, &header->session_id, &state, BPF_ANY );
+    int err = bpf_map_update_elem( player_state_fd, &header->session_id, state, BPF_ANY );
     if ( err != 0 )
     {
         printf( "error: failed to update player state: %s\n", strerror(errno) );
