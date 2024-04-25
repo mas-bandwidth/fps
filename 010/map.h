@@ -97,22 +97,15 @@ static struct map_element_t * map_bucket_find( struct map_bucket_t * bucket, uin
     return NULL;
 }
 
-/*
-static int netcode_address_map_get( struct netcode_address_map_t * map,
-                                    struct netcode_address_t * address )
+static void * map_get( struct map_t * map, uint64_t session_id )
 {
-    int bucket_index = netcode_address_hash( address );
-    struct netcode_address_map_bucket_t * bucket = map->buckets + bucket_index;
-    struct netcode_address_map_element_t * element = netcode_address_map_bucket_find( bucket, address );
-    
-    if ( !element )
-    {
-        return -1;
-    }
-
-    return element->client_index;
+    int bucket_index = session_id % MAP_NUM_BUCKETS;
+    struct map_bucket_t * bucket = map->buckets + bucket_index;
+    struct map_element_t * element = map_bucket_find( bucket, address );
+    return element ? element->player_data : NULL;
 }
 
+/*
 static int netcode_address_map_delete( struct netcode_address_map_t * map,
                                        struct netcode_address_t * address )
 {
