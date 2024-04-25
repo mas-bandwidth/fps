@@ -28,7 +28,7 @@ struct map_t * map_create()
 {
     struct map_t * map = (struct map_t*) malloc( sizeof( struct map_t ) );
     assert( map );
-    memset( map, 0, sizeof(map) );
+    memset( map, 0, sizeof(struct map_t) );
     map_reset( map );
     return map;
 }
