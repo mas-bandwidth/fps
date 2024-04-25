@@ -447,15 +447,9 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         return XDP_DROP; // can't happen
                                     }
 
-                                    struct counters * counters = (struct counters*) bpf_map_lookup_elem( &counters, &zero );
-                                    if ( !counters ) 
-                                    {
-                                        return XDP_DROP; // can't happen
-                                    }
-
                                     packet->packet_type = STATS_RESPONSE_PACKET;
                                     packet->inputs_processed = stats->inputs_processed;
-                                    packet->player_state_packets_sent = counters->player_state_packets_sent;
+                                    packet->player_state_packets_sent = stats->player_state_packets_sent;
 
                                     reflect_packet( data, sizeof(struct stats_request_packet) );
 

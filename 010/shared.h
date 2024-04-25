@@ -57,11 +57,13 @@ struct stats_request_packet
 {
     __u8 packet_type;
     __u64 inputs_processed;
+    __u64 player_packets_sent;
 };
 
 struct server_stats
 {
     __u64 inputs_processed;
+    __u64 player_packets_sent;
 };
 
 struct session_data 
