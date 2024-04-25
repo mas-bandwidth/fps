@@ -97,6 +97,7 @@ static struct map_element_t * map_bucket_find( struct map_bucket_t * bucket, uin
     return NULL;
 }
 
+/*
 static int netcode_address_map_get( struct netcode_address_map_t * map,
                                     struct netcode_address_t * address )
 {
