@@ -2,9 +2,6 @@
     Shared definitions between XDP and userspace.
 */
 
-#ifndef SHARED_H
-#define SHARED_H
-
 #define JOIN_REQUEST_PACKET                                                                 1
 #define JOIN_RESPONSE_PACKET                                                                2
 #define INPUT_PACKET                                                                        3
@@ -84,5 +81,3 @@ struct input_data
 };
 
 #pragma pack(pop)
-
-#endif // #ifndef SHARED_H
