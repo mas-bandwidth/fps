@@ -50,8 +50,6 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
     struct bpf_t * bpf = (struct bpf_t*) ctx;
 
-    int player_state_fd = bpf->player_state_inner_fd[cpu];
-
     struct input_header * header = (struct input_header*) data;
 
     struct input_data * input = (struct input_data*) data + sizeof(struct input_header);
@@ -75,6 +73,7 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
         state->data[i] = (uint8_t) state->t + (uint8_t) i;
     }
 
+    int player_state_fd = bpf->player_state_inner_fd[cpu];
     int err = bpf_map_update_elem( player_state_fd, &header->session_id, state, BPF_ANY );
     if ( err != 0 )
     {

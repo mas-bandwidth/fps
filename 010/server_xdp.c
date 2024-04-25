@@ -244,8 +244,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     // send the input(s) down to userspace via perf buffer
 
-                                    int cpu = session_id % MAX_CPUS;
-
                                     __u64 sequence = (__u64) payload[9];
                                     sequence |= ( (__u64) payload[10] ) << 8;
                                     sequence |= ( (__u64) payload[11] ) << 16;
@@ -390,6 +388,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     }
 
                                     // respond with a player state packet for the client's local player
+
+                                    __u32 cpu = session_id % MAX_CPUS;
 
                                     void * cpu_player_state_map = bpf_map_lookup_elem( &player_state_map, &cpu );
                                     if ( !cpu_player_state_map )
