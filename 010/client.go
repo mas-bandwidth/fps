@@ -24,17 +24,21 @@ const InputHistory = 1024
 
 const PlayerDataSize = 1024
 
+const PlayerStateSize = 1000
+
 const InputPacketSize = 1 + 8 + 8 + 8 + (8 + InputSize) * InputsPerPacket
 const JoinRequestPacketSize = 1 + 8 + 8 + PlayerDataSize
 const JoinResponsePacketSize = 1 + 8 + 8 + 8
 const StatsRequestPacketSize = 1 + 8
 const StatsResponsePacketSize = 1 + 8
+const PlayerStatePacketSize = 1 + 8 + PlayerStateSize
 
 const JoinRequestPacket = 1
 const JoinResponsePacket = 2
 const InputPacket = 3
 const StatsRequestPacket = 4
 const StatsResponsePacket = 5
+const PlayerStatePacket = 6
 
 var numClients int
 
@@ -44,6 +48,7 @@ var serverTime uint64
 var packetsSent uint64
 var packetsReceived uint64
 var totalInputsProcessed uint64
+var playerStatePacketsReceived uint64
 
 type Input struct {
 	sequence uint64
@@ -104,6 +109,7 @@ func main() {
  
 	prev_sent := uint64(0)
 	prev_processed := uint64(0)
+	prev_player_states := uint64(0)
 
  	for {
 		select {
@@ -113,11 +119,14 @@ func main() {
 	 	case <-ticker.C:
 	 		sent := atomic.LoadUint64(&packetsSent)
 	 		processed := atomic.LoadUint64(&totalInputsProcessed)
+	 		player_states := atomic.LoadUint64(&playerStatePacketsReceived)
 	 		sent_delta := sent - prev_sent
 	 		processed_delta := processed - prev_processed
-	 		fmt.Printf("inputs sent delta %d, inputs processed delta %d\n", sent_delta, processed_delta)
+	 		player_state_delta := player_states - prev_player_states
+	 		fmt.Printf("inputs sent delta %d, inputs processed delta %d, player state delta %d\n", sent_delta, processed_delta, player_state_delta)
 			prev_sent = sent
 			prev_processed = processed
+			prev_player_states = player_states
 	 	}
 		quit := atomic.LoadUint64(&quit)
 		if quit != 0 {
@@ -256,6 +265,10 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 				packetInputsProcessed := binary.LittleEndian.Uint64(packetData[1:])
 
 				atomic.StoreUint64(&totalInputsProcessed, packetInputsProcessed)
+
+			} else if packetType == PlayerStatePacket && packetBytes == PlayerStatePacketSize {
+
+				atomic.AddUint64(&playerStatePacketsReceived, 1)
 
 			}
 

@@ -104,6 +104,7 @@ func main() {
  
 	prev_sent := uint64(0)
 	prev_processed := uint64(0)
+	prev_player_states := uint64(0)
 
  	for {
 		select {
@@ -113,11 +114,14 @@ func main() {
 	 	case <-ticker.C:
 	 		sent := atomic.LoadUint64(&packetsSent)
 	 		processed := atomic.LoadUint64(&totalInputsProcessed)
+	 		player_states := atomic.LoadUint64(&playerStatePacketsReceived)
 	 		sent_delta := sent - prev_sent
 	 		processed_delta := processed - prev_processed
-	 		fmt.Printf("inputs sent delta %d, inputs processed delta %d\n", sent_delta, processed_delta)
+	 		player_state_delta := player_states - prev_player_states
+	 		fmt.Printf("inputs sent delta %d, inputs processed delta %d, player state delta %d\n", sent_delta, processed_delta, player_state_delta)
 			prev_sent = sent
 			prev_processed = processed
+			prev_player_states = player_states
 	 	}
 		quit := atomic.LoadUint64(&quit)
 		if quit != 0 {

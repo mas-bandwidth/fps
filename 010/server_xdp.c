@@ -399,7 +399,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         return XDP_DROP;
                                     }
 
-                                    for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
+                                    for ( int i = 0; i < sizeof(struct player_state); i++ )
                                     {
                                         payload[1+i] = player_state[i];
                                     }
