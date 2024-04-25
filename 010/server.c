@@ -25,8 +25,8 @@
 #include <pthread.h>
 #include <sched.h>
 #include <stdlib.h>
-
 #include "shared.h"
+#include "map.h"
 
 struct bpf_t
 {
