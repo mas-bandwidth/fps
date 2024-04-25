@@ -22,44 +22,23 @@ struct map_t
     struct map_bucket_t buckets[MAP_NUM_BUCKETS];
 };
 
-/*
-static void map_reset( struct netcode_address_map_t * map );
+static void map_reset( struct map_t * map );
 
-struct netcode_address_map_t * netcode_address_map_create( void * allocator_context, 
-                                                           void * (*allocate_function)(void*,size_t), 
-                                                           void (*free_function)(void*,void*) )
+struct map_t * map_create()
 {
-    if ( allocate_function == NULL )
-    {
-        allocate_function = netcode_default_allocate_function;
-    }
-
-    if ( free_function == NULL )
-    {
-        free_function = netcode_default_free_function;
-    }
-
-    struct netcode_address_map_t * map = (struct netcode_address_map_t*) 
-        allocate_function( allocator_context, sizeof( struct netcode_address_map_t ) );
-
-    netcode_assert( map );
-
-    netcode_address_map_reset( map );
-
-    map->allocator_context = allocator_context;
-    map->allocate_function = allocate_function;
-    map->free_function = free_function;
-
+    struct map_t * map = (struct map_t*) malloc( sizeof( struct map_t ) );
+    assert( map );
+    map_reset( map );
     return map;
 }
 
-void netcode_address_map_destroy( struct netcode_address_map_t * map )
+static void map_destroy( struct map_t * map )
 {
-    netcode_assert( map );
-    netcode_assert( map->free_function );
-    map->free_function( map->allocator_context, map );
+    assert( map );
+    free( map );
 }
 
+/*
 static void netcode_address_map_element_reset( struct netcode_address_map_element_t * element )
 {
     element->client_index = -1;
