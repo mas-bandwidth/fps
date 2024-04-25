@@ -34,6 +34,7 @@ struct bpf_t
     struct xdp_program * program;
     bool attached_native;
     bool attached_skb;
+    int counters_fd;
     int server_stats_fd;
     int input_buffer_fd;
     int player_state_outer_fd;
@@ -213,6 +214,15 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         return 1;
     }
 
+    // get the file handle to counters
+
+    bpf->counters_fd = bpf_obj_get( "/sys/fs/bpf/counters" );
+    if ( bpf->counters_fd <= 0 )
+    {
+        printf( "\nerror: could not get counters: %s\n\n", strerror(errno) );
+        return 1;
+    }
+
     // get the file handle to the server stats
 
     bpf->server_stats_fd = bpf_obj_get( "/sys/fs/bpf/server_stats" );
@@ -356,6 +366,8 @@ int main( int argc, char *argv[] )
 
     pin_thread_to_cpu( MAX_CPUS );       // IMPORTANT: keep the main thread out of the way of the XDP cpus on google cloud [0,15]
 
+    unsigned int num_cpus = libbpf_num_possible_cpus();
+
     double last_print_time = platform_time();
 
     uint64_t previous_processed_inputs = 0;
@@ -385,6 +397,8 @@ int main( int argc, char *argv[] )
 
         if ( last_print_time + 1.0 <= current_time )
         {
+            // track processed and lost inputs
+
             uint64_t current_processed_inputs = 0;
             uint64_t current_lost_inputs = 0;
             for ( int i = 0; i < MAX_CPUS; i++ )
@@ -399,10 +413,30 @@ int main( int argc, char *argv[] )
             previous_lost_inputs = current_lost_inputs;
             last_print_time = current_time;
 
+            // track player state packets sent
+
+            struct counters values[num_cpus];
+
+            int key = 0;
+            if ( bpf_map_lookup_elem( main->counters_fd, &key, values ) != 0 ) 
+            {
+                printf( "\nerror: could not look up counters: %s\n\n", strerror( errno ) );
+                quit = true;
+                break;
+            }
+
+            uint64_t player_state_packets_sent = 0;
+
+            for ( int i = 0; i < MAX_CPUS; i++ )
+            {
+                player_state_packets_sent += values[i].player_state_packets_sent;
+            }        
+
             // upload stats to the xdp program
 
             struct server_stats stats;
             stats.inputs_processed = current_processed_inputs;
+            stats.player_state_packets_sent = player_state_packets_sent;
 
             __u32 key = 0;
             int err = bpf_map_update_elem( bpf.server_stats_fd, &key, &stats, BPF_ANY );
