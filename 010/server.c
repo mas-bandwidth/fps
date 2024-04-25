@@ -340,6 +340,11 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
+    for ( int i = 0; i < MAX_CPUS; i++ )
+    {
+        cpu_player_map[i] = map_create();
+    }
+
     const char * interface_name = argv[1];
 
     if ( bpf_init( &bpf, interface_name ) != 0 )
@@ -351,11 +356,6 @@ int main( int argc, char *argv[] )
     // main loop
 
     pin_thread_to_cpu( MAX_CPUS );       // IMPORTANT: keep the main thread out of the way of the XDP cpus on google cloud [0,15]
-
-    for ( int i = 0; i < MAX_CPUS; i++ )
-    {
-        cpu_player_map[i] = map_create();
-    }
 
     double last_print_time = platform_time();
 
