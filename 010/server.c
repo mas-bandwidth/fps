@@ -350,7 +350,7 @@ int main( int argc, char *argv[] )
     {
         printf( "add player state %d\n", i );
         player_state[i] = malloc( sizeof(struct player_state ) );
-        map_set( map, (uint64_t)i, player_data[i] );
+        map_set( map, (uint64_t)i, player_state[i] );
     }
 
     map_destroy( map );
