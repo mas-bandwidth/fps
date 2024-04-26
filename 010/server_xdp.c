@@ -415,7 +415,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     payload[0] = PLAYER_STATE_PACKET;
 
-                                    for ( int i = 0; i < sizeof(struct player_state); i++ )
+                                    for ( int i = 0; i < 8 + PLAYER_STATE_SIZE; i++ )
                                     {
                                         payload[1+i] = player_state[i];
                                     }
