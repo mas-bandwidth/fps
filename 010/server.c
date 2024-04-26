@@ -416,7 +416,7 @@ int main( int argc, char *argv[] )
             struct counters values[num_cpus];
 
             int key = 0;
-            if ( bpf_map_lookup_elem( bpf.counters_fd, &key, values ) != 0 ) 
+            if ( bpf_map_lookup_elem( bpf.counters_fd, &key, &values[0] ) != 0 ) 
             {
                 printf( "\nerror: could not look up counters: %s\n\n", strerror( errno ) );
                 quit = true;
