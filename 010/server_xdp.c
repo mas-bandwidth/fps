@@ -32,7 +32,7 @@
 # error "Endianness detection needs to be set up for your compiler?!"
 #endif
 
-#define DEBUG 1
+// #define DEBUG 1
 
 #if DEBUG
 #define debug_printf bpf_printk
@@ -275,11 +275,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     session_id |= ( (__u64) payload[7] ) << 48;
                                     session_id |= ( (__u64) payload[8] ) << 56;
 
-                                    // todo
-                                    __u32 cpu = bpf_get_smp_processor_id();
-
-                                    debug_printf( "processing input for session %x on thread %d", session_id, cpu );
-
                                     struct session_data * session = (struct session_data*) bpf_map_lookup_elem( &session_map, &session_id );
                                     if ( session == NULL )
                                     {
@@ -433,6 +428,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     }
 
                                     // respond with a player state packet for the client's local player
+
+                                    __u32 cpu = bpf_get_smp_processor_id();
 
                                     void * cpu_player_state_map = bpf_map_lookup_elem( &player_state_map, &cpu );
                                     if ( !cpu_player_state_map )
