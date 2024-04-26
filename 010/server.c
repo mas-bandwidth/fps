@@ -401,7 +401,7 @@ int main( int argc, char *argv[] )
         {
             last_print_time = current_time;
 
-            // track player state packets sent
+            // track stats
 
             struct counters values[num_cpus];
             int key = 0;
@@ -411,19 +411,13 @@ int main( int argc, char *argv[] )
                 quit = true;
                 break;
             }
-            uint64_t current_player_state_packets_sent = 0;
-            for ( int i = 0; i < MAX_CPUS; i++ )
-            {
-                player_state_packets_sent += values[i].player_state_packets_sent;
-            }        
-
-            // track processed and lost inputs
 
             uint64_t current_processed_inputs = 0;
             uint64_t current_lost_inputs = 0;
             for ( int i = 0; i < MAX_CPUS; i++ )
             {
                 current_processed_inputs += inputs_processed[i];
+                current_player_state_packets_sent += values[i].player_state_packets_sent;
                 current_lost_inputs += inputs_lost[i];
             }
 
@@ -437,7 +431,7 @@ int main( int argc, char *argv[] )
             previous_player_state_packets_sent = current_player_state_packets_sent;
             previous_lost_inputs = current_lost_inputs;
 
-            // upload stats to the xdp program
+            // upload stats to the xdp program to be sent down to clients
 
             struct server_stats stats;
             stats.inputs_processed = current_processed_inputs;
