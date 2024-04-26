@@ -472,6 +472,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     return XDP_TX;
                                     */
 
+                                    // temp: to check counters
+                                    __sync_fetch_and_add( &counters->player_state_packets_sent, 1 );
                                 }
                                 else if ( packet_type == STATS_REQUEST_PACKET && (void*) payload + STATS_REQUEST_PACKET_SIZE <= data_end )
                                 {
