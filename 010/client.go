@@ -29,8 +29,8 @@ const PlayerStateSize = 1000
 const InputPacketSize = 1 + 8 + 8 + 8 + (8 + InputSize) * InputsPerPacket
 const JoinRequestPacketSize = 1 + 8 + 8 + PlayerDataSize
 const JoinResponsePacketSize = 1 + 8 + 8 + 8
-const StatsRequestPacketSize = 1 + 8
-const StatsResponsePacketSize = 1 + 8
+const StatsRequestPacketSize = 1 + 8 + 8
+const StatsResponsePacketSize = 1 + 8 + 8
 const PlayerStatePacketSize = 1 + 8 + PlayerStateSize
 
 const JoinRequestPacket = 1
