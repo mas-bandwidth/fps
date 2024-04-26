@@ -353,6 +353,16 @@ int main( int argc, char *argv[] )
         map_set( map, (uint64_t)i, player_state[i] );
     }
 
+    for ( int i = 0; i < MaxPlayers; i++ )
+    {
+        printf( "checking player state %d\n", i );
+        if ( player_state[i] != map_get( map, (uint64_t)i ) )
+        {
+            printf( "player state mismatch. map is broken?\n" );
+            return 1;
+        }
+    }
+
     map_destroy( map );
 
     printf( "OK\n" );
