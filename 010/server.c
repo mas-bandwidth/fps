@@ -216,7 +216,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // get the file handle to counters
 
-    bpf->counters_fd = bpf_obj_get( "/sys/fs/bpf/counters" );
+    bpf->counters_fd = bpf_obj_get( "/sys/fs/bpf/counters_map" );
     if ( bpf->counters_fd <= 0 )
     {
         printf( "\nerror: could not get counters: %s\n\n", strerror(errno) );

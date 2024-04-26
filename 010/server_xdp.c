@@ -131,7 +131,7 @@ struct {
     __type( key, int );
     __type( value, struct counters );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
-} counters SEC(".maps");
+} counters_map SEC(".maps");
 
 static void reflect_packet( void * data, int payload_bytes )
 {
@@ -423,7 +423,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     */
 
                                     int zero = 0;
-                                    struct counters * counters = (struct counters*) bpf_map_lookup_elem( &counters, &zero );
+                                    struct counters * counters = (struct counters*) bpf_map_lookup_elem( &counters_map, &zero );
                                     if ( !counters ) 
                                     {
                                         return XDP_DROP; // can't happen
