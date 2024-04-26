@@ -339,40 +339,6 @@ int pin_thread_to_cpu( int cpu )
 
 int main( int argc, char *argv[] )
 {
-    // todo: quickly test map
-
-    printf( "testing map\n" );
-
-    struct map_t * map = map_create();
-
-    const int MaxPlayers = 1024;
-
-    uint8_t * player_state[MaxPlayers];
-    for ( int i = 0; i < MaxPlayers; i++ )
-    {
-        printf( "add player state %d\n", i );
-        player_state[i] = malloc( sizeof(struct player_state ) );
-        map_set( map, (uint64_t)i, player_state[i] );
-    }
-
-    for ( int i = 0; i < MaxPlayers; i++ )
-    {
-        printf( "checking player state %d\n", i );
-        if ( player_state[i] != map_get( map, (uint64_t)i ) )
-        {
-            printf( "player state mismatch. map is broken?\n" );
-            return 1;
-        }
-    }
-
-    map_destroy( map );
-
-    printf( "OK\n" );
-
-    return 0;
-
-    // ---------------------------------
-
     signal( SIGINT,  interrupt_handler );
     signal( SIGTERM, clean_shutdown_handler );
     signal( SIGHUP,  clean_shutdown_handler );
