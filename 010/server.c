@@ -49,6 +49,7 @@ static struct map_t * cpu_player_map[MAX_CPUS];
 
 void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
+    /*
     struct bpf_t * bpf = (struct bpf_t*) ctx;
 
     struct input_header * header = (struct input_header*) data;
@@ -81,6 +82,7 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
     }
 
     __sync_fetch_and_add( &inputs_processed[cpu], 1 );
+    */
 }
 
 void lost_input( void * ctx, int cpu, __u64 count )
@@ -361,6 +363,8 @@ int main( int argc, char *argv[] )
     }
 
     // main loop
+
+    // pin_thread_to_cpu( MAX_CPUS );       // IMPORTANT: keep the main thread out of the way of the XDP cpus on google cloud [0,15]
 
     unsigned int num_cpus = libbpf_num_possible_cpus();
 
