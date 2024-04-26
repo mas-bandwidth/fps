@@ -60,7 +60,7 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
     struct player_state * state = map_get( cpu_player_map[cpu], header->session_id );
     if ( !state )
     {
-        printf( "first player update for session %" PRIx64 "\n", header->session_id );
+        printf( "first player update for session %" PRIx64 "\n", (uint64_t)header->session_id );
 
         // first player update
         state = malloc( sizeof(struct player_state) );
