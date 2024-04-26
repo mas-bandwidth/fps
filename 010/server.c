@@ -413,6 +413,7 @@ int main( int argc, char *argv[] )
             }
 
             uint64_t current_processed_inputs = 0;
+            uint64_t current_player_state_packets_sent = 0;
             uint64_t current_lost_inputs = 0;
             for ( int i = 0; i < MAX_CPUS; i++ )
             {
