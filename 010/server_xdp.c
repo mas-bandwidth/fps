@@ -445,6 +445,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         return XDP_DROP;
                                     }
 
+                                    // todo: this is breaking stuff?
+                                    /*
                                     payload[0] = PLAYER_STATE_PACKET;
 
                                     for ( int i = 0; i < 8 + PLAYER_STATE_SIZE; i++ )
@@ -468,6 +470,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     bpf_xdp_adjust_tail( ctx, -( INPUT_PACKET_SIZE - PLAYER_STATE_PACKET_SIZE ) );
 
                                     return XDP_TX;
+                                    */
 
                                 }
                                 else if ( packet_type == STATS_REQUEST_PACKET && (void*) payload + STATS_REQUEST_PACKET_SIZE <= data_end )
