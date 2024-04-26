@@ -399,6 +399,22 @@ int main( int argc, char *argv[] )
 
         if ( last_print_time + 1.0 <= current_time )
         {
+            // pump the perf buffer
+
+            int err = perf_buffer__poll( bpf.input_buffer, 1 );
+            if ( err == -4 )
+            {
+                // ctrl-c
+                quit = true;
+                break;
+            }
+            if ( err < 0 ) 
+            {
+                printf( "\nerror: could not poll input buffer: %d\n\n", err );
+                quit = true;
+                break;
+            }
+
             // track processed and lost inputs
 
             uint64_t current_processed_inputs = 0;
