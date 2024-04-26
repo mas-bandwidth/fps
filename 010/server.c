@@ -53,7 +53,7 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 
     struct input_header * header = (struct input_header*) data;
 
-    printf( "process input for %" PRIx64 " on cpu %d\n", input_header->session_id, cpu );
+    printf( "process input for %" PRIx64 " on cpu %d\n", header->session_id, cpu );
 
     struct input_data * input = (struct input_data*) data + sizeof(struct input_header);
 
