@@ -49,7 +49,6 @@ static struct map_t * cpu_player_map[MAX_CPUS];
 
 void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
 {
-    /*
     struct bpf_t * bpf = (struct bpf_t*) ctx;
 
     struct input_header * header = (struct input_header*) data;
@@ -82,7 +81,6 @@ void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
     }
 
     __sync_fetch_and_add( &inputs_processed[cpu], 1 );
-    */
 }
 
 void lost_input( void * ctx, int cpu, __u64 count )
@@ -339,6 +337,13 @@ int pin_thread_to_cpu( int cpu )
 
 int main( int argc, char *argv[] )
 {
+    // todo: quickly test map
+    struct map_t * map = map_create();
+    map_destroy( map );
+    return 0;
+
+    // ---------------------------------
+
     signal( SIGINT,  interrupt_handler );
     signal( SIGTERM, clean_shutdown_handler );
     signal( SIGHUP,  clean_shutdown_handler );
