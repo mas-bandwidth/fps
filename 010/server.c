@@ -372,6 +372,7 @@ int main( int argc, char *argv[] )
     double last_print_time = platform_time();
 
     uint64_t previous_processed_inputs = 0;
+    uint64_t previous_player_state_packets_sent = 0;
     uint64_t previous_lost_inputs = 0;
 
     while ( !quit )
@@ -398,6 +399,24 @@ int main( int argc, char *argv[] )
 
         if ( last_print_time + 1.0 <= current_time )
         {
+            last_print_time = current_time;
+
+            // track player state packets sent
+
+            struct counters values[num_cpus];
+            int key = 0;
+            if ( bpf_map_lookup_elem( bpf.counters_fd, &key, values ) != 0 ) 
+            {
+                printf( "\nerror: could not look up counters: %s\n\n", strerror( errno ) );
+                quit = true;
+                break;
+            }
+            uint64_t current_player_state_packets_sent = 0;
+            for ( int i = 0; i < MAX_CPUS; i++ )
+            {
+                player_state_packets_sent += values[i].player_state_packets_sent;
+            }        
+
             // track processed and lost inputs
 
             uint64_t current_processed_inputs = 0;
@@ -407,31 +426,16 @@ int main( int argc, char *argv[] )
                 current_processed_inputs += inputs_processed[i];
                 current_lost_inputs += inputs_lost[i];
             }
+
+            // print out important stats
+
             uint64_t input_delta = current_processed_inputs - previous_processed_inputs;
+            uint64_t player_state_delta = current_player_state_packets_sent - previous_player_state_packets_sent;
             uint64_t lost_delta = current_lost_inputs - previous_lost_inputs;
-            printf( "input delta: %" PRId64 ", lost delta: %" PRId64 "\n", input_delta, lost_delta );
+            printf( "input delta: %" PRId64 ", player state delta: %" PRId64 ", lost delta: %" PRId64 "\n", input_delta, player_state_delta, lost_delta );
             previous_processed_inputs = current_processed_inputs;
+            previous_player_state_packets_sent = current_player_state_packets_sent;
             previous_lost_inputs = current_lost_inputs;
-            last_print_time = current_time;
-
-            // track player state packets sent
-
-            struct counters values[num_cpus];
-
-            int key = 0;
-            if ( bpf_map_lookup_elem( bpf.counters_fd, &key, &values[0] ) != 0 ) 
-            {
-                printf( "\nerror: could not look up counters: %s\n\n", strerror( errno ) );
-                quit = true;
-                break;
-            }
-
-            uint64_t player_state_packets_sent = 0;
-
-            for ( int i = 0; i < MAX_CPUS; i++ )
-            {
-                player_state_packets_sent += values[i].player_state_packets_sent;
-            }        
 
             // upload stats to the xdp program
 
