@@ -463,6 +463,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     debug_printf( "%d player state packets sent from cpu %d", counters->player_state_packets_sent, cpu );
 
+                                    reflect_packet( data, PLAYER_STATE_PACKET_SIZE );
+
                                     bpf_xdp_adjust_tail( ctx, -( INPUT_PACKET_SIZE - PLAYER_STATE_PACKET_SIZE ) );
 
                                     return XDP_TX;
