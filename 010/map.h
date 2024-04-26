@@ -99,6 +99,7 @@ static struct map_element_t * map_bucket_find( struct map_bucket_t * bucket, uin
 
 static void * map_get( struct map_t * map, uint64_t session_id )
 {
+    assert( map );
     int bucket_index = session_id % MAP_NUM_BUCKETS;
     struct map_bucket_t * bucket = map->buckets + bucket_index;
     struct map_element_t * element = map_bucket_find( bucket, session_id );
@@ -107,6 +108,7 @@ static void * map_get( struct map_t * map, uint64_t session_id )
 
 static int map_delete( struct map_t * map, uint64_t session_id )
 {
+    assert( map );
     int bucket_index = session_id % MAP_NUM_BUCKETS;
     struct map_bucket_t * bucket = map->buckets + bucket_index;
     struct map_element_t * element = map_bucket_find( bucket, session_id );

@@ -338,10 +338,25 @@ int pin_thread_to_cpu( int cpu )
 int main( int argc, char *argv[] )
 {
     // todo: quickly test map
+
     printf( "testing map\n" );
+
     struct map_t * map = map_create();
+
+    const int MaxPlayers = 1024;
+
+    uint8_t * player_state[MaxPlayers];
+    for ( int i = 0; i < MaxPlayers; i++ )
+    {
+        printf( "add player data %d\n", i );
+        player_data[i] = malloc( sizeof(struct player_state ) );
+        map_set( map, player_data[i] );
+    }
+
     map_destroy( map );
+
     printf( "OK\n" );
+
     return 0;
 
     // ---------------------------------
