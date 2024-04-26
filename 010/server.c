@@ -348,9 +348,9 @@ int main( int argc, char *argv[] )
     uint8_t * player_state[MaxPlayers];
     for ( int i = 0; i < MaxPlayers; i++ )
     {
-        printf( "add player data %d\n", i );
-        player_data[i] = malloc( sizeof(struct player_state ) );
-        map_set( map, player_data[i] );
+        printf( "add player state %d\n", i );
+        player_state[i] = malloc( sizeof(struct player_state ) );
+        map_set( map, (uint64_t)i, player_data[i] );
     }
 
     map_destroy( map );
