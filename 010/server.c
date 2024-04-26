@@ -338,8 +338,10 @@ int pin_thread_to_cpu( int cpu )
 int main( int argc, char *argv[] )
 {
     // todo: quickly test map
+    printf( "testing map\n" );
     struct map_t * map = map_create();
     map_destroy( map );
+    printf( "OK\n" );
     return 0;
 
     // ---------------------------------
