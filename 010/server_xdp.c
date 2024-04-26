@@ -449,7 +449,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     packet->packet_type = STATS_RESPONSE_PACKET;
                                     packet->inputs_processed = stats->inputs_processed;
-//                                    packet->player_state_packets_sent = stats->player_state_packets_sent;
+                                    packet->player_state_packets_sent = stats->player_state_packets_sent;
 
                                     reflect_packet( data, sizeof(struct stats_request_packet) );
 
