@@ -254,16 +254,32 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
             return 1;
         }
         bpf->player_state_inner_fd[i] = bpf_map_get_fd_by_id( inner_map_id );
-        printf( "player state hash %d = %d\n", i, bpf->player_state_inner_fd[i] );
+        printf( "player state for cpu %d = %d\n", i, bpf->player_state_inner_fd[i] );
     }
 
-    // get the file handle to the input buffer
+    // get the file handle to the outer input buffer map
 
-    bpf->input_buffer_fd = bpf_obj_get( "/sys/fs/bpf/input_buffer" );
-    if ( bpf->input_buffer_fd <= 0 )
+    bpf->input_buffer_outer_fd = bpf_obj_get( "/sys/fs/bpf/input_buffer_map" );
+    if ( bpf->input_buffer_outer_fd <= 0 )
     {
-        printf( "\nerror: could not get input buffer: %s\n\n", strerror(errno) );
+        printf( "\nerror: could not get outer input buffer map: %s\n\n", strerror(errno) );
         return 1;
+    }
+
+    // get the file handle to the inner input buffer maps
+
+    for ( int i = 0; i < MAX_CPUS; i++ )
+    {
+        uint32_t key = i;
+        uint32_t inner_map_id = 0;
+        int result = bpf_map_lookup_elem( bpf->input_buffer_outer_fd, &key, &inner_map_id );
+        if ( result != 0 )
+        {
+            printf( "\nerror: failed lookup input buffer inner map: %s\n\n", strerror(errno) );
+            return 1;
+        }
+        bpf->input_buffer_inner_fd[i] = bpf_map_get_fd_by_id( inner_map_id );
+        printf( "input buffer for cpu %d = %d\n", i, bpf->input_buffer_inner_fd[i] );
     }
 
     // create the input ring buffer
