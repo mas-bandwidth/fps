@@ -49,6 +49,7 @@ static struct map_t * cpu_player_map[MAX_CPUS];
 
 static int process_input( void * ctx, void * data, size_t data_sz )
 {
+    /*
     // todo: temporary
     int cpu = 0;
 
@@ -82,6 +83,7 @@ static int process_input( void * ctx, void * data, size_t data_sz )
         printf( "error: failed to update player state: %s\n", strerror(errno) );
         return 0;
     }
+    */
 
     __sync_fetch_and_add( &inputs_processed[cpu], 1 );
 
