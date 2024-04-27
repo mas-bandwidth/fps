@@ -56,7 +56,7 @@ static int process_input( void * ctx, void * data, size_t data_sz )
 
     struct input_header * header = (struct input_header*) data;
 
-    printf( "update player %" PRIx64 "\n", (uint64_t)header->session_id );
+    printf( "update player %" PRIx64 " on cpu %d\n", (uint64_t)header->session_id, cpu );
 
     struct input_data * input = (struct input_data*) data + sizeof(struct input_header);
 
@@ -78,6 +78,9 @@ static int process_input( void * ctx, void * data, size_t data_sz )
     }
 
     int player_state_fd = bpf->player_state_inner_fd[cpu];
+
+    printf( "player_state_fd = %d\n", player_state_fd );
+
     int err = bpf_map_update_elem( player_state_fd, &header->session_id, state, BPF_ANY );
     if ( err != 0 )
     {
