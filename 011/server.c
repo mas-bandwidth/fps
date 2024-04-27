@@ -56,7 +56,7 @@ static int process_input( void * ctx, void * data, size_t data_sz )
 
     struct input_header * header = (struct input_header*) data;
 
-    printf( "update player %" PRIx64 "\n", header->session_id );
+    printf( "update player %" PRIx64 "\n", (uint64_t)header->session_id );
 
     struct input_data * input = (struct input_data*) data + sizeof(struct input_header);
 
