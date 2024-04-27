@@ -279,6 +279,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         return XDP_DROP;
                                     }
 
+                                    int cpu = session_id % MAX_CPUS;
+
                                     // send the input(s) down to userspace via perf buffer
 
                                     __u64 sequence = (__u64) payload[9];
@@ -319,8 +321,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         debug_printf( "process input %lld (n=%d)", sequence, n );
 
                                         session->next_input_sequence = sequence + 1;
-
-                                        int cpu = session_id % MAX_CPUS;
 
                                         void * input_buffer = bpf_map_lookup_elem( &input_buffer_map, &cpu );
                                         if ( !input_buffer )
