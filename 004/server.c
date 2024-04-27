@@ -108,6 +108,11 @@ int main( int argc, char *argv[] )
     fflush( stdout );
 
     struct ring_buffer * input_buffer = ring_buffer__new( 0, process_input, NULL, NULL );
+    if ( !input_buffer )
+    {
+        printf( "\nerror: could not create input ring buffer\n\n" );
+        return 1;
+    }
 
     printf( "cleaning up\n" );
     fflush( stdout );
