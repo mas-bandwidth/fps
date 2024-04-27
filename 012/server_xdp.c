@@ -58,11 +58,53 @@ struct {
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } server_stats SEC(".maps");
 
-struct {
+struct inner_input_buffer_map {
     __uint( type, BPF_MAP_TYPE_RINGBUF );
     __uint( max_entries, 32 * 1024 * 1024 );
+}
+input_buffer_0 SEC(".maps"),
+input_buffer_1 SEC(".maps"),
+input_buffer_2 SEC(".maps"),
+input_buffer_3 SEC(".maps"),
+input_buffer_4 SEC(".maps"),
+input_buffer_5 SEC(".maps"),
+input_buffer_6 SEC(".maps"),
+input_buffer_7 SEC(".maps"),
+input_buffer_8 SEC(".maps"),
+input_buffer_9 SEC(".maps"),
+input_buffer_10 SEC(".maps"),
+input_buffer_11 SEC(".maps"),
+input_buffer_12 SEC(".maps"),
+input_buffer_13 SEC(".maps"),
+input_buffer_14 SEC(".maps"),
+input_buffer_15 SEC(".maps");
+
+struct {
+    __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
+    __uint( max_entries, MAX_CPUS );
+    __type( key, __u32 );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
-} input_buffer SEC(".maps");
+    __array( values, struct inner_input_buffer_map );
+} input_buffer_map SEC(".maps") = {
+    .values = { 
+        &input_buffer_0,
+        &input_buffer_1,
+        &input_buffer_2,
+        &input_buffer_3,
+        &input_buffer_4,
+        &input_buffer_5,
+        &input_buffer_6,
+        &input_buffer_7,
+        &input_buffer_8,
+        &input_buffer_9,
+        &input_buffer_10,
+        &input_buffer_11,
+        &input_buffer_12,
+        &input_buffer_13,
+        &input_buffer_14,
+        &input_buffer_15,
+    }
+};
 
 struct inner_player_state_map {
     __uint( type, BPF_MAP_TYPE_LRU_HASH );

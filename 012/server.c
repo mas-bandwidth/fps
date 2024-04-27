@@ -271,7 +271,6 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     for ( int i = 0; i < MAX_CPUS; i++ )
     {
         bpf->ring_buffer_cpus[i] = i;
-
         bpf->input_buffer[i] = ring_buffer__new( bpf->input_buffer_fd, process_input, bpf->ring_buffer_cpus + i, NULL );
         if ( !bpf->input_buffer[i] )
         {
@@ -288,6 +287,15 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 void bpf_shutdown( struct bpf_t * bpf )
 {
     assert( bpf );
+
+    for ( int i = 0; i < MAX_CPUS; i++ )
+    {
+        if ( bpf->ring_buffer[i] )
+        {
+            ring_buffer__destroy( bpf->ring_buffer[i] );
+            bpf->ring_buffer[i] = NULL;
+        }
+    }
 
     if ( bpf->program != NULL )
     {
