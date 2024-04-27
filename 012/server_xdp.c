@@ -320,6 +320,15 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         session->next_input_sequence = sequence + 1;
 
+                                        int cpu = session_id % MAX_CPUS;
+
+                                        void * input_buffer = bpf_map_lookup_elem( &input_buffer_map, &cpu );
+                                        if ( !input_buffer )
+                                        {
+                                            debug_printf( "could not find input buffer for cpu %d", cpu );
+                                            return XDP_DROP;
+                                        }
+
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
                                             __u8 * event = bpf_ringbuf_reserve( &input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
@@ -429,9 +438,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     // respond with a player state packet for the client's local player
 
-                                    // todo: temporary
-                                    __u32 cpu = 0;
-
                                     void * cpu_player_state_map = bpf_map_lookup_elem( &player_state_map, &cpu );
                                     if ( !cpu_player_state_map )
                                     {
@@ -462,8 +468,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     }
 
                                     __sync_fetch_and_add( &counters->player_state_packets_sent, 1 );
-
-                                    debug_printf( "%d player state packets sent from cpu %d", counters->player_state_packets_sent, cpu );
 
                                     reflect_packet( data, PLAYER_STATE_PACKET_SIZE );
 
