@@ -266,7 +266,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // create the input ring buffer
 
-    bpf->input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, &bpf, NULL );
+    bpf->input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, bpf, NULL );
     if ( !bpf->input_buffer )
     {
         printf( "\nerror: could not create input buffer\n\n" );
