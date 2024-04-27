@@ -325,21 +325,6 @@ void bpf_shutdown( struct bpf_t * bpf )
         }
         xdp_program__close( bpf->program );
     }
-
-    if ( bpf->counters_fd )
-    {
-        fclose( bpf->counters_fd );
-        bpf_counters_fd = 0;
-    }
-
-    /*
-    int counters_fd;
-    int server_stats_fd;
-    int input_buffer_outer_fd;
-    int input_buffer_inner_fd[MAX_CPUS];
-    int player_state_outer_fd;
-    int player_state_inner_fd[MAX_CPUS];
-    */
 }
 
 volatile bool quit;
