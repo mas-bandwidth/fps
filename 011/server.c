@@ -80,10 +80,12 @@ static int process_input( void * ctx, void * data, size_t data_sz )
     if ( err != 0 )
     {
         printf( "error: failed to update player state: %s\n", strerror(errno) );
-        return;
+        return 0;
     }
 
     __sync_fetch_and_add( &inputs_processed[cpu], 1 );
+
+    return 0;
 }
 
 void lost_input( void * ctx, int cpu, __u64 count )
