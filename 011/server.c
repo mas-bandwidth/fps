@@ -375,10 +375,10 @@ int main( int argc, char *argv[] )
 
     while ( !quit )
     {
-        // poll perf buffer to drive input processing
+        // poll ring buffer to drive input processing
 
-        int err = perf_buffer__poll( bpf.input_buffer, 1 );
-        if ( err == -4 )
+        int err = ring_buffer__poll( bpf.input_buffer, 1 );
+        if ( err == -EINTR )
         {
             // ctrl-c
             quit = true;
