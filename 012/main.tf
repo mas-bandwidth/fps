@@ -395,7 +395,7 @@ resource "google_compute_instance" "server" {
       make -j && make install
 
       cd lib/libbpf/src
-      make -j && make install
+      make -j && DESTDIR=/usr/lib make install
       ldconfig
 
       cd /app

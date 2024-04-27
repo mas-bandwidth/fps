@@ -4,6 +4,7 @@ Description=Player Server Service
 [Service]
 ExecStart=/app/server ens3
 WorkingDirectory=/app
+Environment="LD_LIBRARY_PATH=/usr/lib64"
 Restart=always
 RestartSec=30
 TimeoutStopSec=90
