@@ -400,7 +400,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     __u8 * player_state = (__u8*) bpf_map_lookup_elem( cpu_player_state_map, &session_id );
                                     if ( !player_state )
                                     {
-                                        debug_printf( "could not find player state for session %llx", session_id );
+                                        debug_printf( "could not find player state for session 0x%llx", session_id );
+                                        debug_printfg( "whata the fuck 0x%llx", ( session_id >> 32 ) );
                                         return XDP_DROP;
                                     }
 
