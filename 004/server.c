@@ -58,8 +58,8 @@ int main( int argc, char *argv[] )
                 if ( strcmp( interface_name, iap->ifa_name ) == 0 )
                 {
                     printf( "found network interface: '%s'\n", iap->ifa_name );
-                    bpf->interface_index = if_nametoindex( iap->ifa_name );
-                    if ( !bpf->interface_index ) 
+                    interface_index = if_nametoindex( iap->ifa_name );
+                    if ( !interface_index ) 
                     {
                         printf( "\nerror: if_nametoindex failed\n\n" );
                         return 1;
