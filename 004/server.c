@@ -107,6 +107,13 @@ int main( int argc, char *argv[] )
     printf( "after xdp_program__attach\n" );
     fflush( stdout );
 
+    int input_buffer_fd = bpf_obj_get( "/sys/fs/bpf/input_buffer" );
+    if ( input_buffer_fd <= 0 )
+    {
+        printf( "\nerror: could not get input buffer: %s\n\n", strerror(errno) );
+        return 1;
+    }
+
     struct ring_buffer * input_buffer = ring_buffer__new( 0, process_input, NULL, NULL );
     if ( !input_buffer )
     {
