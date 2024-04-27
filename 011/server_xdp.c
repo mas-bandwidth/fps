@@ -401,7 +401,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     if ( !player_state )
                                     {
                                         debug_printf( "could not find player state for session 0x%llx", session_id );
-                                        debug_printfg( "whata the fuck 0x%llx", ( session_id >> 32 ) );
+                                        debug_printf( "whata the fuck 0x%llx", ( session_id >> 32 ) );
                                         return XDP_DROP;
                                     }
 
