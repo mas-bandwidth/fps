@@ -39,7 +39,7 @@ struct bpf_t
     int input_buffer_fd;
     int player_state_outer_fd;
     int player_state_inner_fd[MAX_CPUS];
-    struct perf_buffer * input_buffer;
+    struct ring_buffer * input_buffer;
 };
 
 static uint64_t inputs_processed[MAX_CPUS];
@@ -47,8 +47,11 @@ static uint64_t inputs_lost[MAX_CPUS];
 
 static struct map_t * cpu_player_map[MAX_CPUS];
 
-void process_input( void * ctx, int cpu, void * data, unsigned int data_sz )
+static int process_input( void * ctx, void * data, size_t data_sz )
 {
+    // todo: temporary
+    int cpu = 0;
+
     struct bpf_t * bpf = (struct bpf_t*) ctx;
 
     struct input_header * header = (struct input_header*) data;
@@ -263,16 +266,12 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         return 1;
     }
 
-    // create the input perf buffer
+    // create the input ring buffer
 
-    struct perf_buffer_opts opts;
-    memset( &opts, 0, sizeof(opts) );
-    opts.sz = sizeof(opts);
-    opts.sample_period = 1; // 1000;
-    bpf->input_buffer = perf_buffer__new( bpf->input_buffer_fd, 131072, process_input, lost_input, bpf, &opts );
-    if ( libbpf_get_error( bpf->input_buffer ) ) 
+    bpf->input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, NULL, NULL );
+    if ( !bpf->input_buffer )
     {
-        printf( "\nerror: could not create input perf buffer\n\n" );
+        printf( "\nerror: could not create input buffer\n\n" );
         return 1;
     }
 

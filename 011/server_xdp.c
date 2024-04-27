@@ -32,7 +32,8 @@
 # error "Endianness detection needs to be set up for your compiler?!"
 #endif
 
-//#define DEBUG 1
+// todo
+#define DEBUG 1
 
 #if DEBUG
 #define debug_printf bpf_printk
@@ -58,9 +59,8 @@ struct {
 } server_stats SEC(".maps");
 
 struct {
-    __uint( type, BPF_MAP_TYPE_PERF_EVENT_ARRAY );
-    __uint( key_size, sizeof(int) );
-    __uint( value_size, sizeof(int) );
+    __uint( type, BPF_MAP_TYPE_RINGBUF );
+    __uint( max_entries, 32 * 1024 * 1024 );
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } input_buffer SEC(".maps");
 
@@ -300,13 +300,22 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
+                                            __u8 * event = bpf_ringbuf_reserve( &input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
+                                            if ( !event )
+                                            {
+                                                debug_printf( "dropped input :(" );
+                                                return XDP_DROP;
+                                            }
+                                            
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ); i++ )
                                             {
-                                                heap[i] = payload[1+i];
+                                                event[i] = payload[1+i];
                                             }
 
-                                            bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, heap, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) );
+                                            bpf_ringbuf_submit( event, 0 );
                                         }
+                                        // todo: update these to ringbuf
+                                        /*
                                         else if ( n == 2 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2 <= data_end )
                                         {
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 2; i++ )
@@ -388,6 +397,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                             bpf_perf_event_output( ctx, &input_buffer, BPF_F_CURRENT_CPU, heap, 8 + 8 + 8 + ( 8 + INPUT_SIZE ) * 10 );
                                         }
+                                        */
                                     }
                                     else
                                     {
