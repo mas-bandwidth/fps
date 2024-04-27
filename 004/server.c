@@ -30,6 +30,8 @@ int main( int argc, char *argv[] )
     }
 
     // find the network interface that matches the interface name
+    
+    int interface_index = 0;
     {
         bool found = false;
 
