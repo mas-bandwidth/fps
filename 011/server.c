@@ -49,7 +49,6 @@ static struct map_t * cpu_player_map[MAX_CPUS];
 
 static int process_input( void * ctx, void * data, size_t data_sz )
 {
-    /*
     // todo: temporary
     int cpu = 0;
 
@@ -83,7 +82,6 @@ static int process_input( void * ctx, void * data, size_t data_sz )
         printf( "error: failed to update player state: %s\n", strerror(errno) );
         return 0;
     }
-    */
 
     __sync_fetch_and_add( &inputs_processed[cpu], 1 );
 
@@ -267,7 +265,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // create the input ring buffer
 
-    bpf->input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, NULL, NULL );
+    bpf->input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, &bpf, NULL );
     if ( !bpf->input_buffer )
     {
         printf( "\nerror: could not create input buffer\n\n" );
