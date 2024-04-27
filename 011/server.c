@@ -88,11 +88,6 @@ static int process_input( void * ctx, void * data, size_t data_sz )
     return 0;
 }
 
-void lost_input( void * ctx, int cpu, __u64 count )
-{
-    __sync_fetch_and_add( &inputs_lost[cpu], count );
-}
-
 static double time_start;
 
 void platform_init()

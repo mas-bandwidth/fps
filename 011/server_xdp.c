@@ -206,8 +206,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                             {
                                 int packet_type = payload[0];
 
-                                debug_printf( "received packet type %d", packet_type );
-
                                 if ( packet_type == JOIN_REQUEST_PACKET && (void*) payload + sizeof(struct join_request_packet) <= data_end )
                                 {
                                     debug_printf( "received join request packet" );
@@ -407,7 +405,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     // respond with a player state packet for the client's local player
 
-                                    __u32 cpu = bpf_get_smp_processor_id();
+                                    // todo: temporary
+                                    __u32 cpu = 0;
 
                                     void * cpu_player_state_map = bpf_map_lookup_elem( &player_state_map, &cpu );
                                     if ( !cpu_player_state_map )
