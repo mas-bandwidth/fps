@@ -306,10 +306,10 @@ void bpf_shutdown( struct bpf_t * bpf )
 
     for ( int i = 0; i < MAX_CPUS; i++ )
     {
-        if ( bpf->ring_buffer[i] )
+        if ( bpf->input_buffer[i] )
         {
-            ring_buffer__destroy( bpf->ring_buffer[i] );
-            bpf->ring_buffer[i] = NULL;
+            ring_buffer__destroy( bpf->input_buffer[i] );
+            bpf->input_buffer[i] = NULL;
         }
     }
 
