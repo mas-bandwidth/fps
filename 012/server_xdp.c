@@ -322,7 +322,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         session->next_input_sequence = sequence + 1;
 
-                                        void * input_buffer = bpf_map_lookup_elem( input_buffer_map, &cpu );
+                                        void * input_buffer = bpf_map_lookup_elem( &input_buffer_map, &cpu );
                                         if ( !input_buffer )
                                         {
                                             debug_printf( "could not find input buffer for cpu %d", cpu );
