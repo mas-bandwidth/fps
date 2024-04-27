@@ -21,7 +21,53 @@ static int process_input( void * ctx, void * data, size_t data_sz )
 
 int main( int argc, char *argv[] )
 {
-    int interface_index = 1;
+    // we can only run xdp programs as root
+
+    if ( geteuid() != 0 ) 
+    {
+        printf( "\nerror: this program must be run as root\n\n" );
+        return 1;
+    }
+
+    // find the network interface that matches the interface name
+    {
+        bool found = false;
+
+        struct ifaddrs * addrs;
+        if ( getifaddrs( &addrs ) != 0 )
+        {
+            printf( "\nerror: getifaddrs failed\n\n" );
+            return 1;
+        }
+
+        for ( struct ifaddrs * iap = addrs; iap != NULL; iap = iap->ifa_next ) 
+        {
+            if ( iap->ifa_addr && ( iap->ifa_flags & IFF_UP ) && iap->ifa_addr->sa_family == AF_INET )
+            {
+                struct sockaddr_in * sa = (struct sockaddr_in*) iap->ifa_addr;
+                if ( strcmp( interface_name, iap->ifa_name ) == 0 )
+                {
+                    printf( "found network interface: '%s'\n", iap->ifa_name );
+                    bpf->interface_index = if_nametoindex( iap->ifa_name );
+                    if ( !bpf->interface_index ) 
+                    {
+                        printf( "\nerror: if_nametoindex failed\n\n" );
+                        return 1;
+                    }
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        freeifaddrs( addrs );
+
+        if ( !found )
+        {
+            printf( "\nerror: could not find any network interface matching '%s'\n\n", interface_name );
+            return 1;
+        }
+    }
 
     struct xdp_program * program = NULL;
     
