@@ -287,7 +287,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     for ( int i = 0; i < MAX_CPUS; i++ )
     {
         bpf->ring_buffer_cpus[i] = i;
-        bpf->input_buffer[i] = ring_buffer__new( bpf->input_buffer_fd, process_input, bpf->ring_buffer_cpus + i, NULL );
+        bpf->input_buffer[i] = ring_buffer__new( bpf->input_buffer_inner_fd, process_input, bpf->ring_buffer_cpus + i, NULL );
         if ( !bpf->input_buffer[i] )
         {
             printf( "\nerror: could not create input buffer[%d]\n\n", i );
