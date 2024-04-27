@@ -365,7 +365,7 @@ void * worker_thread_function( void * context )
 {
     int cpu = *( (int*) context );
 
-    pin_thread_to_core( cpu + MAX_CPUS );   // IMPORTANT: Worker threads run on CPUs [16,31], but *logically* work with maps in the CPU range [0,15]
+    pin_thread_to_cpu( MAX_CPUS + cpu );   // IMPORTANT: Worker threads run on CPUs [16,31], but *logically* work with maps in the CPU range [0,15]
 
     while ( !quit )
     {
