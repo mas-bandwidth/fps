@@ -266,9 +266,7 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 
 				atomic.StoreUint64(&totalInputsProcessed, packetInputsProcessed)
 
-			} else if packetType == PlayerStatePacket { // && packetBytes == PlayerStatePacketSize {
-
-				fmt.Printf("received player state packet (%d bytes)\n", packetBytes)
+			} else if packetType == PlayerStatePacket && packetBytes == PlayerStatePacketSize {
 
 				atomic.AddUint64(&playerStatePacketsReceived, 1)
 
