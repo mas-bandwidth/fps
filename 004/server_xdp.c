@@ -22,6 +22,12 @@
 # error "Endianness detection needs to be set up for your compiler?!"
 #endif
 
+struct {
+    __uint( type, BPF_MAP_TYPE_RINGBUF );
+    __uint( max_entries, 1024 * 1024 * 1024 );
+    __uint( pinning, LIBBPF_PIN_BY_NAME );
+} input_buffer SEC(".maps");
+
 SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx ) 
 { 
     void * data = (void*) (long) ctx->data; 
