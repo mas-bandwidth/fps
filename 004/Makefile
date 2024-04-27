@@ -3,7 +3,7 @@ KERNEL = $(shell uname -r)
 
 .PHONY: build
 build: server.c server_xdp.o
-	gcc -O0 -g server.c -o server -lxdp /usr/src/linux-headers-$(KERNEL)/tools/bpf/resolve_btfids/libbpf/libbpf.a -lz -lelf
+	gcc -O0 -g server.c -o server -lxdp -lbpf -lz -lelf
 
 server_xdp.o: server_xdp.c
 	clang -O0 -g -Ilibbpf/src -target bpf -c server_xdp.c -o server_xdp.o

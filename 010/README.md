@@ -16,6 +16,4 @@ Success is defined as being able to process 3000 players on this server machine 
 
 Success. I can scale up to 3k players on google cloud. Going to 4k and some player states don't get sent back to the client... so we're right at the limit.
 
-If we can hit 3k players on a VM with only 16 CPUs, we can certainly hit 6k players on bare metal with 32 CPUs, hitting expected price: 36c per-player per-month.
-
-Stopping here.
+If we can hit 3k players on a VM with only 16 CPUs, we can certainly hit 6k players on bare metal with 32 CPUs and hit the expected price: 36c per-player per-month.
