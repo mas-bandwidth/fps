@@ -262,11 +262,13 @@ func runClient(clientIndex int, serverAddress *net.UDPAddr) {
 
 			} else if packetType == StatsResponsePacket && packetBytes == StatsResponsePacketSize {
 
-				packetInputsProcessed := binary.LittleEndian.Uint64(packetData[1:])
+			packetInputsProcessed := binary.LittleEndian.Uint64(packetData[1:])
 
 				atomic.StoreUint64(&totalInputsProcessed, packetInputsProcessed)
 
-			} else if packetType == PlayerStatePacket && packetBytes == PlayerStatePacketSize {
+			} else if packetType == PlayerStatePacket { // && packetBytes == PlayerStatePacketSize {
+
+				fmt.Printf("received player state packet (%d bytes)\n", packetBytes)
 
 				atomic.AddUint64(&playerStatePacketsReceived, 1)
 
