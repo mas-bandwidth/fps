@@ -114,17 +114,6 @@ struct {
     }
 };
 
-struct heap {
-    __u8 data[HEAP_SIZE];
-};
-
-struct {
-    __uint( type, BPF_MAP_TYPE_PERCPU_ARRAY );
-    __uint( max_entries, 1 );
-    __type( key, int );
-    __type( value, struct heap );
-} heap_map SEC(".maps");
-
 struct {
     __uint( type, BPF_MAP_TYPE_PERCPU_ARRAY );
     __uint( max_entries, 1 );
@@ -288,13 +277,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         debug_printf( "process input %lld (n=%d)", sequence, n );
 
                                         session->next_input_sequence = sequence + 1;
-
-                                        int zero = 0;
-                                        __u8 * heap = (__u8*) bpf_map_lookup_elem( &heap_map, &zero );
-                                        if ( !heap ) 
-                                        {
-                                            return XDP_DROP; // can't happen
-                                        }
 
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {

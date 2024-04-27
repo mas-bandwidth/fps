@@ -33,8 +33,6 @@
 
 #define PLAYER_STATE_PACKET_SIZE                                ( 1 + 8 + PLAYER_STATE_SIZE )
 
-#define HEAP_SIZE                                                                        2048
-
 #pragma pack(push, 1)
 
 struct join_request_packet
