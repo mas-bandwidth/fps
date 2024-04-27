@@ -6,7 +6,7 @@ build: server.c server_xdp.o
 	gcc -O2 server.c -o server -lxdp -lbpf -lz -lelf
 
 server_xdp.o: server_xdp.c
-	clang -O2 -Ilibbpf/src -target bpf -c server_xdp.c -o server_xdp.o
+	clang -O2 -g -Ilibbpf/src -target bpf -c server_xdp.c -o server_xdp.o
 
 .PHONY: clean
 clean:
