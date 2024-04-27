@@ -40,7 +40,10 @@ struct bpf_t
     int player_state_outer_fd;
     int player_state_inner_fd[MAX_CPUS];
     struct ring_buffer * input_buffer;
+    int ring_buffer_cpus[MAX_CPUS];
 };
+
+static struct bpf_t bpf;
 
 static uint64_t inputs_processed[MAX_CPUS];
 static uint64_t inputs_lost[MAX_CPUS];
@@ -49,14 +52,9 @@ static struct map_t * cpu_player_map[MAX_CPUS];
 
 static int process_input( void * ctx, void * data, size_t data_sz )
 {
-    // todo: temporary
-    int cpu = 0;
-
-    struct bpf_t * bpf = (struct bpf_t*) ctx;
+    int cpu = *(int*) ctx;
 
     struct input_header * header = (struct input_header*) data;
-
-    printf( "update player %" PRIx64 " on cpu %d\n", (uint64_t)header->session_id, cpu );
 
     struct input_data * input = (struct input_data*) data + sizeof(struct input_header);
 
@@ -77,9 +75,7 @@ static int process_input( void * ctx, void * data, size_t data_sz )
         state->data[i] = (uint8_t) state->t + (uint8_t) i;
     }
 
-    int player_state_fd = bpf->player_state_inner_fd[cpu];
-
-    printf( "player_state_fd = %d\n", player_state_fd );
+    int player_state_fd = bpf.player_state_inner_fd[cpu];
 
     int err = bpf_map_update_elem( player_state_fd, &header->session_id, state, BPF_ANY );
     if ( err != 0 )
@@ -271,7 +267,15 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     // create the input ring buffer
 
-    bpf->input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, bpf, NULL );
+    for ( int i = 0; i < MAX_CPUS; i++ )
+    {
+        bpf->ring_buffer_cpus[i] = i;
+    }
+
+    const int cpu = 0;
+
+    // todo: for loop. one ring buffer per-CPU
+    bpf->input_buffer = ring_buffer__new( bpf->input_buffer_fd, process_input, bpf->ring_buffer_cpus + cpu, NULL );
     if ( !bpf->input_buffer )
     {
         printf( "\nerror: could not create input buffer\n\n" );
@@ -300,8 +304,6 @@ void bpf_shutdown( struct bpf_t * bpf )
         xdp_program__close( bpf->program );
     }
 }
-
-static struct bpf_t bpf;
 
 volatile bool quit;
 
