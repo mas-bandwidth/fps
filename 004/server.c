@@ -30,7 +30,15 @@ int main( int argc, char *argv[] )
     }
 
     // find the network interface that matches the interface name
-    
+
+    if ( argc != 2 )
+    {
+        printf( "\nusage: server <interface name>\n\n" );
+        return 1;
+    }
+
+    const char * interface_name = argv[1];
+
     int interface_index = 0;
     {
         bool found = false;
