@@ -428,7 +428,7 @@ int main( int argc, char *argv[] )
     {
         printf( "starting worker thread %d\n", i );
         thread_cpu[i] = i;
-        pthread_create( &thread_id[i], NULL, worker_thread_function, &thread_cpu ); 
+        pthread_create( &thread_id[i], NULL, worker_thread_function, thread_cpu + i ); 
     }
 
     // main loop
