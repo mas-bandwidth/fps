@@ -38,6 +38,8 @@ struct bpf_t
     int server_stats_fd;
     int input_buffer_outer_fd;
     int input_buffer_inner_fd[MAX_CPUS];
+    int player_state_outer_fd;
+    int player_state_inner_fd[MAX_CPUS];
     struct ring_buffer * input_buffer[MAX_CPUS];
     int ring_buffer_cpus[MAX_CPUS];
 };
@@ -72,6 +74,15 @@ static int process_input( void * ctx, void * data, size_t data_sz )
     for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
     {
         state->data[i] = (uint8_t) state->t + (uint8_t) i;
+    }
+
+    int player_state_fd = bpf.player_state_inner_fd[cpu];
+
+    int err = bpf_map_update_elem( player_state_fd, &header->session_id, state, BPF_ANY );
+    if ( err != 0 )
+    {
+        printf( "error: failed to update player state: %s\n", strerror(errno) );
+        return 0;
     }
 
     __sync_fetch_and_add( &inputs_processed[cpu], 1 );
@@ -219,6 +230,31 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     {
         printf( "\nerror: could not get server stats: %s\n\n", strerror(errno) );
         return 1;
+    }
+
+    // get the file handle to the outer player state map
+
+    bpf->player_state_outer_fd = bpf_obj_get( "/sys/fs/bpf/player_state_map" );
+    if ( bpf->player_state_outer_fd <= 0 )
+    {
+        printf( "\nerror: could not get outer player state map: %s\n\n", strerror(errno) );
+        return 1;
+    }
+
+    // get the file handle to the inner player state maps
+
+    for ( int i = 0; i < MAX_CPUS; i++ )
+    {
+        uint32_t key = i;
+        uint32_t inner_map_id = 0;
+        int result = bpf_map_lookup_elem( bpf->player_state_outer_fd, &key, &inner_map_id );
+        if ( result != 0 )
+        {
+            printf( "\nerror: failed lookup player state inner map: %s\n\n", strerror(errno) );
+            return 1;
+        }
+        bpf->player_state_inner_fd[i] = bpf_map_get_fd_by_id( inner_map_id );
+        printf( "player state for cpu %d = %d\n", i, bpf->player_state_inner_fd[i] );
     }
 
     // get the file handle to the outer input buffer map
