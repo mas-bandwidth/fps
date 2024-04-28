@@ -32,7 +32,7 @@
 # error "Endianness detection needs to be set up for your compiler?!"
 #endif
 
-#define DEBUG 1
+//#define DEBUG 1
 
 #if DEBUG
 #define debug_printf bpf_printk
@@ -330,12 +330,9 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
-                                            debug_printf( "forwarding input to cpu %d", cpu );
-
                                             __u8 * event = bpf_ringbuf_reserve( input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
                                             if ( !event )
                                             {
-                                                // todo: lots of these. what if not all threads are being read?
                                                 debug_printf( "dropped input :(" );
                                                 return XDP_DROP;
                                             }
@@ -438,8 +435,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         return XDP_DROP;
                                     }
 
-                                    // todo: disable this to see if the bottleneck is player state contention
-                                    /*
                                     // respond with a player state packet for the client's local player
 
                                     void * cpu_player_state_map = bpf_map_lookup_elem( &player_state_map, &cpu );
@@ -478,7 +473,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     bpf_xdp_adjust_tail( ctx, -( INPUT_PACKET_SIZE - PLAYER_STATE_PACKET_SIZE ) );
 
                                     return XDP_TX;
-                                    */
                                 }
                                 else if ( packet_type == STATS_REQUEST_PACKET && (void*) payload + STATS_REQUEST_PACKET_SIZE <= data_end )
                                 {
