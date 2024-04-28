@@ -280,8 +280,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                     int cpu = session_id % MAX_CPUS;
 
-                                    debug_printf( "forwarding input to cpu %d\n", cpu );
-
                                     // send the input(s) down to userspace via perf buffer
 
                                     __u64 sequence = (__u64) payload[9];
@@ -333,6 +331,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
+                                            debug_printf( "forwarding input to cpu %d\n", cpu );
+
                                             __u8 * event = bpf_ringbuf_reserve( input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
                                             if ( !event )
                                             {
