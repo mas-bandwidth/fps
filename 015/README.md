@@ -10,4 +10,17 @@ Since it seems that the best result is to process packets on the CPU that receiv
 
 # Results
 
-...
+Success. We are able to scale up to 4k players still, when responding back
+
+```
+Apr 28 16:49:44 client-9plv client[11221]: inputs sent delta 99396, inputs processed delta 398186, player state delta 99391
+Apr 28 16:49:45 client-9plv client[11221]: inputs sent delta 99342, inputs processed delta 398545, player state delta 99345
+Apr 28 16:49:46 client-9plv client[11221]: inputs sent delta 99303, inputs processed delta 398427, player state delta 99304
+Apr 28 16:49:47 client-9plv client[11221]: inputs sent delta 99298, inputs processed delta 397852, player state delta 99300
+Apr 28 16:49:48 client-9plv client[11221]: inputs sent delta 100000, inputs processed delta 397646, player state delta 99998
+```
+
+Lessons learned:
+
+1. The ring buffer is definitely faster than the perf buffer (saves a copy, and memory bandwidth is definitely a limiting factor here)
+2. It's best to process inputs and player state on the same CPU that received the traffic (avoid contention and NUMA bottlenecks)

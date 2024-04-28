@@ -371,7 +371,21 @@ void * worker_thread_function( void * context )
 
     while ( !quit )
     {
-        ring_buffer__consume( bpf.input_buffer[cpu] );
+        // poll ring buffer to drive input processing
+
+        int err = ring_buffer__poll( bpf.input_buffer, 1000 );
+        if ( err == -EINTR )
+        {
+            // ctrl-c
+            quit = true;
+            break;
+        }
+        if ( err < 0 ) 
+        {
+            printf( "\nerror: could not poll input buffer: %d\n\n", err );
+            quit = true;
+            break;
+        }    
     }
 
     return NULL;
