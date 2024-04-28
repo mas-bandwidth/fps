@@ -6,4 +6,4 @@ google_region               = "us-central1"
 google_zone                 = "us-central1-b"
 google_zones                = ["us-central1-b"]  # IMPORTANT: keep to a single zone to make sure bandwidth is free during load testing
 
-tag                         = "028" # bump this each time you want to recreate the VMs
+tag                         = "029" # bump this each time you want to recreate the VMs

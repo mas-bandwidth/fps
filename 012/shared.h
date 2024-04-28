@@ -29,7 +29,7 @@
 
 #define MAX_CPUS                                                                           16
 
-#define PLAYERS_PER_CPU                                                                   380
+#define PLAYERS_PER_CPU                                                                   500
 
 #define PLAYER_STATE_PACKET_SIZE                                ( 1 + 8 + PLAYER_STATE_SIZE )
 

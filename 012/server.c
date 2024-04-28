@@ -430,7 +430,7 @@ int main( int argc, char *argv[] )
 
     // main loop
 
-    pin_thread_to_cpu( MAX_CPUS );       // IMPORTANT: keep the main thread out of the way of the XDP cpus on google cloud [0,15]
+    pin_thread_to_cpu( MAX_CPUS * 2 );       // IMPORTANT: keep the main thread out of the way of the XDP cpus on google cloud [0,15] and the worker threads [16,31]
 
     unsigned int num_cpus = libbpf_num_possible_cpus();
 
