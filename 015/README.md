@@ -36,6 +36,6 @@ Assume that we can get double the results on the bare metal that we can get on t
 
 A 32 core machine only costs $1,870 USD per-month.
 
-We need 111 machines now, if we can fit 9k players per-servere.
+We need 111 machines now, if we can fit 9k players on each player server.
 
-Now the total cost is $207,570 USD per-month, or just 20.7c per-player per-month...
+Now the total cost is $207,570 USD per-month, or just 20.7c per-player per-month.
