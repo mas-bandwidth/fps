@@ -10,7 +10,7 @@ Since it seems that the best result is to process packets on the CPU that receiv
 
 # Results
 
-Success. We are able to scale up to 4k per-player server:
+Success. We are able to scale up to 4k players per-player server:
 
 ```
 Apr 28 16:49:44 client-9plv client[11221]: inputs sent delta 99396, inputs processed delta 398186, player state delta 99391
