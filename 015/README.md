@@ -10,7 +10,7 @@ Since it seems that the best result is to process packets on the CPU that receiv
 
 # Results
 
-Success. We are able to scale up to 4k players still, when responding back
+Success. We are able to scale up to 4k per-player server:
 
 ```
 Apr 28 16:49:44 client-9plv client[11221]: inputs sent delta 99396, inputs processed delta 398186, player state delta 99391
@@ -24,3 +24,8 @@ Lessons learned:
 
 1. The ring buffer is definitely faster than the perf buffer (saves a copy, and memory bandwidth is definitely a limiting factor here)
 2. It's best to process inputs and player state on the same CPU that received the traffic (avoid contention and NUMA bottlenecks)
+3. There's lots of CPU remaining to run player simulation, even on 16 CPUs.
+
+<img width="1002" alt="image" src="https://github.com/mas-bandwidth/fps/assets/696656/c4e7dab6-cb6c-42da-bef9-d2d25a9110c1">
+
+In short, the application is IO bound not CPU bound, which is great because we need the CPU for more complicated future player simulations!
