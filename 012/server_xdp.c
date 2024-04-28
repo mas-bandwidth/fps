@@ -32,7 +32,7 @@
 # error "Endianness detection needs to be set up for your compiler?!"
 #endif
 
-//#define DEBUG 1
+#define DEBUG 1
 
 #if DEBUG
 #define debug_printf bpf_printk
@@ -262,6 +262,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                 }
                                 else if ( packet_type == INPUT_PACKET && (void*) payload + INPUT_PACKET_SIZE <= data_end )
                                 {
+                                    debug_printf( "processing input packet\n" );
+
                                     __u64 session_id = (__u64) payload[1];
                                     session_id |= ( (__u64) payload[2] ) << 8;
                                     session_id |= ( (__u64) payload[3] ) << 16;
