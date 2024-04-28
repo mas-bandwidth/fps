@@ -55,6 +55,9 @@ static int process_input( void * ctx, void * data, size_t data_sz )
 {
     int cpu = *(int*) ctx;
 
+    // todo
+    printf( "process input on cpu %d\n", cpu );
+
     struct input_header * header = (struct input_header*) data;
 
     struct input_data * input = (struct input_data*) data + sizeof(struct input_header);
