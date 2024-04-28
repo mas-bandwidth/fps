@@ -33,3 +33,6 @@ Apr 28 13:02:10 client-nt4n client[11037]: inputs sent delta 99157, inputs proce
 ```
 
 I don't even.
+
+Try the ring buffer with epoll, but waking up only once every 1000 samples...
+
