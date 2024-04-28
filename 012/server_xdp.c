@@ -321,7 +321,6 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         session->next_input_sequence = sequence + 1;
 
-                                        // todo: are we getting a lot of contention on this? it's all reads so they should be fast, right?
                                         void * input_buffer = bpf_map_lookup_elem( &input_buffer_map, &cpu );
                                         if ( !input_buffer )
                                         {
