@@ -371,9 +371,7 @@ void * worker_thread_function( void * context )
 
     while ( !quit )
     {
-        // poll ring buffer to drive input processing
-
-        int err = ring_buffer__poll( bpf.input_buffer[cpu], 1 );
+        int err = ring_buffer__consume( bpf.input_buffer[cpu] );
         if ( err == -EINTR )
         {
             // ctrl-c

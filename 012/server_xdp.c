@@ -32,7 +32,7 @@
 # error "Endianness detection needs to be set up for your compiler?!"
 #endif
 
-#define DEBUG 1
+//#define DEBUG 1
 
 #if DEBUG
 #define debug_printf bpf_printk
@@ -278,7 +278,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         return XDP_DROP;
                                     }
 
-                                    int cpu = session_id % MAX_CPUS;
+                                    // todo: try using the same processor id that packets were received on?
+                                    int cpu = bpf_get_smp_processor_id();
 
                                     // send the input(s) down to userspace via perf buffer
 
