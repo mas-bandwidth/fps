@@ -8,4 +8,12 @@ If this is true, then the performance of this version should be much higher, and
 
 # Results
 
-...
+The results are exactly the same:
+
+```
+Apr 28 14:28:13 client-jb43 client[11040]: inputs sent delta 99509, inputs processed delta 228295, player state delta 99281
+```
+
+The player state map commit is not the bottleneck.
+
+So what is?

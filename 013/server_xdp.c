@@ -105,56 +105,6 @@ struct {
     }
 };
 
-struct inner_player_state_map {
-    __uint( type, BPF_MAP_TYPE_LRU_HASH );
-    __type( key, __u64 );
-    __type( value, struct player_state );
-    __uint( max_entries, PLAYERS_PER_CPU );
-} 
-player_state_0 SEC(".maps"),
-player_state_1 SEC(".maps"),
-player_state_2 SEC(".maps"),
-player_state_3 SEC(".maps"),
-player_state_4 SEC(".maps"),
-player_state_5 SEC(".maps"),
-player_state_6 SEC(".maps"),
-player_state_7 SEC(".maps"),
-player_state_8 SEC(".maps"),
-player_state_9 SEC(".maps"),
-player_state_10 SEC(".maps"),
-player_state_11 SEC(".maps"),
-player_state_12 SEC(".maps"),
-player_state_13 SEC(".maps"),
-player_state_14 SEC(".maps"),
-player_state_15 SEC(".maps");
-
-struct {
-    __uint( type, BPF_MAP_TYPE_ARRAY_OF_MAPS );
-    __uint( max_entries, MAX_CPUS );
-    __type( key, __u32 );
-    __uint( pinning, LIBBPF_PIN_BY_NAME );
-    __array( values, struct inner_player_state_map );
-} player_state_map SEC(".maps") = {
-    .values = { 
-        &player_state_0,
-        &player_state_1,
-        &player_state_2,
-        &player_state_3,
-        &player_state_4,
-        &player_state_5,
-        &player_state_6,
-        &player_state_7,
-        &player_state_8,
-        &player_state_9,
-        &player_state_10,
-        &player_state_11,
-        &player_state_12,
-        &player_state_13,
-        &player_state_14,
-        &player_state_15,
-    }
-};
-
 struct {
     __uint( type, BPF_MAP_TYPE_PERCPU_ARRAY );
     __uint( max_entries, 1 );
@@ -433,47 +383,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     else
                                     {
                                         debug_printf( "input packet is old" );
-                                        return XDP_DROP;
                                     }
-
-                                    // respond with a player state packet for the client's local player
-
-                                    void * cpu_player_state_map = bpf_map_lookup_elem( &player_state_map, &cpu );
-                                    if ( !cpu_player_state_map )
-                                    {
-                                        debug_printf( "could not find player state map for cpu %d", cpu );
-                                        return XDP_DROP;
-                                    }
-
-                                    __u8 * player_state = (__u8*) bpf_map_lookup_elem( cpu_player_state_map, &session_id );
-                                    if ( !player_state )
-                                    {
-                                        debug_printf( "could not find player state for session 0x%llx", session_id );
-                                        debug_printf( "whata the fuck 0x%llx", ( session_id >> 32 ) );
-                                        return XDP_DROP;
-                                    }
-
-                                    payload[0] = PLAYER_STATE_PACKET;
-
-                                    for ( int i = 0; i < 8 + PLAYER_STATE_SIZE; i++ )
-                                    {
-                                        payload[1+i] = player_state[i];
-                                    }
-  
-                                    int zero = 0;
-                                    struct counters * counters = (struct counters*) bpf_map_lookup_elem( &counters_map, &zero );
-                                    if ( !counters ) 
-                                    {
-                                        return XDP_DROP; // can't happen
-                                    }
-
-                                    __sync_fetch_and_add( &counters->player_state_packets_sent, 1 );
-
-                                    reflect_packet( data, PLAYER_STATE_PACKET_SIZE );
-
-                                    bpf_xdp_adjust_tail( ctx, -( INPUT_PACKET_SIZE - PLAYER_STATE_PACKET_SIZE ) );
-
-                                    return XDP_TX;
                                 }
                                 else if ( packet_type == STATS_REQUEST_PACKET && (void*) payload + STATS_REQUEST_PACKET_SIZE <= data_end )
                                 {

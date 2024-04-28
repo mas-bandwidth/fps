@@ -76,7 +76,6 @@ static int process_input( void * ctx, void * data, size_t data_sz )
         state->data[i] = (uint8_t) state->t + (uint8_t) i;
     }
 
-    /*
     int player_state_fd = bpf.player_state_inner_fd[cpu];
 
     int err = bpf_map_update_elem( player_state_fd, &header->session_id, state, BPF_ANY );
@@ -85,7 +84,6 @@ static int process_input( void * ctx, void * data, size_t data_sz )
         printf( "error: failed to update player state: %s\n", strerror(errno) );
         return 0;
     }
-    */
 
     __sync_fetch_and_add( &inputs_processed[cpu], 1 );
 
