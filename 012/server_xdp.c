@@ -331,7 +331,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
-                                            debug_printf( "forwarding input to cpu %d\n", cpu );
+                                            debug_printf( "forwarding input to cpu %d", cpu );
 
                                             __u8 * event = bpf_ringbuf_reserve( input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
                                             if ( !event )
