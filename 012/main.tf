@@ -310,7 +310,7 @@ resource "google_compute_instance_template" "client" {
 }
 
 resource "google_compute_region_instance_group_manager" "client" {
-  target_size               = 3
+  target_size               = 1
   name                      = "client"
   project                   = google_project.fps.project_id
   region                    = var.google_region
@@ -400,13 +400,6 @@ resource "google_compute_instance" "server" {
 
       cd /app
       make
-
-      cat <<EOF > /etc/sysctl.conf
-      net.core.rmem_max=1000000000
-      net.core.wmem_max=1000000000
-      net.core.netdev_max_backlog=10000
-      EOF
-      sysctl -p
 
       cp server.service /etc/systemd/system/server.service
 
