@@ -11,7 +11,7 @@ If this is true, then the performance of this version should be much higher, and
 The results are exactly the same:
 
 ```
-Apr 28 14:28:13 client-jb43 client[11040]: inputs sent delta 99509, inputs processed delta 228295, player state delta 99281
+Apr 28 14:51:23 client-gcqb client[11013]: inputs sent delta 99950, inputs processed delta 227367, player state delta 0
 ```
 
 The player state map commit is not the bottleneck.
