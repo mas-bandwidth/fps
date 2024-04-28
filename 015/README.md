@@ -28,4 +28,14 @@ Lessons learned:
 
 <img width="1002" alt="image" src="https://github.com/mas-bandwidth/fps/assets/696656/c4e7dab6-cb6c-42da-bef9-d2d25a9110c1">
 
-In short, the application is IO bound not CPU bound, which is great because we need the CPU for more complicated future player simulations!
+In short, the application is currently IO bound and we have plenty of CPU left.
+
+This is great news, because we can reduce our player server down from 64 cores to 32 cores.
+
+Assume that we can get double the results on the bare metal that we can get on the VM, so 4.5k -> 9k player per-player server.
+
+A 32 core machine only costs $1,870 USD per-month.
+
+We need 111 machines now, if we can fit 9k players per-servere.
+
+Now the total cost is $207,570 USD per-month, or just 20.7c per-player per-month...

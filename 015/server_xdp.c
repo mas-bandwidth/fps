@@ -59,7 +59,7 @@ struct {
 
 struct inner_input_buffer_map {
     __uint( type, BPF_MAP_TYPE_RINGBUF );
-    __uint( max_entries, 256 * 1024 * 1024 );
+    __uint( max_entries, 512 * 1024 * 1024 );
 }
 input_buffer_0 SEC(".maps"),
 input_buffer_1 SEC(".maps"),
