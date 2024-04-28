@@ -342,7 +342,7 @@ resource "google_compute_instance" "server" {
 
   name         = "server-${var.tag}"
   project      = google_project.fps.project_id
-  machine_type = "c3-highmem-44"
+  machine_type = "c3-highmem-88"
   zone         = var.google_zone
   tags         = ["allow-ssh", "allow-udp"]
 
@@ -395,7 +395,7 @@ resource "google_compute_instance" "server" {
       make -j && make install
 
       cd lib/libbpf/src
-      make -j && DESTDIR=/usr/lib make install
+      make -j && make install
       ldconfig
 
       cd /app

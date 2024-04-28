@@ -32,8 +32,7 @@
 # error "Endianness detection needs to be set up for your compiler?!"
 #endif
 
-// todo
-#define DEBUG 1
+//#define DEBUG 1
 
 #if DEBUG
 #define debug_printf bpf_printk
@@ -322,6 +321,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         session->next_input_sequence = sequence + 1;
 
+                                        // todo: are we getting a lot of contention on this? it's all reads so they should be fast, right?
                                         void * input_buffer = bpf_map_lookup_elem( &input_buffer_map, &cpu );
                                         if ( !input_buffer )
                                         {
@@ -334,6 +334,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                             __u8 * event = bpf_ringbuf_reserve( input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
                                             if ( !event )
                                             {
+                                                // todo: lots of these. what if not all threads are being read?
                                                 debug_printf( "dropped input :(" );
                                                 return XDP_DROP;
                                             }
@@ -436,6 +437,8 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         return XDP_DROP;
                                     }
 
+                                    // todo: disable this to see if the bottleneck is player state contention
+                                    /*
                                     // respond with a player state packet for the client's local player
 
                                     void * cpu_player_state_map = bpf_map_lookup_elem( &player_state_map, &cpu );
@@ -474,6 +477,7 @@ SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     bpf_xdp_adjust_tail( ctx, -( INPUT_PACKET_SIZE - PLAYER_STATE_PACKET_SIZE ) );
 
                                     return XDP_TX;
+                                    */
                                 }
                                 else if ( packet_type == STATS_REQUEST_PACKET && (void*) payload + STATS_REQUEST_PACKET_SIZE <= data_end )
                                 {
