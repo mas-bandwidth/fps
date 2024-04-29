@@ -32,10 +32,10 @@ In short, the application is currently IO bound and we have plenty of CPU left.
 
 This is great news, because we can reduce our player server down from 64 cores to 32 cores.
 
-Assume that we can get double the results on the bare metal that we can get on the VM, so 4.5k -> 9k player per-player server.
+Assume that we can get double the results on the bare metal that we can get on the VM, so 4 -> 8k player per-player server.
 
 A 32 core machine only costs $1,870 USD per-month.
 
-We need 111 machines now, if we can fit 9k players on each player server.
+We need 125 machines if we can fit 8k players on each player server.
 
-Now the total cost is $207,570 USD per-month, or just 20.7c per-player per-month.
+Now the total cost is $233,750 USD per-month, or just 23.7c per-player per-month.
