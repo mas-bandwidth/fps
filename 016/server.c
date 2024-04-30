@@ -243,11 +243,6 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
-    for ( int i = 0; i < MAX_CPUS; i++ )
-    {
-        cpu_player_map[i] = map_create();
-    }
-
     const char * interface_name = argv[1];
 
     if ( bpf_init( &bpf, interface_name ) != 0 )
