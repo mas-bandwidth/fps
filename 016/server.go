@@ -46,7 +46,7 @@ func main() {
 	defer input_buffer_outer.Close()
 
 	var input_buffer_inner *ebpf.Map
-	err := input_buffer_outer.Lookup(cpu, &input_buffer_inner)
+	err = input_buffer_outer.Lookup(cpu, &input_buffer_inner)
 	if err != nil {
 		fmt.Printf("\nerror: could not lookup input buffer for cpu %d\n\n", cpu)
 		os.Exit(1)
