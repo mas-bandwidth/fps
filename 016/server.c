@@ -274,17 +274,12 @@ int main( int argc, char *argv[] )
     signal( SIGTERM, clean_shutdown_handler );
     signal( SIGHUP,  clean_shutdown_handler );
 
-    if ( argc != 2 )
-    {
-        printf( "\nusage: server <interface name>\n\n" );
-        return 1;
-    }
-
     for ( int i = 0; i < MAX_CPUS; i++ )
     {   
         pid_t c = fork();
         if ( c == 0 )
         { 
+            // child worker process
             printf( "starting golang worker %d\n", i );
             char cpu_string[64];
             sprintf( cpu_string, "%d", i );
@@ -293,6 +288,14 @@ int main( int argc, char *argv[] )
             exit(0); 
         } 
     } 
+
+    // parent process
+
+    if ( argc != 2 )
+    {
+        printf( "\nusage: server <interface name>\n\n" );
+        return 1;
+    }
 
     for ( int i = 0; i < MAX_CPUS; i++ )
     {
