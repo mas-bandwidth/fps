@@ -15,8 +15,6 @@ import (
 
 const MaxCPUs = 16
 
-// todo: signal handler CTRL-C etc
-
 func main() {
 
 	if len(os.Args) != 2 {

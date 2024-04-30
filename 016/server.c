@@ -36,59 +36,13 @@ struct bpf_t
     bool attached_skb;
     int counters_fd;
     int server_stats_fd;
-    int input_buffer_outer_fd;
-    int input_buffer_inner_fd[MAX_CPUS];
     int player_state_outer_fd;
     int player_state_inner_fd[MAX_CPUS];
-    struct ring_buffer * input_buffer[MAX_CPUS];
-    int ring_buffer_cpus[MAX_CPUS];
 };
 
 static struct bpf_t bpf;
 
-static uint64_t inputs_processed[MAX_CPUS];
-static uint64_t inputs_lost[MAX_CPUS];
-
 static struct map_t * cpu_player_map[MAX_CPUS];
-
-static int process_input( void * ctx, void * data, size_t data_sz )
-{
-    int cpu = *(int*) ctx;
-
-    struct input_header * header = (struct input_header*) data;
-
-    struct input_data * input = (struct input_data*) data + sizeof(struct input_header);
-
-    struct player_state * state = map_get( cpu_player_map[cpu], header->session_id );
-    if ( !state )
-    {
-        // first player update
-        state = malloc( sizeof(struct player_state) );
-        map_set( cpu_player_map[cpu], header->session_id, state );
-    }
-
-    // todo: handle multiple inputs
-
-    state->t += input->dt;
-
-    for ( int i = 0; i < PLAYER_STATE_SIZE; i++ )
-    {
-        state->data[i] = (uint8_t) state->t + (uint8_t) i;
-    }
-
-    int player_state_fd = bpf.player_state_inner_fd[cpu];
-
-    int err = bpf_map_update_elem( player_state_fd, &header->session_id, state, BPF_ANY );
-    if ( err != 0 )
-    {
-        printf( "error: failed to update player state: %s\n", strerror(errno) );
-        return 0;
-    }
-
-    __sync_fetch_and_add( &inputs_processed[cpu], 1 );
-
-    return 0;
-}
 
 static double time_start;
 
@@ -257,44 +211,6 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         printf( "player state for cpu %d = %d\n", i, bpf->player_state_inner_fd[i] );
     }
 
-    // get the file handle to the outer input buffer map
-
-    bpf->input_buffer_outer_fd = bpf_obj_get( "/sys/fs/bpf/input_buffer_map" );
-    if ( bpf->input_buffer_outer_fd <= 0 )
-    {
-        printf( "\nerror: could not get outer input buffer map: %s\n\n", strerror(errno) );
-        return 1;
-    }
-
-    // get the file handle to the inner input buffer maps
-
-    for ( int i = 0; i < MAX_CPUS; i++ )
-    {
-        uint32_t key = i;
-        uint32_t inner_map_id = 0;
-        int result = bpf_map_lookup_elem( bpf->input_buffer_outer_fd, &key, &inner_map_id );
-        if ( result != 0 )
-        {
-            printf( "\nerror: failed lookup input buffer inner map: %s\n\n", strerror(errno) );
-            return 1;
-        }
-        bpf->input_buffer_inner_fd[i] = bpf_map_get_fd_by_id( inner_map_id );
-        printf( "input buffer for cpu %d = %d\n", i, bpf->input_buffer_inner_fd[i] );
-    }
-
-    // create the input ring buffer
-
-    for ( int i = 0; i < MAX_CPUS; i++ )
-    {
-        bpf->ring_buffer_cpus[i] = i;
-        bpf->input_buffer[i] = ring_buffer__new( bpf->input_buffer_inner_fd[i], process_input, bpf->ring_buffer_cpus + i, NULL );
-        if ( !bpf->input_buffer[i] )
-        {
-            printf( "\nerror: could not create input buffer[%d]\n\n", i );
-            return 1;
-        }
-    }
-
     printf( "ready\n" );
 
     return 0;
@@ -303,15 +219,6 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 void bpf_shutdown( struct bpf_t * bpf )
 {
     assert( bpf );
-
-    for ( int i = 0; i < MAX_CPUS; i++ )
-    {
-        if ( bpf->input_buffer[i] )
-        {
-            ring_buffer__free( bpf->input_buffer[i] );
-            bpf->input_buffer[i] = NULL;
-        }
-    }
 
     if ( bpf->program != NULL )
     {
@@ -361,36 +268,6 @@ int pin_thread_to_cpu( int cpu )
     return pthread_setaffinity_np( current_thread, sizeof(cpu_set_t), &cpuset );
 }
 
-void * worker_thread_function( void * context )
-{
-    int cpu = *( (int*) context );
-
-    printf( "worker thread sees cpu is #%d\n", cpu );
-
-    pin_thread_to_cpu( cpu );
-
-    while ( !quit )
-    {
-        // poll ring buffer to drive input processing
-
-        int err = ring_buffer__poll( bpf.input_buffer[cpu], 1000 );
-        if ( err == -EINTR )
-        {
-            // ctrl-c
-            quit = true;
-            break;
-        }
-        if ( err < 0 ) 
-        {
-            printf( "\nerror: could not poll input buffer: %d\n\n", err );
-            quit = true;
-            break;
-        }    
-    }
-
-    return NULL;
-}
-
 int main( int argc, char *argv[] )
 {
     signal( SIGINT,  interrupt_handler );
@@ -402,6 +279,20 @@ int main( int argc, char *argv[] )
         printf( "\nusage: server <interface name>\n\n" );
         return 1;
     }
+
+    for ( int i = 0; i < MAX_THREADS; i++ )
+    {   
+        pid_t c = fork();
+        if ( c == 0 )
+        { 
+            printf( "starting golang worker %d\n" );
+            char cpu_string[64];
+            sprintf( cpu_string, "%d", cpu );
+            char * args[] = { cpu_string, 0 };
+            execv( "./worker", args );
+            exit(0); 
+        } 
+    } 
 
     for ( int i = 0; i < MAX_CPUS; i++ )
     {
@@ -434,9 +325,7 @@ int main( int argc, char *argv[] )
 
     unsigned int num_cpus = libbpf_num_possible_cpus();
 
-    uint64_t previous_processed_inputs = 0;
     uint64_t previous_player_state_packets_sent = 0;
-    uint64_t previous_lost_inputs = 0;
 
     while ( !quit )
     {
@@ -453,22 +342,17 @@ int main( int argc, char *argv[] )
             break;
         }
 
-        uint64_t current_processed_inputs = 0;
         uint64_t current_player_state_packets_sent = 0;
-        uint64_t current_lost_inputs = 0;
+
         for ( int i = 0; i < MAX_CPUS; i++ )
         {
-            current_processed_inputs += inputs_processed[i];
             current_player_state_packets_sent += values[i].player_state_packets_sent;
-            current_lost_inputs += inputs_lost[i];
         }
 
         // print out important stats
 
-        uint64_t input_delta = current_processed_inputs - previous_processed_inputs;
         uint64_t player_state_delta = current_player_state_packets_sent - previous_player_state_packets_sent;
-        uint64_t lost_delta = current_lost_inputs - previous_lost_inputs;
-        printf( "input delta: %" PRId64 ", player state delta: %" PRId64 ", lost delta: %" PRId64 "\n", input_delta, player_state_delta, lost_delta );
+        printf( "player state delta: %" PRId64 "\n", player_state_delta );
         previous_processed_inputs = current_processed_inputs;
         previous_player_state_packets_sent = current_player_state_packets_sent;
         previous_lost_inputs = current_lost_inputs;
