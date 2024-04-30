@@ -13,6 +13,8 @@ import (
 
 const MaxCPUs = 16
 
+// todo: signal handler CTRL-C etc
+
 func main() {
 
 	if len(os.Args) != 2 {
@@ -61,7 +63,7 @@ func main() {
 			fmt.Printf("\nerror: failed to read from ring buffer: %v\n\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("process event\n")
+		fmt.Printf("process event (%d bytes)\n")
 		_ = record
 	}
 }
