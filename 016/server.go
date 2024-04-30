@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"runtime"
 	"strconv"
+
+	"github.com/cilium/ebpf"
 )
 
 func main() {
@@ -18,7 +19,7 @@ func main() {
 
 	cpu, err :=	strconv.Atoi(os.Args[1])
 	if err != nil {
-		fmt.Printf( "\nerror: could not read cpu index\n\n")
+		fmt.Printf("\nerror: could not read cpu index\n\n")
 		os.Exit(1)
 	}
 
@@ -26,7 +27,7 @@ func main() {
 		pid := os.Getpid()
 		cmd := exec.Command("taskset", "-pc", fmt.Sprintf("%d", cpu), fmt.Sprintf("%d", pid))
 		if err := cmd.Run(); err != nil {
-			log.Fatal(err)
+			fmt.Printf("\nerror: could not pin process to cpu %d: %v\n\n", cpu, err)
 		}	
 	}
 
@@ -34,7 +35,11 @@ func main() {
 
 	fmt.Printf("golang server running on cpu %d\n", cpu)
 
-	// todo: get ring buffer outer map
+	input_buffer_outer, err := ebpf.LoadPinnedMap("/sys/fs/bpf/input_buffer_map", nil)
+	if err != nil {
+		fmt.Printf("\nerror: could not get input buffer map: %v\n\n", err)
+	}
+	defer input_buffer_outer.Close()
 
 	// todo: get ring buffer for cpu #
 
