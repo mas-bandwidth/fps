@@ -36,35 +36,9 @@ struct bpf_t
     bool attached_skb;
     int counters_fd;
     int server_stats_fd;
-    int player_state_outer_fd;
-    int player_state_inner_fd[MAX_CPUS];
 };
 
 static struct bpf_t bpf;
-
-static struct map_t * cpu_player_map[MAX_CPUS];
-
-static double time_start;
-
-void platform_init()
-{
-    struct timespec ts;
-    clock_gettime( CLOCK_MONOTONIC_RAW, &ts );
-    time_start = ts.tv_sec + ( (double) ( ts.tv_nsec ) ) / 1000000000.0;
-}
-
-double platform_time()
-{
-    struct timespec ts;
-    clock_gettime( CLOCK_MONOTONIC_RAW, &ts );
-    double current = ts.tv_sec + ( (double) ( ts.tv_nsec ) ) / 1000000000.0;
-    return current - time_start;
-}
-
-void platform_sleep( double time )
-{
-    usleep( (int) ( time * 1000000 ) );
-}
 
 int bpf_init( struct bpf_t * bpf, const char * interface_name )
 {
@@ -186,30 +160,6 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
         return 1;
     }
 
-    // get the file handle to the outer player state map
-
-    bpf->player_state_outer_fd = bpf_obj_get( "/sys/fs/bpf/player_state_map" );
-    if ( bpf->player_state_outer_fd <= 0 )
-    {
-        printf( "\nerror: could not get outer player state map: %s\n\n", strerror(errno) );
-        return 1;
-    }
-
-    // get the file handle to the inner player state maps
-
-    for ( int i = 0; i < MAX_CPUS; i++ )
-    {
-        uint32_t key = i;
-        uint32_t inner_map_id = 0;
-        int result = bpf_map_lookup_elem( bpf->player_state_outer_fd, &key, &inner_map_id );
-        if ( result != 0 )
-        {
-            printf( "\nerror: failed lookup player state inner map: %s\n\n", strerror(errno) );
-            return 1;
-        }
-        bpf->player_state_inner_fd[i] = bpf_map_get_fd_by_id( inner_map_id );
-    }
-
     printf( "ready\n" );
 
     return 0;
@@ -320,7 +270,7 @@ int main( int argc, char *argv[] )
 
     while ( !quit )
     {
-        platform_sleep( 1.0 );
+        usleep( 1000000 );
 
         // track stats
 
