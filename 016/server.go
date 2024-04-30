@@ -24,7 +24,7 @@ func main() {
 
 	if runtime.GOOS == "linux" {
 		pid := os.Getpid()
-		cmd := exec.Command("taskset", "-c", fmt.Sprintf("%d", cpu), "-p", fmt.Sprintf("%d", pid))
+		cmd := exec.Command("taskset", "-pc", fmt.Sprintf("%d", cpu), fmt.Sprintf("%d", pid))
 		if err := cmd.Run(); err != nil {
 			log.Fatal(err)
 		}	
