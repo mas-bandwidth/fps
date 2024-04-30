@@ -66,7 +66,7 @@ func main() {
 				fmt.Printf("\nerror: failed to read from ring buffer: %v\n\n", err)
 				os.Exit(1)
 			}
-			fmt.Printf("process event (%d bytes)\n")
+			fmt.Printf("process event (%d bytes)\n", len(record.RawSample))
 			_ = record
 		}
 	}()
