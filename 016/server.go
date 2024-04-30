@@ -10,6 +10,8 @@ import (
 	"github.com/cilium/ebpf"
 )
 
+const MaxCPUs = 16
+
 func main() {
 
 	if len(os.Args) != 2 {
@@ -34,13 +36,7 @@ func main() {
 
 	runtime.GOMAXPROCS(1)
 
-	possibleCPUs, err := ebpf.PossibleCPU()
-	if err != nil {
-		fmt.Printf("\nerror: could not get possible cpus: %v\n\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Printf("golang server running on cpu %d/%d\n", cpu, possibleCPUs)
+	fmt.Printf("golang server running on cpu %d/%d\n", cpu, MaxCPUs)
 
 	input_buffer_outer, err := ebpf.LoadPinnedMap("/sys/fs/bpf/input_buffer_map", nil)
 	if err != nil {
@@ -49,7 +45,14 @@ func main() {
 	}
 	defer input_buffer_outer.Close()
 
-	// todo: get ring buffer for cpu #
+	var input_buffer_inner *ebpf.Map
+	err := input_buffer_outer.Lookup(cpu, &input_buffer_inner)
+	if err != nil {
+		fmt.Printf("\nerror: could not lookup input buffer for cpu %d\n\n", cpu)
+		os.Exit(1)
+	}
 
-	// todo: consume ring buffer
+	// todo: create ring buffer
+
+	// todo: consume ring buffer events
 }
