@@ -76,4 +76,6 @@ func main() {
 	}()
 
 	<- termChan
+
+	fmt.Printf("\nshutting down\n")
 }
