@@ -284,7 +284,7 @@ int main( int argc, char *argv[] )
             fflush( stdout );
             char cpu_string[64];
             sprintf( cpu_string, "%d", i );
-            char * args[] = { cpu_string, 0 };
+            char * args[] = { "server", cpu_string, 0 };
             execv( "./worker", args );
             exit(0); 
         } 
