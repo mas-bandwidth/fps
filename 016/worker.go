@@ -55,9 +55,8 @@ func main() {
 
 	input_buffer, err := ringbuf.NewReader(input_buffer_inner)
 
-	var record ringbuf.Record
 	for {
-		err := input_buffer.ReadInto(&record)
+		record, err := input_buffer.Read()
 		if err != nil {
 			fmt.Printf("\nerror: failed to read from ring buffer: %v\n\n", err)
 			os.Exit(1)
