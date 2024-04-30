@@ -364,9 +364,11 @@ int main( int argc, char *argv[] )
         }
     }
 
+    printf( "\nshutting down...\n" );
+
     cleanup();
 
-    printf( "\n" );
+    printf( "done\n\n" );
 
     return 0;
 }
