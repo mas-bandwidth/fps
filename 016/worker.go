@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"runtime"
 	"strconv"
+	"os/signal"
+	"syscall"
 
 	"github.com/cilium/ebpf"
 	"github.com/cilium/ebpf/ringbuf"
@@ -21,6 +23,10 @@ func main() {
 		fmt.Printf( "\nusage: go run worker <cpu_index>\n\n")
 		os.Exit(0)
 	}
+
+	termChan := make(chan os.Signal, 1)
+
+	signal.Notify(termChan, os.Interrupt, syscall.SIGTERM)
 
 	cpu, err :=	strconv.Atoi(os.Args[1])
 	if err != nil {
@@ -57,13 +63,17 @@ func main() {
 
 	input_buffer, err := ringbuf.NewReader(input_buffer_inner)
 
-	for {
-		record, err := input_buffer.Read()
-		if err != nil {
-			fmt.Printf("\nerror: failed to read from ring buffer: %v\n\n", err)
-			os.Exit(1)
+	go func() {
+		for {
+			record, err := input_buffer.Read()
+			if err != nil {
+				fmt.Printf("\nerror: failed to read from ring buffer: %v\n\n", err)
+				os.Exit(1)
+			}
+			fmt.Printf("process event (%d bytes)\n")
+			_ = record
 		}
-		fmt.Printf("process event (%d bytes)\n")
-		_ = record
 	}
+
+	<- termChan
 }
