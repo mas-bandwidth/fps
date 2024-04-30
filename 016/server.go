@@ -28,16 +28,24 @@ func main() {
 		cmd := exec.Command("taskset", "-pc", fmt.Sprintf("%d", cpu), fmt.Sprintf("%d", pid))
 		if err := cmd.Run(); err != nil {
 			fmt.Printf("\nerror: could not pin process to cpu %d: %v\n\n", cpu, err)
+			os.Exit(1)
 		}	
 	}
 
 	runtime.GOMAXPROCS(1)
 
-	fmt.Printf("golang server running on cpu %d\n", cpu)
+	possibleCPUs, err := ebpf.PossibleCPU()
+	if err != nil {
+		fmt.Printf("\nerror: could not get possible cpus: %v\n\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("golang server running on cpu %d/%d\n", cpu, possibleCPUs)
 
 	input_buffer_outer, err := ebpf.LoadPinnedMap("/sys/fs/bpf/input_buffer_map", nil)
 	if err != nil {
 		fmt.Printf("\nerror: could not get input buffer map: %v\n\n", err)
+		os.Exit(1)
 	}
 	defer input_buffer_outer.Close()
 
