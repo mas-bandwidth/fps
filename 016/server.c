@@ -280,7 +280,7 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
-    for ( int i = 0; i < MAX_THREADS; i++ )
+    for ( int i = 0; i < MAX_CPUS; i++ )
     {   
         pid_t c = fork();
         if ( c == 0 )
