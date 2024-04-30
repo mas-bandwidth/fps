@@ -307,21 +307,9 @@ int main( int argc, char *argv[] )
         return 1;
     }
 
-    // run worker threads
-
-    int thread_cpu[MAX_CPUS];
-    pthread_t thread_id[MAX_CPUS];
-
-    for ( int i = 0; i < MAX_CPUS; i++ )
-    {
-        printf( "starting worker thread %d\n", i );
-        thread_cpu[i] = i;
-        pthread_create( &thread_id[i], NULL, worker_thread_function, thread_cpu + i ); 
-    }
-
     // main loop
 
-    pin_thread_to_cpu( MAX_CPUS );       // IMPORTANT: keep the main thread out of the way of the XDP cpus on google cloud [0,15]
+    pin_thread_to_cpu( MAX_CPUS );       // IMPORTANT: keep out of the way of the XDP cpus on google cloud [0,15]
 
     unsigned int num_cpus = libbpf_num_possible_cpus();
 
@@ -360,7 +348,7 @@ int main( int argc, char *argv[] )
         // upload stats to the xdp program to be sent down to clients
 
         struct server_stats stats;
-        stats.inputs_processed = current_processed_inputs;
+        memset( &stats, 0, sizeof(stats) );
         stats.player_state_packets_sent = current_player_state_packets_sent;
 
         int err = bpf_map_update_elem( bpf.server_stats_fd, &key, &stats, BPF_ANY );
@@ -370,13 +358,6 @@ int main( int argc, char *argv[] )
             quit = true;
             break;
         }
-    }
-
-    // clean up
-
-    for ( int i = 0; i < MAX_CPUS; i++ )
-    {
-        pthread_join( thread_id[i], NULL );
     }
 
     cleanup();
