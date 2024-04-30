@@ -285,9 +285,9 @@ int main( int argc, char *argv[] )
         pid_t c = fork();
         if ( c == 0 )
         { 
-            printf( "starting golang worker %d\n" );
+            printf( "starting golang worker %d\n", i );
             char cpu_string[64];
-            sprintf( cpu_string, "%d", cpu );
+            sprintf( cpu_string, "%d", i );
             char * args[] = { cpu_string, 0 };
             execv( "./worker", args );
             exit(0); 
