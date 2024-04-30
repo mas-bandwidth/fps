@@ -43,8 +43,6 @@ func main() {
 
 	runtime.GOMAXPROCS(1)
 
-	fmt.Printf("golang worker running on cpu %d/%d\n", cpu, MaxCPUs)
-
 	input_buffer_outer, err := ebpf.LoadPinnedMap("/sys/fs/bpf/input_buffer_map", nil)
 	if err != nil {
 		fmt.Printf("\nerror: could not get input buffer map: %v\n\n", err)
