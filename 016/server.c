@@ -281,6 +281,7 @@ int main( int argc, char *argv[] )
         { 
             // child worker process
             printf( "starting golang worker %d\n", i );
+            fflush( STDOUT );
             char cpu_string[64];
             sprintf( cpu_string, "%d", i );
             char * args[] = { cpu_string, 0 };
