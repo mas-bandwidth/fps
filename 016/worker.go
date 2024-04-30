@@ -73,7 +73,7 @@ func main() {
 			fmt.Printf("process event (%d bytes)\n")
 			_ = record
 		}
-	}
+	}()
 
 	<- termChan
 }
