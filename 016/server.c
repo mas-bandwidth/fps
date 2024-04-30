@@ -340,10 +340,10 @@ int main( int argc, char *argv[] )
         // print out important stats
 
         uint64_t player_state_delta = current_player_state_packets_sent - previous_player_state_packets_sent;
+
         printf( "player state delta: %" PRId64 "\n", player_state_delta );
-        previous_processed_inputs = current_processed_inputs;
+
         previous_player_state_packets_sent = current_player_state_packets_sent;
-        previous_lost_inputs = current_lost_inputs;
 
         // upload stats to the xdp program to be sent down to clients
 
