@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/cilium/ebpf"
+	"github.com/cilium/ebpf/ringbuf"
 )
 
 const MaxCPUs = 16
@@ -52,7 +53,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	// todo: create ring buffer
+	input_buffer, err := ringbuf.NewReader(input_buffer_inner)
 
-	// todo: consume ring buffer events
+	var record ringbuf.Record
+	for {
+		err := input_buffer.ReadInto(&record)
+		if err != nil {
+			fmt.Printf("\nerror: failed to read from ring buffer: %v\n\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("process event\n")
+	}
 }
