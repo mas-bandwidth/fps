@@ -62,5 +62,6 @@ func main() {
 			os.Exit(1)
 		}
 		fmt.Printf("process event\n")
+		_ = record
 	}
 }
