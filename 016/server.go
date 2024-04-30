@@ -32,7 +32,7 @@ func main() {
 
 	runtime.GOMAXPROCS(1)
 
-	fmt.Printf("server running on cpu %d\n", cpu)
+	fmt.Printf("golang server running on cpu %d\n", cpu)
 
 	// todo: get ring buffer outer map
 
