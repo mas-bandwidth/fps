@@ -17,8 +17,6 @@ const MaxCPUs = 16
 
 func main() {
 
-	fmt.Printf("args len = %d\n", len(os.Args))
-
 	if len(os.Args) != 2 {
 		fmt.Printf( "\nusage: go run worker <cpu_index>\n\n")
 		os.Exit(0)

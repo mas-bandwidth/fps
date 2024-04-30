@@ -208,7 +208,6 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
             return 1;
         }
         bpf->player_state_inner_fd[i] = bpf_map_get_fd_by_id( inner_map_id );
-        printf( "player state for cpu %d = %d\n", i, bpf->player_state_inner_fd[i] );
     }
 
     printf( "ready\n" );
@@ -364,11 +363,7 @@ int main( int argc, char *argv[] )
         }
     }
 
-    printf( "\nshutting down...\n" );
-
     cleanup();
-
-    printf( "done\n\n" );
 
     return 0;
 }
