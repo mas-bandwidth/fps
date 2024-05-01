@@ -52,7 +52,7 @@ func main() {
 	}
 	defer player_state_outer.Close()
 
-	fmt.Printf("map %+v\n", player_state_outer)
+	fmt.Printf("map %+v\n", player_state_outer.Info())
 
 	/*
 	var player_state_map *ebpf.Map
