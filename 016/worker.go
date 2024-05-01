@@ -53,7 +53,7 @@ func main() {
 	defer player_state_outer.Close()
 
 	var player_state_map *ebpf.Map
-	err = player_state_map.Lookup(uint32(cpu), &player_state_inner)
+	err = player_state_map.Lookup(uint32(cpu), &player_state_map)
 	if err != nil {
 		fmt.Printf("\nerror: could not lookup player state map for cpu %d: %v\n\n", cpu, err)
 		os.Exit(1)
