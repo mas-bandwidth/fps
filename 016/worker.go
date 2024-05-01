@@ -52,12 +52,16 @@ func main() {
 	}
 	defer player_state_outer.Close()
 
+	fmt.Printf("map %s\n", player_state_outer.String())
+
+	/*
 	var player_state_map *ebpf.Map
 	err = player_state_map.Lookup(uint32(cpu), &player_state_map)
 	if err != nil {
 		fmt.Printf("error: could not lookup player state map for cpu %d: %v\n", cpu, err)
 		os.Exit(1)
 	}
+	*/
 
 	// get input buffer map for our CPU
 
