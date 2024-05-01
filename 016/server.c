@@ -218,6 +218,22 @@ int main( int argc, char *argv[] )
     signal( SIGTERM, clean_shutdown_handler );
     signal( SIGHUP,  clean_shutdown_handler );
 
+    if ( argc != 2 )
+    {
+        printf( "\nusage: server <interface name>\n\n" );
+        return 1;
+    }
+
+    const char * interface_name = argv[1];
+
+    if ( bpf_init( &bpf, interface_name ) != 0 )
+    {
+        cleanup();
+        return 1;
+    }
+
+    // fork workers
+
     for ( int i = 0; i < MAX_CPUS; i++ )
     {   
         pid_t c = fork();
@@ -232,22 +248,6 @@ int main( int argc, char *argv[] )
             execv( "./worker", args );
             exit(0); 
         } 
-    } 
-
-    // parent process
-
-    if ( argc != 2 )
-    {
-        printf( "\nusage: server <interface name>\n\n" );
-        return 1;
-    }
-
-    const char * interface_name = argv[1];
-
-    if ( bpf_init( &bpf, interface_name ) != 0 )
-    {
-        cleanup();
-        return 1;
     }
 
     // main loop
