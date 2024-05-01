@@ -43,6 +43,24 @@ func main() {
 
 	runtime.GOMAXPROCS(1)
 
+	// get player state map for our CPU
+
+	player_state_outer, err := ebpf.LoadPinnedMap("/sys/fs/bpf/player_state_map", nil)
+	if err != nil {
+		fmt.Printf("\nerror: could not get player state map: %v\n\n", err)
+		os.Exit(1)
+	}
+	defer player_state_outer.Close()
+
+	var player_state_map *ebpf.Map
+	err = player_state_map.Lookup(uint32(cpu), &player_state_inner)
+	if err != nil {
+		fmt.Printf("\nerror: could not lookup player state map for cpu %d: %v\n\n", cpu, err)
+		os.Exit(1)
+	}
+
+	// get input buffer map for our CPU
+
 	input_buffer_outer, err := ebpf.LoadPinnedMap("/sys/fs/bpf/input_buffer_map", nil)
 	if err != nil {
 		fmt.Printf("\nerror: could not get input buffer map: %v\n\n", err)
@@ -57,7 +75,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	// create input ring buffer
+
 	input_buffer, err := ringbuf.NewReader(input_buffer_inner)
+
+	// poll ring buffer to read inputs
 
 	go func() {
 		for {
@@ -68,6 +90,7 @@ func main() {
 			}
 			fmt.Printf("process event (%d bytes)\n", len(record.RawSample))
 			_ = record
+			_ = player_state_map
 		}
 	}()
 
