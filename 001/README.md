@@ -1,28 +1,12 @@
 # 001
 
-To build an FPS with a million players, we're first going to need a way to process player inputs at scale. 
+Let's see if we can process 1M player inputs in an FPS shooter style. 
 
-It won't be possible to have all players simulated on one server, there's simply too much bandwidth and CPU cost for a single machine.
+Send inputs over UDP to the server. 100 byte inputs @ 100HZ.
 
-So let's create a new type of server. A "player server". Each player server handles player input processing and simulation, each with n players connected to them. 
+10 inputs are included in each packet, giving 10X redundancy. If one input packet is lost, the very next one has the lost input, plus the next one we need.
 
-Player servers take the player input + delta time (dt) and step the player state forward in time. Players are simulated forward only when input packets arrive from their client. There is no global tick on a player server. This is similar to how most first person shooters in the quake netcode model process player inputs. For example, Counterstrike, Titanfall and Apex Legends.
-
-The assumptions made here are: 
-
-1. the world is static
-2. each player has a representation of this world in some form that allows for collision detection to be performed
-3. players do not physically collide with each other (common in MMOs)
-
-These assumptions together let us simulate player state forward completely independently of each other. This is how we can unlock 1M player performance.
-
-Player inputs are sent at 100HZ, and each input is 100 bytes long. This is typically an overestimate, inputs are usually much smaller in FPS games. But let's be conservative.
-
-Inputs are sent over UDP because they are time series data and are extremely latency sensitive. All inputs must arrive for simulation, or the client will see mispredictions, because the server state is authoritative. We rely on the client and server running the same simulation on the same inputs and delta times and getting (approximately) the same result. This is known as client side prediction, or outside of game development, optimistic execution with rollback.
-
-We cannot use TCP for this reliability, because head of line blocking would cause significant delays in input delivery under both latency and packet loss. Instead, we send the most recent 10 inputs in each input packet, thus we have 10X redundancy. Inputs are relatively small so this strategy is acceptable, and if one input packet is dropped, the very next packet 1/100th of a second later contains the dropped input PLUS the next input we need to step the player forward. Perfect.
-
-This reliability is performed entirely in XDP, and inputs (excluding redundant ones) are queued up in a bpf perf buffer to be passed down to the userspace player server application for processing.
+Reliability for inputs is performed entirely in XDP, and inputs (excluding redundant ones) are queued up in a bpf perf buffer to be passed down to the userspace player server application for processing.
 
 BPF perf buffers are per-CPU queues that are processed in userspace. This allows us to run player input processing wide across all cores in a machine (at least, the cores that are involved in packet processing).
 
