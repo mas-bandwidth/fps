@@ -110,6 +110,10 @@ func main() {
 
 	input_buffer, err := ringbuf.NewReader(input_buffer_inner)
 
+	// create player map
+
+	playerMap = make(map[uint64]*PlayerData)
+
 	// poll ring buffer to read inputs
 
 	go func() {
