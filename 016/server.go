@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/netip"
 	"os"
-	"strings"
 	"time"
 
 	// "github.com/cilium/ebpf"
