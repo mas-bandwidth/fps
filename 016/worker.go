@@ -17,7 +17,7 @@ import (
 
 const MaxCPUs = 16
 const PlayerInputChanSize = 100000
-const PlayerStateSize = 1008
+const PlayerStateSize = 8 + 1000
 const PlayerTimeout = 15
 
 type PlayerData struct {
@@ -55,9 +55,10 @@ func processInput(input []byte) {
 				for i := range player.state {
 					player.state[i] ^= byte(t) + byte(i)
 				}
+				binary.LittleEndian.PutUint64(packet[packetIndex:], sessionId)
 				err := playerStateMap.Put(sessionId, player.state)
 				if err != nil {
-					fmt.Printf("error: %v\n", err)
+					panic(err)
 				}
 			}
 		}()
