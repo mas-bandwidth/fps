@@ -333,7 +333,7 @@ SEC("xdp") int server_xdp_filter( struct xdp_md *ctx )
 
                                         if ( n == 1 && (void*) payload + 1 + 8 + 8 + 8 + ( 8 + INPUT_SIZE ) <= data_end )
                                         {
-                                            __u8 * event = bpf_ringbuf_reserve( input_buffer, 8 + 8 + 8 + ( 8 + INPUT_SIZE ), 0 );
+                                            __u8 * event = bpf_ringbuf_reserve( input_buffer, 8 + 8 + 8 + INPUT_SIZE, 0 );
                                             if ( !event )
                                             {
                                                 debug_printf( "dropped input :(" );
@@ -343,12 +343,6 @@ SEC("xdp") int server_xdp_filter( struct xdp_md *ctx )
                                             memcpy( event, payload + 1, 8 );
                                             memcpy( event + 8, payload + 1 + 8 + 8 , 8 + 8 + INPUT_SIZE );
 
-/*
-                                            for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ); i++ )
-                                            {
-                                                event[i] = payload[1+i];
-                                            }
-*/
                                             bpf_ringbuf_submit( event, 0 );
                                         }
                                         // todo: update these to ringbuf
