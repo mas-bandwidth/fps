@@ -134,7 +134,7 @@ func main() {
 		ticker := time.NewTicker(time.Second)
 	 	for {
 		 	<-ticker.C
-		 	currentTime := uint64(time.Now.Unix())
+		 	currentTime := uint64(time.Now().Unix())
 		 	for k,v := range playerMap {
 			    if v.lastInputTime + PlayerTimeout < currentTime {
 			    	v.quitChan <- true
