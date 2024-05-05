@@ -36,6 +36,7 @@ func main() {
 	l, err := link.AttachXDP(link.XDPOptions{
 		Program:   objs.ServerXdpFilter,
 		Interface: iface.Index,
+		PinPath:   "/sys/fs/bpf",
 //		Flags:     link.XDPDriverMode,
 	})
 	if err != nil {
