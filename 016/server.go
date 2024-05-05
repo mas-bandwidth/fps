@@ -27,7 +27,12 @@ func main() {
 
 	// Load pre-compiled programs into the kernel.
 	objs := bpfObjects{}
-	if err := loadBpfObjects(&objs, nil); err != nil {
+	opts := ebpf.CollectionOptions{
+		Maps: ebpf.MapOptions{
+			PinPath: "/sys/fs/bpf",
+		},
+	}
+	if err := loadBpfObjects(&objs, &opts); err != nil {
 		log.Fatalf("loading objects: %s", err)
 	}
 	defer objs.Close()
@@ -36,7 +41,6 @@ func main() {
 	l, err := link.AttachXDP(link.XDPOptions{
 		Program:   objs.ServerXdpFilter,
 		Interface: iface.Index,
-		PinPath:   "/sys/fs/bpf",
 //		Flags:     link.XDPDriverMode,
 	})
 	if err != nil {
