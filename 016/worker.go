@@ -17,7 +17,7 @@ import (
 
 const MaxCPUs = 16
 const PlayerInputChanSize = 100000
-const PlayerStateSize = 1000
+const PlayerStateSize = 1008
 const PlayerTimeout = 15
 
 type PlayerData struct {
