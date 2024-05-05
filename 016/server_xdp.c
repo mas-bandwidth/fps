@@ -1,5 +1,3 @@
-//go:build ignore
-
 /*
     FPS server XDP program
 
@@ -449,7 +447,6 @@ SEC("xdp") int server_xdp_filter( struct xdp_md *ctx )
                                     if ( !player_state )
                                     {
                                         debug_printf( "could not find player state for session 0x%llx", session_id );
-                                        debug_printf( "whata the fuck 0x%llx", ( session_id >> 32 ) );
                                         return XDP_DROP;
                                     }
 
