@@ -15,6 +15,9 @@ import (
 
 const MaxCPUs = 16
 
+var cpu int
+var player_state_map *ebpf.Map
+
 func processInput(input []byte) {
 	fmt.Printf("worker %d process input (%d bytes)\n", cpu, len(input))
 }
@@ -30,7 +33,8 @@ func main() {
 
 	signal.Notify(termChan, os.Interrupt, syscall.SIGTERM)
 
-	cpu, err :=	strconv.Atoi(os.Args[1])
+	var err error
+	cpu, err =	strconv.Atoi(os.Args[1])
 	if err != nil {
 		fmt.Printf("error: could not read cpu index\n")
 		os.Exit(1)
@@ -56,7 +60,6 @@ func main() {
 	}
 	defer player_state_outer.Close()
 
-	var player_state_map *ebpf.Map
 	err = player_state_outer.Lookup(uint32(cpu), &player_state_map)
 	if err != nil {
 		fmt.Printf("error: could not lookup player state map for cpu %d: %v\n", cpu, err)
