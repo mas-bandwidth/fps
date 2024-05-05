@@ -92,7 +92,7 @@ func main() {
 				fmt.Printf("error: failed to read from ring buffer: %v\n", err)
 				os.Exit(1)
 			}
-			fmt.Printf("process event (%d bytes)\n", len(record.RawSample))
+			fmt.Printf("worker %d process event (%d bytes)\n", cpu, len(record.RawSample))
 			_ = record
 			// _ = player_state_map
 		}
