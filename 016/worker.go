@@ -53,7 +53,7 @@ func processInput(input []byte) {
 				dt := binary.LittleEndian.Uint64(input[24:])
 				fmt.Printf("player %x process input: t = %x, dt = %x [cpu #%d]\n", player.sessionId, t, dt, cpu)
 				for i := range player.state {
-					player.state[i] ^= byte(state->t) + byte(i)
+					player.state[i] ^= byte(t) + byte(i)
 				}
 			}
 		}()
