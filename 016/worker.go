@@ -16,7 +16,7 @@ import (
 )
 
 const MaxCPUs = 16
-const PlayerInputChanSize = 1024
+const PlayerInputChanSize = 100000
 const PlayerStateSize = 1000
 const PlayerTimeout = 15
 
@@ -33,6 +33,7 @@ var playerMap map[uint64]*PlayerData
 var playerStateMap *ebpf.Map
 
 func processInput(input []byte) {
+	fmt.Printf("process input\n")
 	sessionId := binary.LittleEndian.Uint64(input[:])
 	player := playerMap[sessionId]
 	if player == nil {
