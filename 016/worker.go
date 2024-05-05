@@ -32,7 +32,7 @@ var playerMap map[uint64]*PlayerData
 var playerStateMap *ebpf.Map
 
 func processInput(input []byte) {
-	sessionId := uint64(0) // todo: extract from input
+	sessionId := binary.LittleEndian.Uint64(input[:])
 	player := playerMap[sessionId]
 	if player == nil {
 		fmt.Printf("creating player %x\n", sessionId)
