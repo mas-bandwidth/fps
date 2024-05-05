@@ -52,8 +52,6 @@ func main() {
 	}
 	defer player_state_outer.Close()
 
-	info, err := player_state_outer.Info()
-
 	var player_state_map *ebpf.Map
 	err = player_state_outer.Lookup(uint32(cpu), &player_state_map)
 	if err != nil {
