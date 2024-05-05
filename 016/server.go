@@ -34,7 +34,7 @@ func main() {
 
 	// Attach the program.
 	l, err := link.AttachXDP(link.XDPOptions{
-		Program:   objs.XdpProgFunc,
+		Program:   objs.ServerXdpFilter,
 		Interface: iface.Index,
 	})
 	if err != nil {
