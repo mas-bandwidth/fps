@@ -95,7 +95,7 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
 
     printf( "loading server_xdp...\n" );
 
-    bpf->program = xdp_program__open_file( "server_xdp.o", "server_xdp", NULL );
+    bpf->program = xdp_program__open_file( "server_xdp.o", "xdp", NULL );
     if ( libxdp_get_error( bpf->program ) ) 
     {
         printf( "\nerror: could not load server_xdp program\n\n");
