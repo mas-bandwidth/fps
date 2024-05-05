@@ -45,6 +45,7 @@ func processInput(input []byte) {
 			for {
 				input := <-player.inputChan
 				if len(input) == 1 {
+					fmt.Printf("player %x destroy\n", sessionId)
 					return
 				}
 				player.lastInputTime = uint64(time.Now().Unix())
@@ -136,6 +137,7 @@ func main() {
 		 	currentTime := uint64(time.Now().Unix())
 		 	for k,v := range playerMap {
 			    if v.lastInputTime + PlayerTimeout < currentTime {
+			    	fmt.Printf("cleaning up session %x\n", k)
 			    	v.inputChan <- make([]byte, 1)
 			    	delete(playerMap, k)
 			    }
