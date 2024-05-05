@@ -29,10 +29,11 @@ func processInput(input []byte) {
 	sessionId := uint64(0) // todo: extract from input
 	player := playerMap[sessionId]
 	if player == nil {
+		fmt.Printf("creating player %x\n", sessionId)
 		player = &PlayerData{}
 		playerMap[sessionId] = player
 		player.quitChan = make(chan bool, 1)
-		player.inputChan = make(chan []byte, 1024)
+		player.inputChan = make(chan []byte, 1024) // todo: constant
 		go func(p *PlayerData) {
 			for {
 				input := <-p.inputChan
