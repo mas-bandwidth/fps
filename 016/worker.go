@@ -14,11 +14,14 @@ import (
 )
 
 const MaxCPUs = 16
+const PlayerInputChanSize = 1024
+const PlayerStateSize = 1000
 
 type PlayerData struct {
 	sessionId uint64
 	quitChan  chan bool
 	inputChan chan []byte
+	state     []byte
 }
 
 var cpu int
@@ -34,7 +37,8 @@ func processInput(input []byte) {
 		playerMap[sessionId] = player
 		player.sessionId = sessionId
 		player.quitChan = make(chan bool, 1)
-		player.inputChan = make(chan []byte, 1024) // todo: constant
+		player.inputChan = make(chan []byte, PlayerInputChanSize)
+		player.state = make([]byte, PlayerStateSize)
 		go func(p *PlayerData) {
 			for {
 				input := <-p.inputChan
