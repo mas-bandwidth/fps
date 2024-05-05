@@ -121,6 +121,16 @@ func main() {
 
 	playerMap = make(map[uint64]*PlayerData)
 
+	// periodically clean up the player map
+
+	go func() {
+		ticker := time.NewTicker(time.Second)
+	 	for {
+		 	<-ticker.C:
+		 	fmt.Printf("cleanup tick\n")
+	 	}
+	}()
+
 	// poll ring buffer to read inputs
 
 	go func() {
