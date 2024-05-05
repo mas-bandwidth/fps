@@ -43,7 +43,7 @@ func processInput(input []byte) {
 		go func(p *PlayerData) {
 			for {
 				input := <-p.inputChan
-				fmt.Printf("player %x processing input\n", p.sessionId)
+				fmt.Printf("player %x processing input [cpu #%d]\n", p.sessionId, cpu)
 				// 
 				_ = input
 			}
