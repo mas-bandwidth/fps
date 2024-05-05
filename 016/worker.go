@@ -31,16 +31,17 @@ func processInput(input []byte) {
 	if player == nil {
 		player = &PlayerData{}
 		playerMap[sessionId] = player
-		player.quitChan = make(chan bool)
-		player.inputChan = make(chan []byte)
+		player.quitChan = make(chan bool, 1)
+		player.inputChan = make(chan []byte, 1024)
 		go func(p *PlayerData) {
 			for {
 				input := <-p.inputChan
 				fmt.Printf("player processing input\n")
+				_ = input
 			}
 		}(player)
 	}
-	player <- input
+	player.inputChan <- input
 }
 
 // todo: cleanup thread. if a player has not received any inputs for more than 15 seconds, delete the player
