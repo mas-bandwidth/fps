@@ -45,10 +45,10 @@ func processInput(input []byte) {
 		go func() {
 			for {
 				select {
-				case <-quitChan:
+				case <-player.quitChan:
 					fmt.Printf("destroy player %x\n", player.sessionId)
 					return
-			 	case input := <-ticker.C:
+			 	case input := <-player.inputChan:
 					player.lastInputTime = uint64(time.Now().Unix())
 					fmt.Printf("player %x processing input [cpu #%d]\n", player.sessionId, cpu)
 					// ...
