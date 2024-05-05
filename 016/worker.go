@@ -17,12 +17,14 @@ import (
 const MaxCPUs = 16
 const PlayerInputChanSize = 1024
 const PlayerStateSize = 1000
+const PlayerTimeout = 15
 
 type PlayerData struct {
-	sessionId uint64
-	quitChan  chan bool
-	inputChan chan []byte
-	state     []byte
+	lastInputTime uint64
+	sessionId     uint64
+	quitChan      chan bool
+	inputChan     chan []byte
+	state         []byte
 }
 
 var cpu int
@@ -37,22 +39,26 @@ func processInput(input []byte) {
 		player = &PlayerData{}
 		playerMap[sessionId] = player
 		player.sessionId = sessionId
-		player.quitChan = make(chan bool, 1)
+		player.quitChan = make(chan bool)
 		player.inputChan = make(chan []byte, PlayerInputChanSize)
 		player.state = make([]byte, PlayerStateSize)
-		go func(p *PlayerData) {
+		go func() {
 			for {
-				input := <-p.inputChan
-				fmt.Printf("player %x processing input [cpu #%d]\n", p.sessionId, cpu)
-				// 
-				_ = input
+				select {
+				case <-quitChan:
+					fmt.Printf("destroy player %x\n", player.sessionId)
+					return
+			 	case input := <-ticker.C:
+					player.lastInputTime = uint64(time.Now().Unix())
+					fmt.Printf("player %x processing input [cpu #%d]\n", player.sessionId, cpu)
+					// ...
+					_ = input
+			 	}
 			}
-		}(player)
+		}()
 	}
 	player.inputChan <- input
 }
-
-// todo: cleanup thread. if a player has not received any inputs for more than 15 seconds, delete the player
 
 func main() {
 
@@ -128,7 +134,13 @@ func main() {
 		ticker := time.NewTicker(time.Second)
 	 	for {
 		 	<-ticker.C
-		 	fmt.Printf("cleanup tick\n")
+		 	currentTime := uint64(time.Now.Unix())
+		 	for k,v := range playerMap {
+			    if v.lastInputTime + PlayerTimeout < currentTime {
+			    	v.quitChan <- true
+			    	delete(playerMap, k)
+			    }
+			}
 	 	}
 	}()
 
