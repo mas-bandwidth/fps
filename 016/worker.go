@@ -28,7 +28,7 @@ func main() {
 
 	cpu, err :=	strconv.Atoi(os.Args[1])
 	if err != nil {
-		fmt.Printf("\nerror: could not read cpu index\n\n")
+		fmt.Printf("error: could not read cpu index\n")
 		os.Exit(1)
 	}
 
@@ -36,7 +36,7 @@ func main() {
 		pid := os.Getpid()
 		cmd := exec.Command("taskset", "-pc", fmt.Sprintf("%d", cpu), fmt.Sprintf("%d", pid))
 		if err := cmd.Run(); err != nil {
-			fmt.Printf("\nerror: could not pin process to cpu %d: %v\n\n", cpu, err)
+			fmt.Printf("error: could not pin process to cpu %d: %v\n", cpu, err)
 			os.Exit(1)
 		}	
 	}
@@ -47,24 +47,27 @@ func main() {
 
 	player_state_outer, err := ebpf.LoadPinnedMap("/sys/fs/bpf/player_state_map", nil)
 	if err != nil {
-		fmt.Printf("\nerror: could not get player state map: %v\n\n", err)
+		fmt.Printf("error: could not get player state map: %v\n", err)
 		os.Exit(1)
 	}
 	defer player_state_outer.Close()
 
-/*
+	info, err := player_state_outer.Info()
+
+	fmt.Printf("map %+v\n", info)
+
 	var player_state_map *ebpf.Map
 	err = player_state_map.Lookup(uint32(cpu), &player_state_map)
 	if err != nil {
-		fmt.Printf("\nerror: could not lookup player state map for cpu %d: %v\n\n", cpu, err)
+		fmt.Printf("error: could not lookup player state map for cpu %d: %v\n", cpu, err)
 		os.Exit(1)
 	}
-*/
+
 	// get input buffer map for our CPU
 
 	input_buffer_outer, err := ebpf.LoadPinnedMap("/sys/fs/bpf/input_buffer_map", nil)
 	if err != nil {
-		fmt.Printf("\nerror: could not get input buffer map: %v\n\n", err)
+		fmt.Printf("error: could not get input buffer map: %v\n", err)
 		os.Exit(1)
 	}
 	defer input_buffer_outer.Close()
@@ -72,7 +75,7 @@ func main() {
 	var input_buffer_inner *ebpf.Map
 	err = input_buffer_outer.Lookup(uint32(cpu), &input_buffer_inner)
 	if err != nil {
-		fmt.Printf("\nerror: could not lookup input buffer for cpu %d: %v\n\n", cpu, err)
+		fmt.Printf("error: could not lookup input buffer for cpu %d: %v\n", cpu, err)
 		os.Exit(1)
 	}
 
@@ -86,7 +89,7 @@ func main() {
 		for {
 			record, err := input_buffer.Read()
 			if err != nil {
-				fmt.Printf("\nerror: failed to read from ring buffer: %v\n\n", err)
+				fmt.Printf("error: failed to read from ring buffer: %v\n", err)
 				os.Exit(1)
 			}
 			fmt.Printf("process event (%d bytes)\n", len(record.RawSample))

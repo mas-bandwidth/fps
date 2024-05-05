@@ -38,4 +38,4 @@ A 32 core machine only costs $1,870 USD per-month.
 
 We need 125 machines if we can fit 8k players on each player server.
 
-Now the total cost is $233,750 USD per-month, or just 23.7c per-player per-month.
+Now the total cost is $233,750 USD per-month, or just 23.4c per-player per-month.
