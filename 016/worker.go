@@ -26,7 +26,6 @@ var playerMap map[uint64]*PlayerData
 var playerStateMap *ebpf.Map
 
 func processInput(input []byte) {
-	fmt.Printf("worker %d process input (%d bytes)\n", cpu, len(input))
 	sessionId := uint64(0) // todo: extract from input
 	player := playerMap[sessionId]
 	if player == nil {
