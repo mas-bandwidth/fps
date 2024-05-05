@@ -2,66 +2,54 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net"
+	"net/netip"
 	"os"
-	"os/exec"
-	"runtime"
-	"strconv"
+	"strings"
+	"time"
 
 	"github.com/cilium/ebpf"
-	"github.com/cilium/ebpf/ringbuf"
+	"github.com/cilium/ebpf/link"
 )
 
-const MaxCPUs = 16
+//go:generate go run github.com/cilium/ebpf/cmd/bpf2go bpf server_xdp.c
 
 func main() {
-
-	if len(os.Args) != 2 {
-		fmt.Printf( "\nusage: go run server <cpu_index>\n\n")
-		os.Exit(0)
+	if len(os.Args) < 2 {
+		log.Fatalf("Please specify a network interface")
 	}
 
-	cpu, err :=	strconv.Atoi(os.Args[1])
+	// Look up the network interface by name.
+	ifaceName := os.Args[1]
+	iface, err := net.InterfaceByName(ifaceName)
 	if err != nil {
-		fmt.Printf("\nerror: could not read cpu index\n\n")
-		os.Exit(1)
+		log.Fatalf("lookup network iface %q: %s", ifaceName, err)
 	}
 
-	if runtime.GOOS == "linux" {
-		pid := os.Getpid()
-		cmd := exec.Command("taskset", "-pc", fmt.Sprintf("%d", cpu), fmt.Sprintf("%d", pid))
-		if err := cmd.Run(); err != nil {
-			fmt.Printf("\nerror: could not pin process to cpu %d: %v\n\n", cpu, err)
-			os.Exit(1)
-		}	
+	// Load pre-compiled programs into the kernel.
+	objs := bpfObjects{}
+	if err := loadBpfObjects(&objs, nil); err != nil {
+		log.Fatalf("loading objects: %s", err)
 	}
+	defer objs.Close()
 
-	runtime.GOMAXPROCS(1)
-
-	fmt.Printf("golang server running on cpu %d/%d\n", cpu, MaxCPUs)
-
-	input_buffer_outer, err := ebpf.LoadPinnedMap("/sys/fs/bpf/input_buffer_map", nil)
+	// Attach the program.
+	l, err := link.AttachXDP(link.XDPOptions{
+		Program:   objs.XdpProgFunc,
+		Interface: iface.Index,
+	})
 	if err != nil {
-		fmt.Printf("\nerror: could not get input buffer map: %v\n\n", err)
-		os.Exit(1)
+		log.Fatalf("could not attach XDP program: %s", err)
 	}
-	defer input_buffer_outer.Close()
+	defer l.Close()
 
-	var input_buffer_inner *ebpf.Map
-	err = input_buffer_outer.Lookup(uint32(cpu), &input_buffer_inner)
-	if err != nil {
-		fmt.Printf("\nerror: could not lookup input buffer for cpu %d: %v\n\n", cpu, err)
-		os.Exit(1)
-	}
+	log.Printf("Attached XDP program to iface %q (index %d)", iface.Name, iface.Index)
+	log.Printf("Press Ctrl-C to exit and remove the program")
 
-	input_buffer, err := ringbuf.NewReader(input_buffer_inner)
-
-	var record ringbuf.Record
-	for {
-		err := input_buffer.ReadInto(&record)
-		if err != nil {
-			fmt.Printf("\nerror: failed to read from ring buffer: %v\n\n", err)
-			os.Exit(1)
-		}
-		fmt.Printf("process event\n")
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+	for range ticker.C {
+		fmt.Printf("tick\n")
 	}
 }
