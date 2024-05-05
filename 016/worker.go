@@ -81,7 +81,7 @@ func main() {
 
 	// create input ring buffer
 
-	input_buffer, err := ringbuf.NewReader(input_buffer_inner)
+	input_buffer, err := ringbuf.NewReader(&input_buffer_inner)
 
 	// poll ring buffer to read inputs
 
