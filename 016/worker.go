@@ -55,6 +55,7 @@ func processInput(input []byte) {
 				for i := range player.state {
 					player.state[i] ^= byte(t) + byte(i)
 				}
+				playerStateMap.Put(sessionId, player.state)
 			}
 		}()
 	}
