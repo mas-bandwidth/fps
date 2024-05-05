@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"os/signal"
 	"syscall"
-	// "encoding/binary"
+	"encoding/binary"
 
 	"github.com/cilium/ebpf"
 	"github.com/cilium/ebpf/ringbuf"
@@ -34,7 +34,6 @@ var playerStateMap *ebpf.Map
 
 func processInput(input []byte) {
 	fmt.Printf("process input\n")
-	/*
 	sessionId := binary.LittleEndian.Uint64(input[:])
 	player := playerMap[sessionId]
 	if player == nil {
@@ -47,23 +46,17 @@ func processInput(input []byte) {
 		player.state = make([]byte, PlayerStateSize)
 		go func() {
 			for {
-				select {
-				case <-player.quitChan:
-					fmt.Printf("player %x destroy\n", player.sessionId)
-					return
-			 	case input := <-player.inputChan:
-					player.lastInputTime = uint64(time.Now().Unix())
-					t := binary.LittleEndian.Uint64(input[16:])
-					dt := binary.LittleEndian.Uint64(input[24:])
-					fmt.Printf("player %x process input: t = %x, dt = %x [cpu #%d]\n", player.sessionId, t, dt, cpu)
-					// ...
-					_ = input
-			 	}
+				input := <-player.inputChan:
+				player.lastInputTime = uint64(time.Now().Unix())
+				t := binary.LittleEndian.Uint64(input[16:])
+				dt := binary.LittleEndian.Uint64(input[24:])
+				fmt.Printf("player %x process input: t = %x, dt = %x [cpu #%d]\n", player.sessionId, t, dt, cpu)
+				// ...
+				_ = input
 			}
 		}()
 	}
 	player.inputChan <- input
-	*/
 }
 
 func main() {
