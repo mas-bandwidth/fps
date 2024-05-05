@@ -56,7 +56,7 @@ func main() {
 
 	fmt.Printf("map %+v\n", info)
 
-	var player_state_map *ebpf.Map
+	var player_state_map ebpf.Map
 	err = player_state_map.Lookup(uint32(cpu), &player_state_map)
 	if err != nil {
 		fmt.Printf("error: could not lookup player state map for cpu %d: %v\n", cpu, err)
@@ -72,7 +72,7 @@ func main() {
 	}
 	defer input_buffer_outer.Close()
 
-	var input_buffer_inner *ebpf.Map
+	var input_buffer_inner ebpf.Map
 	err = input_buffer_outer.Lookup(uint32(cpu), &input_buffer_inner)
 	if err != nil {
 		fmt.Printf("error: could not lookup input buffer for cpu %d: %v\n", cpu, err)
