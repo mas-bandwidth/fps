@@ -208,7 +208,7 @@ static __u64 get_server_time()
     return bpf_ktime_get_boot_ns();
 }
 
-SEC("server_xdp") int server_xdp_filter( struct xdp_md *ctx ) 
+SEC("xdp") int server_xdp_filter( struct xdp_md *ctx ) 
 { 
     void * data = (void*) (long) ctx->data; 
 
