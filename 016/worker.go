@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"os/signal"
 	"syscall"
+	"encoding/binary"
 
 	"github.com/cilium/ebpf"
 	"github.com/cilium/ebpf/ringbuf"
