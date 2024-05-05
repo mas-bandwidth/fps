@@ -52,8 +52,9 @@ func processInput(input []byte) {
 				t := binary.LittleEndian.Uint64(input[16:])
 				dt := binary.LittleEndian.Uint64(input[24:])
 				fmt.Printf("player %x process input: t = %x, dt = %x [cpu #%d]\n", player.sessionId, t, dt, cpu)
-				// ...
-				_ = input
+				for i := range player.state {
+					player.state[i] ^= byte(state->t) + byte(i)
+				}
 			}
 		}()
 	}
@@ -137,7 +138,6 @@ func main() {
 		 	currentTime := uint64(time.Now().Unix())
 		 	for k,v := range playerMap {
 			    if v.lastInputTime + PlayerTimeout < currentTime {
-			    	fmt.Printf("cleaning up session %x\n", k)
 			    	v.inputChan <- make([]byte, 1)
 			    	delete(playerMap, k)
 			    }
