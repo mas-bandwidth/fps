@@ -126,7 +126,7 @@ func main() {
 	go func() {
 		ticker := time.NewTicker(time.Second)
 	 	for {
-		 	<-ticker.C:
+		 	<-ticker.C
 		 	fmt.Printf("cleanup tick\n")
 	 	}
 	}()
