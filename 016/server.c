@@ -1,3 +1,5 @@
+//go:build ignore
+
 /*
     FPS server XDP program (Userspace)
 
