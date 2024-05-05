@@ -36,7 +36,7 @@ func processInput(input []byte) {
 	sessionId := binary.LittleEndian.Uint64(input[:])
 	player := playerMap[sessionId]
 	if player == nil {
-		fmt.Printf("creating player %x\n", sessionId)
+		fmt.Printf("player %x create\n", sessionId)
 		player = &PlayerData{}
 		playerMap[sessionId] = player
 		player.sessionId = sessionId
@@ -47,11 +47,11 @@ func processInput(input []byte) {
 			for {
 				select {
 				case <-player.quitChan:
-					fmt.Printf("destroy player %x\n", player.sessionId)
+					fmt.Printf("player %x destroy\n", player.sessionId)
 					return
 			 	case input := <-player.inputChan:
 					player.lastInputTime = uint64(time.Now().Unix())
-					fmt.Printf("player %x processing input [cpu #%d]\n", player.sessionId, cpu)
+					fmt.Printf("player %x process input [cpu #%d]\n", player.sessionId, cpu)
 					// ...
 					_ = input
 			 	}
