@@ -51,7 +51,7 @@ func processInput(input []byte) {
 					return
 			 	case input := <-player.inputChan:
 					player.lastInputTime = uint64(time.Now().Unix())
-					fmt.Printf("player %x input t = xxxxxx, dt = xxxxxx [cpu #%d]\n", player.sessionId, cpu)
+					fmt.Printf("player %x process input: t = xxxxxx, dt = xxxxxx [cpu #%d]\n", player.sessionId, cpu)
 					// ...
 					_ = input
 			 	}
