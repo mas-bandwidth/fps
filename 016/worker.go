@@ -23,7 +23,6 @@ const PlayerTimeout = 15
 type PlayerData struct {
 	lastInputTime uint64
 	sessionId     uint64
-	quitChan      chan bool
 	inputChan     chan []byte
 	state         []byte
 }
@@ -33,7 +32,6 @@ var playerMap map[uint64]*PlayerData
 var playerStateMap *ebpf.Map
 
 func processInput(input []byte) {
-	fmt.Printf("process input\n")
 	sessionId := binary.LittleEndian.Uint64(input[:])
 	player := playerMap[sessionId]
 	if player == nil {
@@ -41,12 +39,14 @@ func processInput(input []byte) {
 		player = &PlayerData{}
 		playerMap[sessionId] = player
 		player.sessionId = sessionId
-		player.quitChan = make(chan bool)
 		player.inputChan = make(chan []byte, PlayerInputChanSize)
 		player.state = make([]byte, PlayerStateSize)
 		go func() {
 			for {
 				input := <-player.inputChan
+				if len(input) == 1 {
+					return
+				}
 				player.lastInputTime = uint64(time.Now().Unix())
 				t := binary.LittleEndian.Uint64(input[16:])
 				dt := binary.LittleEndian.Uint64(input[24:])
@@ -136,7 +136,7 @@ func main() {
 		 	currentTime := uint64(time.Now().Unix())
 		 	for k,v := range playerMap {
 			    if v.lastInputTime + PlayerTimeout < currentTime {
-			    	v.quitChan <- true
+			    	v.inputChan <- make([]byte, 1)
 			    	delete(playerMap, k)
 			    }
 			}
