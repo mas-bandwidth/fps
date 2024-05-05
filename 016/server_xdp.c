@@ -340,11 +340,15 @@ SEC("xdp") int server_xdp_filter( struct xdp_md *ctx )
                                                 return XDP_DROP;
                                             }
                                             
+                                            memcpy( event, payload + 1, 8 );
+                                            memcpy( event + 8, payload + 1 + 8 + 8 , 8 + 8 + INPUT_SIZE );
+
+/*
                                             for ( int i = 0; i < 8 + 8 + 8 + ( 8 + INPUT_SIZE ); i++ )
                                             {
                                                 event[i] = payload[1+i];
                                             }
-
+*/
                                             bpf_ringbuf_submit( event, 0 );
                                         }
                                         // todo: update these to ringbuf
