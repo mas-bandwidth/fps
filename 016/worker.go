@@ -15,12 +15,35 @@ import (
 
 const MaxCPUs = 16
 
+type PlayerData struct {
+	quitChan  chan bool
+	inputChan chan []byte
+}
+
 var cpu int
-var player_state_map *ebpf.Map
+var playerMap map[uint64]*PlayerData
+var playerStateMap *ebpf.Map
 
 func processInput(input []byte) {
 	fmt.Printf("worker %d process input (%d bytes)\n", cpu, len(input))
+	sessionId := uint64(0) // todo: extract from input
+	player := playerMap[sessionId]
+	if player == nil {
+		player = &PlayerData{}
+		playerMap[sessionId] = player
+		player.quitChan = make(chan bool)
+		player.inputChan = make(chan []byte)
+		go func(p *PlayerData) {
+			for {
+				input := <-p.inputChan
+				fmt.Printf("player processing input\n")
+			}
+		}(player)
+	}
+	player <- input
 }
+
+// todo: cleanup thread. if a player has not received any inputs for more than 15 seconds, delete the player
 
 func main() {
 
@@ -60,7 +83,7 @@ func main() {
 	}
 	defer player_state_outer.Close()
 
-	err = player_state_outer.Lookup(uint32(cpu), &player_state_map)
+	err = player_state_outer.Lookup(uint32(cpu), &playerStateMap)
 	if err != nil {
 		fmt.Printf("error: could not lookup player state map for cpu %d: %v\n", cpu, err)
 		os.Exit(1)
