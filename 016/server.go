@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cilium/ebpf"
+	// "github.com/cilium/ebpf"
 	"github.com/cilium/ebpf/link"
 )
 
