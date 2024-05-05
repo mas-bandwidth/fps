@@ -15,6 +15,10 @@ import (
 
 const MaxCPUs = 16
 
+func processInput(input []byte) {
+	fmt.Printf("worker %d process input (%d bytes)\n", cpu, len(input))
+}
+
 func main() {
 
 	if len(os.Args) != 2 {
@@ -82,15 +86,14 @@ func main() {
 	// poll ring buffer to read inputs
 
 	go func() {
+		
 		for {
 			record, err := input_buffer.Read()
 			if err != nil {
 				fmt.Printf("error: failed to read from ring buffer: %v\n", err)
 				os.Exit(1)
 			}
-			fmt.Printf("worker %d process event (%d bytes)\n", cpu, len(record.RawSample))
-			_ = record
-			// _ = player_state_map
+			processInput(record.RawSample)
 		}
 	}()
 
