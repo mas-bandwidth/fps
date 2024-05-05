@@ -46,7 +46,7 @@ func processInput(input []byte) {
 		player.state = make([]byte, PlayerStateSize)
 		go func() {
 			for {
-				input := <-player.inputChan:
+				input := <-player.inputChan
 				player.lastInputTime = uint64(time.Now().Unix())
 				t := binary.LittleEndian.Uint64(input[16:])
 				dt := binary.LittleEndian.Uint64(input[24:])
