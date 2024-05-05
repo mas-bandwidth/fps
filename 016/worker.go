@@ -34,6 +34,7 @@ var playerStateMap *ebpf.Map
 
 func processInput(input []byte) {
 	fmt.Printf("process input\n")
+	/*
 	sessionId := binary.LittleEndian.Uint64(input[:])
 	player := playerMap[sessionId]
 	if player == nil {
@@ -62,6 +63,7 @@ func processInput(input []byte) {
 		}()
 	}
 	player.inputChan <- input
+	*/
 }
 
 func main() {
