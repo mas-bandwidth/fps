@@ -54,8 +54,6 @@ func main() {
 
 	info, err := player_state_outer.Info()
 
-	fmt.Printf("map %+v\n", info)
-
 	var player_state_map *ebpf.Map
 	err = player_state_outer.Lookup(uint32(cpu), &player_state_map)
 	if err != nil {
