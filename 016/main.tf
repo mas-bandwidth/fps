@@ -72,12 +72,12 @@ data "local_file" "shared_h" {
   filename = "shared.h"
 }
 
-data "local_file" "map_h" {
-  filename = "map.h"
-}
-
 data "local_file" "server_c" {
   filename = "server.c"
+}
+
+data "local_file" "worker_go" {
+  filename = "worker.go"
 }
 
 data "local_file" "server_xdp_c" {
@@ -112,12 +112,12 @@ data "archive_file" "source_zip" {
     content  = data.local_file.shared_h.content
   }
   source {
-    filename = "map.h"
-    content  = data.local_file.map_h.content
-  }
-  source {
     filename = "server.c"
     content  = data.local_file.server_c.content
+  }
+  source {
+    filename = "worker.go"
+    content  = data.local_file.worker_go.content
   }
   source {
     filename = "server_xdp.c"
