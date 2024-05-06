@@ -70,6 +70,8 @@ func processInput(input []byte) {
 
 func main() {
 
+	fmt.Printf("worker hello world\n")
+
 	if len(os.Args) != 2 {
 		fmt.Printf( "\nusage: go run worker <cpu_index>\n\n")
 		os.Exit(0)
