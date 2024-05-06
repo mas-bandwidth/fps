@@ -53,8 +53,7 @@ Everything looks fine!
 
 That's 8000 players processing player inputs at 100HZ across 32 worker CPUs.
 
-<img width="802" alt="image" src="https://github.com/mas-bandwidth/fps/assets/696656/d41cc5ac-7d90-415d-972e-f8c803ea7220">
-
 I did notice that it is necessary to call runtime.Gosched() at the end of processing each input, as well as inside the loop that was generating player inputs.
 
 This might be the thing that unlocks performance when run inside ring buffer processing?
+
