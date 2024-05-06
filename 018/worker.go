@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 	"os"
-	"os/exec"
 	"runtime"
 	"strconv"
 	"os/signal"
