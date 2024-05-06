@@ -19,6 +19,7 @@ const MaxCPUs = 16
 const PlayerInputChanSize = 100000
 const PlayerStateSize = 8 + 1000
 const PlayerTimeout = 15
+const InputSize = 8 + 8 + 8 + 100
 
 type PlayerData struct {
 	lastInputTime uint64
@@ -44,7 +45,7 @@ func processInput(input []byte) {
 		go func() {
 			for {
 				input := <-player.inputChan
-				if len(input) == 1 {
+				if len(input) == InputSize {
 					// fmt.Printf("player %x destroy\n", sessionId)
 					return
 				}
@@ -52,20 +53,20 @@ func processInput(input []byte) {
 				t := binary.LittleEndian.Uint64(input[16:])
 				dt := binary.LittleEndian.Uint64(input[24:])
 				// fmt.Printf("player %x process input: t = %x, dt = %x [cpu #%d]\n", player.sessionId, t, dt, cpu)
-				_ = t
-				_ = dt
 				for i := range player.state {
 					player.state[i] ^= byte(t) + byte(i)
 				}
-				binary.LittleEndian.PutUint64(player.state[0:8], sessionId)
+				binary.LittleEndian.PutUint64(player.state[0:8], t+dt)
 				err := playerStateMap.Put(sessionId, player.state)
 				if err != nil {
 					panic(err)
 				}
+				runtime.Gosched()
 			}
 		}()
 	}
 	player.inputChan <- input
+	runtime.Gosched()
 }
 
 func main() {
@@ -84,15 +85,6 @@ func main() {
 	if err != nil {
 		fmt.Printf("error: could not read cpu index\n")
 		os.Exit(1)
-	}
-
-	if runtime.GOOS == "linux" {
-		pid := os.Getpid()
-		cmd := exec.Command("taskset", "-pc", fmt.Sprintf("%d", cpu), fmt.Sprintf("%d", pid))
-		if err := cmd.Run(); err != nil {
-			fmt.Printf("error: could not pin process to cpu %d: %v\n", cpu, err)
-			os.Exit(1)
-		}	
 	}
 
 	runtime.GOMAXPROCS(1)
