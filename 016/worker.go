@@ -52,10 +52,12 @@ func processInput(input []byte) {
 				t := binary.LittleEndian.Uint64(input[16:])
 				dt := binary.LittleEndian.Uint64(input[24:])
 				// fmt.Printf("player %x process input: t = %x, dt = %x [cpu #%d]\n", player.sessionId, t, dt, cpu)
+				_ = t
+				_ = dt
 				for i := range player.state {
 					player.state[i] ^= byte(t) + byte(i)
 				}
-				binary.LittleEndian.PutUint64(packet[packetIndex:], sessionId)
+				binary.LittleEndian.PutUint64(player.state[0:8], sessionId)
 				err := playerStateMap.Put(sessionId, player.state)
 				if err != nil {
 					panic(err)

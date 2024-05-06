@@ -377,7 +377,7 @@ resource "google_compute_instance" "server" {
       NEEDRESTART_SUSPEND=1 apt upgrade -y
       NEEDRESTART_SUSPEND=1 apt dist-upgrade -y
       NEEDRESTART_SUSPEND=1 apt full-upgrade -y
-      NEEDRESTART_SUSPEND=1 apt install libcurl3-gnutls-dev build-essential vim golang-go wget libsodium-dev flex bison clang unzip libc6-dev-i386 gcc-12 dwarves libelf-dev pkg-config m4 libpcap-dev net-tools -y
+      NEEDRESTART_SUSPEND=1 apt install libcurl3-gnutls-dev build-essential vim wget libsodium-dev flex bison clang unzip libc6-dev-i386 gcc-12 dwarves libelf-dev pkg-config m4 libpcap-dev net-tools -y
       NEEDRESTART_SUSPEND=1 apt install linux-headers-`uname -r` linux-tools-`uname -r` -y
       NEEDRESTART_SUSPEND=1 apt autoremove -y
 
@@ -398,7 +398,14 @@ resource "google_compute_instance" "server" {
       make -j && make install
       ldconfig
 
+      cd /usr/local
+      wget https://go.dev/dl/go1.22.2.linux-amd64.tar.gz
+      tar -zxf go*.tar.gz
+
+      export PATH=$PATH:/usr/local/go/bin
+
       cd /app
+      go get 
       make
 
       cp server.service /etc/systemd/system/server.service
