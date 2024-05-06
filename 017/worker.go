@@ -112,7 +112,7 @@ func main() {
 					runtime.Gosched()
 				}
 			}
-			log.Printf("update %d: %d inputs processed\n", t, inputsProcessed)
+			log.Printf("update %d: %d inputs processed on cpu #%d\n", t, inputsProcessed, cpu)
 			t += dt
 	 	}		
 	}()
