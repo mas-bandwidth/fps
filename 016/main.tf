@@ -403,6 +403,10 @@ resource "google_compute_instance" "server" {
       tar -zxf go*.tar.gz
 
       export PATH=$PATH:/usr/local/go/bin
+      export GOPATH=/app
+      export GOCACHE=/tmp
+      go version
+      go env -w GOMODCACHE=$HOME/golang/pkg/mod
 
       cd /app
       go get 
