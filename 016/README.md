@@ -16,4 +16,6 @@ This will keep all ring buffer processing on the same CPU that processed the pac
 
 # Results
 
-...
+Throughput reduces to 14,000 players per-second, which is pathologically low. I believe something must be wrong. 
+
+It's probably a good idea to test on bare metal moving forward instead of google cloud.
