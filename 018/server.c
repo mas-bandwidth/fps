@@ -244,8 +244,8 @@ int main( int argc, char *argv[] )
             fflush( stdout );
             char cpu_string[64];
             sprintf( cpu_string, "%d", i );
-            char * args[] = { "-c", cpu_string, "./worker", cpu_string, 0 };
-            execv( "taskset", args );
+            char * args[] = { "taskset", "-c", cpu_string, "./worker", cpu_string, 0 };
+            execv( "/usr/bin/taskset", args );
             exit(0); 
         } 
     }
