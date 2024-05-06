@@ -20,7 +20,7 @@
 #include <sched.h>
 #include <stdlib.h>
 
-#define MAX_CPUS 16
+#define MAX_CPUS 32
 
 volatile bool quit;
 

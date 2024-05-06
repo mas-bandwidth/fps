@@ -61,3 +61,7 @@ Everything looks fine!
 2024/05/06 15:00:58 update 11: 300000 inputs processed on cpu #9
 2024/05/06 15:00:58 update 11: 300000 inputs processed on cpu #11
 ```
+
+I did notice that it is necessary to call runtime.Gosched() at the end of processing each input, as well as inside the loop that was generating player inputs.
+
+This might be the thing that unlocks performance when run inside ring buffer processing?

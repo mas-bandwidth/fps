@@ -13,7 +13,7 @@ import (
 	"log"
 )
 
-const MaxCPUs = 16
+const MaxCPUs = 32
 const MaxSessions = 250
 const PlayerInputChanSize = 100000
 const PlayerStateSize = 8 + 1000
