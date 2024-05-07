@@ -252,8 +252,6 @@ int main( int argc, char *argv[] )
 
     // main loop
 
-    pin_thread_to_cpu( MAX_CPUS );       // IMPORTANT: keep out of the way of the XDP cpus on google cloud [0,15]
-
     unsigned int num_cpus = libbpf_num_possible_cpus();
 
     uint64_t previous_player_state_packets_sent = 0;
@@ -279,6 +277,8 @@ int main( int argc, char *argv[] )
         {
             current_player_state_packets_sent += values[i].player_state_packets_sent;
         }
+
+        // todo: inputs processed delta
 
         // print out important stats
 
