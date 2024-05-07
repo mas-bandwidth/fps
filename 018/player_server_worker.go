@@ -37,7 +37,7 @@ func processInput(input []byte) {
 	sessionId := binary.LittleEndian.Uint64(input[:])
 	player := playerMap[sessionId]
 	if player == nil {
-		fmt.Printf("player %x create\n", sessionId)
+		// fmt.Printf("player %x create\n", sessionId)
 		player = &PlayerData{}
 		playerMap[sessionId] = player
 		player.sessionId = sessionId
@@ -47,13 +47,13 @@ func processInput(input []byte) {
 			for {
 				input := <-player.inputChan
 				if len(input) == 1 {
-					fmt.Printf("player %x destroy\n", sessionId)
+					// fmt.Printf("player %x destroy\n", sessionId)
 					return
 				}
 				player.lastInputTime = uint64(time.Now().Unix())
 				t := binary.LittleEndian.Uint64(input[8:])
 				dt := binary.LittleEndian.Uint64(input[16:])
-				fmt.Printf("player %x process input: t = %x, dt = %x [cpu #%d]\n", player.sessionId, t, dt, cpu)
+				// fmt.Printf("player %x process input: t = %x, dt = %x [cpu #%d]\n", player.sessionId, t, dt, cpu)
 				for i := range player.state {
 					player.state[i] ^= byte(t) + byte(i)
 				}
@@ -163,6 +163,7 @@ func main() {
 		ticker := time.NewTicker(time.Second)
 	 	for {
 		 	<-ticker.C
+		 	fmt.Printf("update stats: %d\n", inputsProcessed)
 			inputsProcessedMap.Put(&cpu, inputsProcessed)
 	 	}
 	}()
