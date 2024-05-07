@@ -240,7 +240,7 @@ int main( int argc, char *argv[] )
         if ( c == 0 )
         { 
             // child worker process
-            printf( "starting golang worker %d\n", i );
+            printf( "starting golang worker on cpu #%d\n", i );
             fflush( stdout );
             char cpu_string[64];
             sprintf( cpu_string, "%d", i );
