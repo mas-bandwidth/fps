@@ -285,7 +285,7 @@ int main( int argc, char *argv[] )
         // track player state packets sent
 
         struct counters values[num_cpus];
-        memset( &counters, 0, sizeof(values) );
+        memset( &values, 0, sizeof(values) );
 
         int key = 0;
         bpf_map_lookup_elem( bpf.counters_fd, &key, values );
