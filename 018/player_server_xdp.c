@@ -3,7 +3,7 @@
 
     USAGE:
 
-        clang -Ilibbpf/src -g -O2 -target bpf -c server_xdp.c -o server_xdp.o
+        clang -Ilibbpf/src -g -O2 -target bpf -c player_server_xdp.c -o player_server_xdp.o
         sudo cat /sys/kernel/debug/tracing/trace_pipe
 */
 
