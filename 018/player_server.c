@@ -302,7 +302,7 @@ int main( int argc, char *argv[] )
         uint64_t inputs_processed_delta = current_inputs_processed - previous_inputs_processed;
         uint64_t player_state_delta = current_player_state_packets_sent - previous_player_state_packets_sent;
 
-        printf( "inputs processed: %" PRId64 ", player state packets sent: %" PRId64 "\n", inputs_processed_delta, player_state_delta );
+        printf( "inputs processed delta: %" PRId64 ", player state delta: %" PRId64 "\n", inputs_processed_delta, player_state_delta );
 
         previous_inputs_processed = current_inputs_processed;
         previous_player_state_packets_sent = current_player_state_packets_sent;
