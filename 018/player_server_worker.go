@@ -44,7 +44,7 @@ func processInput(input []byte) {
 		go func() {
 			for {
 				input := <-player.inputChan
-				if len(input) == InputSize {
+				if len(input) == 1 {
 					fmt.Printf("player %x destroy\n", sessionId)
 					return
 				}
