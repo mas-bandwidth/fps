@@ -61,6 +61,7 @@ func processInput(input []byte) {
 				if err != nil {
 					panic(err)
 				}
+				inputsProcessed++
 				runtime.Gosched()
 			}
 		}()
@@ -106,6 +107,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	// get inputs processed map
+
+	inputs_processed_map, err := ebpf.LoadPinnedMap("/sys/fs/bpf/inputs_processed_map", nil)
+	if err != nil {
+		fmt.Printf("error: could not get inputs processed map: %v\n", err)
+		os.Exit(1)
+	}
+	defer input_processed_map.Close()
+
 	// get input buffer map for our CPU
 
 	input_buffer_outer, err := ebpf.LoadPinnedMap("/sys/fs/bpf/input_buffer_map", nil)
@@ -143,6 +153,16 @@ func main() {
 			    	delete(playerMap, k)
 			    }
 			}
+	 	}
+	}()
+
+	// update inputs processed map once per-second
+
+	go func() {
+		ticker := time.NewTicker(time.Second)
+	 	for {
+		 	<-ticker.C
+			inputsProcessedMap.Put(&cpu, inputsProcessed)
 	 	}
 	}()
 
