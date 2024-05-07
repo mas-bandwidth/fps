@@ -13,5 +13,6 @@ server_xdp.o: server_xdp.c worker
 
 .PHONY: clean
 clean:
+	rm -f worker
 	rm -f server
 	rm -f *.o
