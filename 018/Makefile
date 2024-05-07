@@ -2,17 +2,18 @@
 KERNEL = $(shell uname -r)
 
 .PHONY: build
-build: server.c server_xdp.o
-	gcc -O2 server.c -o server -lxdp -lbpf -lz -lelf
+build: player_server.c player_server_xdp.o
+	gcc -O2 player_server.c -o player_server -lxdp -lbpf -lz -lelf
 
-worker: worker.go
-	go build worker.go
+worker: player_server_worker.go
+	go build player_server_worker.go
 
-server_xdp.o: server_xdp.c worker
-	clang -O2 -g -Ilibbpf/src -target bpf -c server_xdp.c -o server_xdp.o
+server_xdp.o: player_server_xdp.c player_server_worker
+	clang -O2 -g -Ilibbpf/src -target bpf -c player_server_xdp.c -o player_server_xdp.o
 
 .PHONY: clean
 clean:
-	rm -f worker
-	rm -f server
+	rm -f client
+	rm -f player_server_worker
+	rm -f player_server
 	rm -f *.o
