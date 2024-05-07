@@ -30,6 +30,7 @@ type PlayerData struct {
 var cpu int
 var playerMap map[uint64]*PlayerData
 var playerStateMap *ebpf.Map
+var inputsProcessed uint64
 
 func processInput(input []byte) {
 	sessionId := binary.LittleEndian.Uint64(input[:])
@@ -71,7 +72,7 @@ func processInput(input []byte) {
 func main() {
 
 	if len(os.Args) != 2 {
-		fmt.Printf( "\nusage: go run worker <cpu_index>\n\n")
+		fmt.Printf( "\nusage: ./player_server_worker <cpu_index>\n\n")
 		os.Exit(0)
 	}
 
@@ -86,7 +87,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("golang worker running on cpu #%d\n", cpu)
+	fmt.Printf("player server worker running on cpu #%d\n", cpu)
 
 	runtime.GOMAXPROCS(1)
 

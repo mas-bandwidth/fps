@@ -34,6 +34,7 @@ struct bpf_t
     bool attached_native;
     bool attached_skb;
     int counters_fd;
+    int inputs_processed_fd;
     int server_stats_fd;
 };
 
@@ -142,7 +143,16 @@ int bpf_init( struct bpf_t * bpf, const char * interface_name )
     bpf->counters_fd = bpf_obj_get( "/sys/fs/bpf/counters_map" );
     if ( bpf->counters_fd <= 0 )
     {
-        printf( "\nerror: could not get counters: %s\n\n", strerror(errno) );
+        printf( "\nerror: could not get counters map: %s\n\n", strerror(errno) );
+        return 1;
+    }
+
+    // get the file handle to inputs processed
+
+    bpf->inputs_processed_fd = bpf_obj_get( "/sys/fs/bpf/inputs_processed_map" );
+    if ( bpf->inputs_processed_fd <= 0 )
+    {
+        printf( "\nerror: could not get inputs processed map: %s\n\n", strerror(errno) );
         return 1;
     }
 
@@ -240,7 +250,7 @@ int main( int argc, char *argv[] )
         if ( c == 0 )
         { 
             // child worker process
-            printf( "starting golang worker on cpu #%d\n", i );
+            printf( "starting player server worker on cpu #%d\n", i );
             fflush( stdout );
             char cpu_string[64];
             sprintf( cpu_string, "%d", i );
@@ -254,22 +264,31 @@ int main( int argc, char *argv[] )
 
     unsigned int num_cpus = libbpf_num_possible_cpus();
 
+    uint64_t previous_inputs_processed = 0;
     uint64_t previous_player_state_packets_sent = 0;
 
     while ( !quit )
     {
         usleep( 1000000 );
 
-        // track stats
+        // track inputs processed
+
+        uint64_t current_inputs_processed = 0;
+
+        for ( int i = 0; i < MAX_CPUS; i++ )
+        {
+            uint64_t value = 0;
+            bpf_map_lookup_elem( bpf.inputs_processed_fd, &i, &value );
+            current_inputs_processed += value;
+        }
+
+        // track player state packets sent
 
         struct counters values[num_cpus];
+        memset( &counters, 0, sizeof(values) );
+
         int key = 0;
-        if ( bpf_map_lookup_elem( bpf.counters_fd, &key, values ) != 0 ) 
-        {
-            printf( "\nerror: could not look up counters: %s\n\n", strerror( errno ) );
-            quit = true;
-            break;
-        }
+        bpf_map_lookup_elem( bpf.counters_fd, &key, values );
 
         uint64_t current_player_state_packets_sent = 0;
 
@@ -278,14 +297,14 @@ int main( int argc, char *argv[] )
             current_player_state_packets_sent += values[i].player_state_packets_sent;
         }
 
-        // todo: inputs processed delta
-
         // print out important stats
 
+        uint64_t inputs_processed_delta = current_inputs_processed - previous_inputs_processed;
         uint64_t player_state_delta = current_player_state_packets_sent - previous_player_state_packets_sent;
 
-        printf( "player state delta: %" PRId64 "\n", player_state_delta );
+        printf( "inputs processed: %" PRId64 ", player state packets sent: %" PRId64 "\n", inputs_processed_delta, player_state_delta );
 
+        previous_inputs_processed = current_inputs_processed
         previous_player_state_packets_sent = current_player_state_packets_sent;
 
         // upload stats to the xdp program to be sent down to clients

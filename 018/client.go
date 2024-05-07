@@ -142,8 +142,7 @@ func main() {
 }
 
 func sampleInput(sequence uint64, t uint64, dt uint64) Input {
-	// todo: here you would sample player input, eg. keyboard, mouse or controller
-	return Input{input: make([]byte, 100), sequence: sequence, t: t, dt: dt}
+	return Input{input: make([]byte, InputSize), sequence: sequence, t: t, dt: dt}
 }
 
 func addInput(sequence uint64, inputBuffer []Input, input Input) {

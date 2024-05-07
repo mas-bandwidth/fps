@@ -227,6 +227,14 @@ struct {
     __uint( pinning, LIBBPF_PIN_BY_NAME );
 } counters_map SEC(".maps");
 
+struct {
+    __uint( type, BPF_MAP_TYPE_ARRAY );
+    __uint( max_entries, MAX_CPUS );
+    __type( key, __u32 );
+    __type( value, __u64 );
+    __uint( pinning, LIBBPF_PIN_BY_NAME );
+} inputs_processed_map SEC(".maps");
+
 static void reflect_packet( void * data, int payload_bytes )
 {
     struct ethhdr * eth = data;
@@ -342,7 +350,6 @@ SEC("xdp") int server_xdp_filter( struct xdp_md *ctx )
                                         return XDP_DROP;
                                     }
 
-                                    // todo: try using the same processor id that packets were received on?
                                     int cpu = bpf_get_smp_processor_id();
 
                                     // send the input(s) down to userspace via perf buffer
