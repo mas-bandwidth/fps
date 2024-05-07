@@ -164,7 +164,10 @@ func main() {
 	 	for {
 		 	<-ticker.C
 		 	fmt.Printf("update stats: %d\n", inputsProcessed)
-			inputsProcessedMap.Put(&cpu, inputsProcessed)
+			err := inputsProcessedMap.Put(&cpu, inputsProcessed)
+			if err != nil {
+				panic(err)
+			}
 	 	}
 	}()
 
