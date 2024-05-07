@@ -31,6 +31,7 @@ var cpu int
 var playerMap map[uint64]*PlayerData
 var playerStateMap *ebpf.Map
 var inputsProcessed uint64
+var inputsProcessedMap *ebpf.Map
 
 func processInput(input []byte) {
 	sessionId := binary.LittleEndian.Uint64(input[:])
@@ -92,6 +93,15 @@ func main() {
 
 	runtime.GOMAXPROCS(1)
 
+	// get inputs processed map
+
+	inputsProcessedMap, err = ebpf.LoadPinnedMap("/sys/fs/bpf/inputs_processed_map", nil)
+	if err != nil {
+		fmt.Printf("error: could not get inputs processed map: %v\n", err)
+		os.Exit(1)
+	}
+	defer inputsProcessedMap.Close()
+
 	// get player state map for our CPU
 
 	player_state_outer, err := ebpf.LoadPinnedMap("/sys/fs/bpf/player_state_map", nil)
@@ -106,15 +116,6 @@ func main() {
 		fmt.Printf("error: could not lookup player state map for cpu %d: %v\n", cpu, err)
 		os.Exit(1)
 	}
-
-	// get inputs processed map
-
-	inputs_processed_map, err := ebpf.LoadPinnedMap("/sys/fs/bpf/inputs_processed_map", nil)
-	if err != nil {
-		fmt.Printf("error: could not get inputs processed map: %v\n", err)
-		os.Exit(1)
-	}
-	defer input_processed_map.Close()
 
 	// get input buffer map for our CPU
 
