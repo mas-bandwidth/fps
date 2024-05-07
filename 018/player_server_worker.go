@@ -49,8 +49,8 @@ func processInput(input []byte) {
 					return
 				}
 				player.lastInputTime = uint64(time.Now().Unix())
-				t := binary.LittleEndian.Uint64(input[16:])
-				dt := binary.LittleEndian.Uint64(input[24:])
+				t := binary.LittleEndian.Uint64(input[8:])
+				dt := binary.LittleEndian.Uint64(input[16:])
 				fmt.Printf("player %x process input: t = %x, dt = %x [cpu #%d]\n", player.sessionId, t, dt, cpu)
 				for i := range player.state {
 					player.state[i] ^= byte(t) + byte(i)
