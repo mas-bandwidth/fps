@@ -165,7 +165,7 @@ func main() {
 		 	<-ticker.C
 		 	fmt.Printf("update stats: %d\n", inputsProcessed)
 		 	cpu_uint32 := uint32(int)
-			err := inputsProcessedMap.Put(&cpu_uint32, inputsProcessed)
+			err := inputsProcessedMap.Put(&cpu_uint32, &inputsProcessed)
 			if err != nil {
 				panic(err)
 			}
