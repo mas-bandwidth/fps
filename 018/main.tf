@@ -379,6 +379,7 @@ resource "google_compute_instance" "server" {
       NEEDRESTART_SUSPEND=1 apt full-upgrade -y
       NEEDRESTART_SUSPEND=1 apt install libcurl3-gnutls-dev build-essential vim wget libsodium-dev flex bison clang unzip libc6-dev-i386 gcc-12 dwarves libelf-dev pkg-config m4 libpcap-dev net-tools -y
       NEEDRESTART_SUSPEND=1 apt install linux-headers-`uname -r` linux-tools-`uname -r` -y
+      NEEDRESTART_SUSPEND=1 apt install util-linux
       NEEDRESTART_SUSPEND=1 apt autoremove -y
 
       sudo cp /sys/kernel/btf/vmlinux /usr/lib/modules/`uname -r`/build/
