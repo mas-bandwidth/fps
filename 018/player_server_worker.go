@@ -89,6 +89,7 @@ func processInput(input []byte) {
             os.Exit(1)
         }
         player.conn = conn
+        player.reader = bufio.NewReader(conn)
 
 		go func() {
 
