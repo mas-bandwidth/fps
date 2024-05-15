@@ -28,6 +28,7 @@ type PlayerData struct {
 	inputChan     chan []byte
 	state         []byte
 	conn          net.Conn
+	reader        *bufio.Reader
 }
 
 var cpu int
