@@ -88,6 +88,7 @@ func processInput(input []byte) {
             fmt.Printf("\nerror: could not connect to world database: %v\n\n")
             os.Exit(1)
         }
+        defer conn.Close()
         player.conn = conn
         player.reader = bufio.NewReader(conn)
 
@@ -113,6 +114,15 @@ func processInput(input []byte) {
 				}
 
 				binary.LittleEndian.PutUint64(player.state[0:8], t+dt)
+
+	            player.conn.Write([]byte(string("ping\n")))
+
+				response, err := player.conn.ReadString('\n')
+			    if err != nil {
+			    	panic(err)
+			    }
+
+			    fmt.Printf("response is '%s'\n", response)
 
 				err := playerStateMap.Put(sessionId, player.state)
 				if err != nil {
