@@ -11,7 +11,6 @@ import (
 	"encoding/binary"
     "bufio"
     "net"
-    "strings"
 
 	"github.com/cilium/ebpf"
 	"github.com/cilium/ebpf/ringbuf"
