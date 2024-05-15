@@ -124,7 +124,7 @@ func processInput(input []byte) {
 
 			    fmt.Printf("response is '%s'\n", response)
 
-				err := playerStateMap.Put(sessionId, player.state)
+				err = playerStateMap.Put(sessionId, player.state)
 				if err != nil {
 					panic(err)
 				}
