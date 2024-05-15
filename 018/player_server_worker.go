@@ -11,6 +11,7 @@ import (
 	"encoding/binary"
     "bufio"
     "net"
+    "strings"
 
 	"github.com/cilium/ebpf"
 	"github.com/cilium/ebpf/ringbuf"
@@ -88,7 +89,6 @@ func processInput(input []byte) {
             fmt.Printf("\nerror: could not connect to world database: %v\n\n")
             os.Exit(1)
         }
-        defer conn.Close()
         player.conn = conn
         player.reader = bufio.NewReader(conn)
 
@@ -122,6 +122,8 @@ func processInput(input []byte) {
 			    	panic(err)
 			    }
 
+		        response = strings.TrimSpace(string(response))
+
 			    fmt.Printf("response is '%s'\n", response)
 
 				err = playerStateMap.Put(sessionId, player.state)
@@ -133,6 +135,8 @@ func processInput(input []byte) {
 
 				runtime.Gosched()
 			}
+
+	        conn.Close()
 
 		}()
 
