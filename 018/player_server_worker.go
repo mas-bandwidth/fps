@@ -93,7 +93,9 @@ func processInput(input []byte) {
 
 		        response = strings.TrimSpace(string(response))
 
-			    fmt.Printf("response is '%s'\n", response)
+		        if response != "pong" {
+		        	panic("expected pong")
+		        }
 
 				err = playerStateMap.Put(sessionId, player.state)
 				if err != nil {
