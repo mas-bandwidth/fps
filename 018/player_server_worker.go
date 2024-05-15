@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"time"
 	"os"
+	"os/signal"
 	"runtime"
 	"strconv"
-	"os/signal"
 	"syscall"
 	"encoding/binary"
+    "bufio"
+    "net"
+    "strings"
 
 	"github.com/cilium/ebpf"
 	"github.com/cilium/ebpf/ringbuf"
@@ -25,6 +28,7 @@ type PlayerData struct {
 	sessionId     uint64
 	inputChan     chan []byte
 	state         []byte
+	conn          *net.Conn
 }
 
 var cpu int
@@ -33,41 +37,98 @@ var playerStateMap *ebpf.Map
 var inputsProcessed uint64
 var inputsProcessedMap *ebpf.Map
 
+/*
+func main() {
+        arguments := os.Args
+        if len(arguments) == 1 {
+                fmt.Println("Please provide host:port.")
+                return
+        }
+
+        CONNECT := arguments[1]
+        c, err := net.Dial("tcp", CONNECT)
+        if err != nil {
+                fmt.Println(err)
+                return
+        }
+
+        for {
+                reader := bufio.NewReader(os.Stdin)
+                fmt.Print(">> ")
+                text, _ := reader.ReadString('\n')
+                fmt.Fprintf(c, text+"\n")
+
+                message, _ := bufio.NewReader(c).ReadString('\n')
+                fmt.Print("->: " + message)
+                if strings.TrimSpace(string(text)) == "STOP" {
+                        fmt.Println("TCP client exiting...")
+                        return
+                }
+        }
+}
+*/
+
 func processInput(input []byte) {
+
 	sessionId := binary.LittleEndian.Uint64(input[:])
+
 	player := playerMap[sessionId]
+
 	if player == nil {
+
 		// fmt.Printf("player %x create\n", sessionId)
+
 		player = &PlayerData{}
 		playerMap[sessionId] = player
 		player.sessionId = sessionId
 		player.inputChan = make(chan []byte, PlayerInputChanSize)
 		player.state = make([]byte, PlayerStateSize)
+        conn, err := net.Dial("tcp", "127.0.0.1:50000")
+        if err != nil {
+            fmt.Printf("\nerror: could not connect to world database: %v\n\n")
+            os.Exit(1)
+        }
+        player.conn = conn
+
 		go func() {
+
 			for {
 				input := <-player.inputChan
 				if len(input) == 1 {
 					// fmt.Printf("player %x destroy\n", sessionId)
 					return
 				}
+
 				player.lastInputTime = uint64(time.Now().Unix())
+
 				t := binary.LittleEndian.Uint64(input[8:])
+
 				dt := binary.LittleEndian.Uint64(input[16:])
+
 				// fmt.Printf("player %x process input: t = %x, dt = %x [cpu #%d]\n", player.sessionId, t, dt, cpu)
+
 				for i := range player.state {
 					player.state[i] ^= byte(t) + byte(i)
 				}
+
 				binary.LittleEndian.PutUint64(player.state[0:8], t+dt)
+
 				err := playerStateMap.Put(sessionId, player.state)
 				if err != nil {
 					panic(err)
 				}
+
 				inputsProcessed++
+
 				runtime.Gosched()
 			}
+
 		}()
+
 	}
+
 	player.inputChan <- input
+
 	runtime.Gosched()
 }
 

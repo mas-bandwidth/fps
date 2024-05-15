@@ -49,12 +49,12 @@ func handleConnection(conn net.Conn) {
         line = strings.TrimSpace(string(line))
 
         if line == "ping" {
-            fmt.Printf("%s ping -> pong\n", conn.RemoteAddr().String())            
+            fmt.Printf("%s: ping -> pong\n", conn.RemoteAddr().String())            
             conn.Write([]byte(string("pong\n")))
         }
 
         if line == "quit" {
-            fmt.Printf("%s quits\n", conn.RemoteAddr().String())
+            fmt.Printf("%s: quits\n", conn.RemoteAddr().String())
             break
         }
 
