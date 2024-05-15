@@ -7,18 +7,12 @@ In this version the goals are:
 
 This time regularly yield with runtime.Gosched() at key places and make sure the go workers are actually pinned to the right CPU.
 
-To mock the block on IO implement a simple TCP server in world_database.go with a blocking TCP socket connection per-player. 
+To mock the yield while waiting on blocking IO, implement a simple TCP server in world_database.go with a blocking TCP socket connection per-player. 
 
-When the world database receives "ping" return the response "pong".
-
-Verify the correct pinning to cores with top.
-
-Verify multiple player updates work.
+When the world database receives "ping" it returns the response "pong".
 
 # Results
 
 We can run multiple clients and their inputs get processed correctly. 
 
-The IO block appears to be yielding to other player input processing functions. This is a standard feature of golang, so no surprises there.
-
-There's no way we're going to get 8k clients running with the simple TCP socket like this... but in the future we can upgrade the player server <-> world db comms now that we've shown the player server works with goroutines.
+The IO block appears to be yielding to other player input processing functions.
