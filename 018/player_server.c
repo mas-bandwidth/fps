@@ -311,6 +311,7 @@ int main( int argc, char *argv[] )
 
         struct server_stats stats;
         memset( &stats, 0, sizeof(stats) );
+        stats.inputs_processed = current_inputs_processed;
         stats.player_state_packets_sent = current_player_state_packets_sent;
 
         int err = bpf_map_update_elem( bpf.server_stats_fd, &key, &stats, BPF_ANY );
