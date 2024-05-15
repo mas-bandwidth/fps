@@ -117,7 +117,7 @@ func processInput(input []byte) {
 
 	            player.conn.Write([]byte(string("ping\n")))
 
-				response, err := player.conn.ReadString('\n')
+				response, err := player.reader.ReadString('\n')
 			    if err != nil {
 			    	panic(err)
 			    }
