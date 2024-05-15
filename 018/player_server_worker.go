@@ -27,7 +27,7 @@ type PlayerData struct {
 	sessionId     uint64
 	inputChan     chan []byte
 	state         []byte
-	conn          *net.Conn
+	conn          net.Conn
 }
 
 var cpu int
