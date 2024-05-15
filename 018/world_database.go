@@ -42,7 +42,6 @@ func handleConnection(conn net.Conn) {
 
         line, err := reader.ReadString('\n')
         if err != nil {
-            fmt.Printf("error: could not read line: %v\n", err)
             return
         }
 
@@ -51,11 +50,6 @@ func handleConnection(conn net.Conn) {
         if line == "ping" {
             fmt.Printf("%s: ping -> pong\n", conn.RemoteAddr().String())            
             conn.Write([]byte(string("pong\n")))
-        }
-
-        if line == "quit" {
-            fmt.Printf("%s: quits\n", conn.RemoteAddr().String())
-            break
         }
 
     }
