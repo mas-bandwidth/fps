@@ -55,7 +55,7 @@ func processInput(input []byte) {
 		player.state = make([]byte, PlayerStateSize)
         conn, err := net.Dial("tcp", "127.0.0.1:50000")
         if err != nil {
-            fmt.Printf("\nerror: could not connect to world database: %v\n\n")
+            fmt.Printf("\nerror: could not connect to world database: %v\n\n", err)
             os.Exit(1)
         }
         player.conn = conn

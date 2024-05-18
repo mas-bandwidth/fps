@@ -3,18 +3,13 @@ package main
 import (
     "fmt"
     "net"
-    "io"
     "time"
+    "sync"
     "encoding/binary"
 )
 
 const Port = 50000
 const HistorySize = 1024
-const PlayerStateBytes = 100
-
-const PingPacket = 0
-const PongPacket = 1
-const PlayerStatePacket = 2
 
 type PlayerData struct {
     lastUpdateTime uint64
@@ -24,7 +19,11 @@ type PlayerData struct {
 
 var playerMap map[uint64]*PlayerData
 
+var playerMutex sync.Mutex
+
 func main() {
+
+    playerMap = make(map[uint64]*PlayerData)
 
     listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", Port))
     if err != nil {
@@ -53,58 +52,21 @@ func handleConnection(conn net.Conn) {
 
     for {
 
-        // read packet length
+        packetData := ReceivePacket(conn)
 
-        var buffer [4]byte
-        index := 0
-        for {
-            n, err := conn.Read(buffer[index:4])
-            if err == io.EOF {
-                return
-            }
-            index += n
-            if index == 4 {
-                break
-            }
-        }
-
-        length := binary.LittleEndian.Uint32(buffer[:])
-
-        // quit on zero length
-
-        if length == 0 {
+        if packetData == nil {
             return
         }
-
-        // read packet data
-
-        packetData := make([]byte, length)
-        index = 0
-        for {
-            n, err := conn.Read(buffer[index:length])
-            if err == io.EOF {
-                return
-            }
-            index += n
-            if index == int(length) {
-                break
-            }
-        }
-
-        // handle packet type
 
         switch packetData[0] {
 
         case PingPacket:
 
-            response := [5]byte{}
-            binary.LittleEndian.PutUint32(response[:4], 1)
-            response[4] = PongPacket
-            conn.Write(response[:])
+            SendPongPacket(conn)
 
         case PlayerStatePacket:
 
-            if len(packetData) < 1 + 8 + 8 + 8 {
+            if len(packetData) != 1 + 8 + 8 + 8 + PlayerStateBytes {
                 return
             }
         
@@ -112,6 +74,8 @@ func handleConnection(conn net.Conn) {
             frame := binary.LittleEndian.Uint64(packetData[1+8:1+8+8])
             t := binary.LittleEndian.Uint64(packetData[1+8+8:1+8+8+8])
         
+            playerMutex.Lock()
+
             player := playerMap[sessionId]
             if player == nil {
                 player = &PlayerData{}
@@ -123,6 +87,8 @@ func handleConnection(conn net.Conn) {
             player.lastUpdateTime = uint64(time.Now().Unix())
             player.t[index] = t
             copy(player.state[index][:], packetData[1+8+8+8:]) 
+
+            playerMutex.Unlock()
         }
     }
 }
