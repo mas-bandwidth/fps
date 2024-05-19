@@ -5,11 +5,12 @@ import (
 	"time"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
     "net"
 )
 
-const NumPlayers = 200
+const NumPlayers = 1000
 
 var playerUpdates uint64
 
@@ -51,7 +52,7 @@ func updatePlayers() {
 		        }
 
 		        SendPlayerStatePacket(conn, sessionId, frame, t, state)
-
+		        
 		        t += dt
 		        frame++
 
@@ -59,6 +60,8 @@ func updatePlayers() {
 		 	}
 
 		}(uint64(i))
+
+		time.Sleep(time.Millisecond)
 	}
 }
 
@@ -75,6 +78,8 @@ func printStats() {
 }
 
 func main() {
+
+	runtime.GOMAXPROCS(1)
 
 	termChan := make(chan os.Signal, 1)
 

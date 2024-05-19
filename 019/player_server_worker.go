@@ -17,7 +17,6 @@ import (
 	"github.com/cilium/ebpf/ringbuf"
 )
 
-const MaxCPUs = 32
 const PlayerInputChanSize = 100000
 const PlayerStateSize = 8 + 1000
 const PlayerTimeout = 15
