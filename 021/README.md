@@ -1,41 +1,29 @@
-# 020
+# 021
 
-In this version we try to improve TCP server performance for the world database.
+In this version we implement method for the player server to apply damage to another player.
 
-Split up into 250 players per-CPU, then run multiple player instances to simulate the player server (I'm travelling so I don't have access to my linux bare metal machines in my office).
+We cannot just send this event to the world database, since the world database does not own the real player state, only a history of shallow state per-player that is read only.
 
-Some promising libraries to evaluate:
+So we must have a connection from each player server to other player servers, where we can send events.
 
-https://github.com/maurice2k/tcpserver
-https://betterprogramming.pub/gain-the-new-fastest-go-tcp-framework-40ec111d40e6
-https://gnet.host
+For example, "apply damage: [health to subtract]".
+
+The question should be, how do we route from player server to the correct other player server?
+
+To keep it general, maybe we could keep a map of session id -> player server the are on, and broadcast from each player server to each other player server?
+
+eg. broadcast out player join [session id] and player leave [session id]?
+
+And then following this we can track where each player is across player servers, and automatically route to the correct player server instance.
+
+Hmmmm. But then when a new player server instance connects, it must be told -- on join, the entire state of all players connected to all other player server instances.
+
+And when a player server shuts down, it must broadcast to other player server instances that it is leaving the mesh.
+
+Thinking about this some more I really don't want to implement a service mesh or peer-to-peer thing between the player servers.
+
+I think I will cop it out and have an "index server" which is tracking things globally, and then player servers can each connect to it, rather than O(n^2), and get updated on player servers connecting, disconnecting, and on players joining and leaving.
 
 # Results
 
-With maurice2k/tcpserver can still only do up to around 1000 players before it can't keep up.
-
-With the bandwidth I'm sending, for 1000 players I have:
-
-100 bytes * 100 * 1000 = 10,000,000 bytes per-second, = 80000000 bits per-second = 80 mbit/sec.
-
-Which I should hope I should be able to do on my macbook air m2 over localhost?
-
-Let's try gnet instead to see if it's faster...
-
-Looks like gnet is built on https://github.com/tidwall/evio
-
-Seems that the big win with TCP is to replace select with epoll on Linux.
-
-https://en.wikipedia.org/wiki/Epoll
-
-I don't think I can go much further with MacOS testing. Time to switch to Linux.
-
-Notes on further TCP scalability in C: 
-
-https://jackiedinh8.medium.com/1m-tcp-connections-in-c-511da0b1a283
-
-The good thing is that there is an existence proof this is possible. We can have 10k TCP clients per-server and it is an expected, fairly standard benchmark that we should be able to meet.
-
-My guess is that the best way to get there is to use evio with TCP in golang, and switch to epoll and away from one goroutine polling sockets per-connection.
-
-Moving forward, I feel confident that this can be achieved. So I will focus more effort now on implementing functionality in the world server instead, and switch back to scalability over TCP when I have access to Linux machines again.
+...

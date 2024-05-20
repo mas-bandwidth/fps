@@ -34,7 +34,7 @@ func main() {
         os.Exit(1)
     }
 
-    fmt.Printf("world database is listening on port %d\n", Port)
+    fmt.Printf("world database started on port %d\n", Port)
 
     server.SetRequestHandler(requestHandler)
     server.Listen()
@@ -53,11 +53,11 @@ func requestHandler(conn tcpserver.Connection) {
 
         switch packetData[0] {
 
-        case PingPacket:
+        case WorldDatabasePacket_Ping:
 
-            SendPongPacket(conn)
+            SendWorldDatabasePacket_Pong(conn)
 
-        case PlayerStatePacket:
+        case WorldDatabasePacket_PlayerState:
 
             if len(packetData) != 1 + 8 + 8 + 8 + PlayerStateBytes {
                 return

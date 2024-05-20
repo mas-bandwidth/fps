@@ -16,7 +16,7 @@ player_server_xdp.o: player_server_xdp.c player_server_worker
 else
 
 .PHONY: build
-build: player world_database client
+build: client player world_database index_server
 
 endif
 
@@ -28,6 +28,9 @@ client: client.go
 
 world_database: world_database.go
 	go build world_database.go packets.go
+
+index_server: index_server.go
+	go build index_server.go packets.go
 
 .PHONY: clean
 clean:
