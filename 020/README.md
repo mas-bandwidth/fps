@@ -24,4 +24,8 @@ Let's try gnet instead to see if it's faster...
 
 Looks like gnet is built on https://github.com/tidwall/evio
 
-Maybe try using evio directly?
+Seems that the big with with TCP is to replace select with epoll on Linux.
+
+https://en.wikipedia.org/wiki/Epoll
+
+I don't think I can go much further with MacOS testing. Time to switch to Linux.
