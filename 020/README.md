@@ -1,23 +1,27 @@
-# 019
+# 020
 
-Prototype sending shallow player state from the player server to the world database.
+In this version we try to improve TCP server performance for the world database.
 
-The world database stores this per-player state in one second ring buffer per-player.
-
-At the same time, switch from a text protocal to binary over TCP.
-
-# Results
-
-With naive TCP I can send one ping/pong per-player update, and player state to the world database for around 1000 players across all threads.
-
-Adjusting so that everything is pinned to the same CPU, I still get the same results.
-
-I'm pretty sure this means the bottleneck is not the golang program, but the system CPU usage processing the TCP stack in the kernel.
-
-Next, I'll need to investigate faster ways to implement the TCP server for the world database.
+Split up into 250 players per-CPU, then run multiple player instances to simulate the player server (I'm travelling so I don't have access to my linux bare metal machines in my office).
 
 Some promising libraries to evaluate:
 
 https://github.com/maurice2k/tcpserver
 https://betterprogramming.pub/gain-the-new-fastest-go-tcp-framework-40ec111d40e6
 https://gnet.host
+
+# Results
+
+With maurice2k/tcpserver can still only do up to around 1000 players before it can't keep up.
+
+With the bandwidth I'm sending, for 1000 players I have:
+
+100 bytes * 100 * 1000 = 10,000,000 bytes per-second, = 80000000 bits per-second = 80 mbit/sec.
+
+Which I should hope I should be able to do on my macbook air m2 over localhost?
+
+Let's try gnet instead to see if it's faster...
+
+Looks like gnet is built on https://github.com/tidwall/evio
+
+Maybe try using evio directly?

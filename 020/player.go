@@ -10,7 +10,7 @@ import (
     "net"
 )
 
-const NumPlayers = 1000
+const NumPlayers = 250
 
 var playerUpdates uint64
 

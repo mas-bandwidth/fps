@@ -2,10 +2,12 @@ package main
 
 import (
     "fmt"
-    "net"
     "time"
     "sync"
+    "os"
     "encoding/binary"
+
+    "github.com/maurice2k/tcpserver"
 )
 
 const Port = 50000
@@ -25,30 +27,21 @@ func main() {
 
     playerMap = make(map[uint64]*PlayerData)
 
-    listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", Port))
+    server, err := tcpserver.NewServer(fmt.Sprintf("127.0.0.1:%d", Port))
+
     if err != nil {
-        fmt.Printf("error: could not listen on tcp socket: %v\n", err)
-        return
+        fmt.Printf("error: could not start tcp server: %v\n", err)
+        os.Exit(1)
     }
-    defer listener.Close()
 
     fmt.Printf("world database is listening on port %d\n", Port)
 
-    for {
-        conn, err := listener.Accept()
-        if err != nil {
-            fmt.Printf("error: could not accept client connection: %v\n", err)
-            continue
-        }
-        go handleConnection(conn)
-    }
+    server.SetRequestHandler(requestHandler)
+    server.Listen()
+    server.Serve()
 }
 
-func handleConnection(conn net.Conn) {
-
-    fmt.Printf("new connection from %s\n", conn.RemoteAddr().String())
-
-    defer conn.Close()
+func requestHandler(conn tcpserver.Connection) {
 
     for {
 
