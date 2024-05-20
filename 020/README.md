@@ -24,7 +24,7 @@ Let's try gnet instead to see if it's faster...
 
 Looks like gnet is built on https://github.com/tidwall/evio
 
-Seems that the big with with TCP is to replace select with epoll on Linux.
+Seems that the big win with TCP is to replace select with epoll on Linux.
 
 https://en.wikipedia.org/wiki/Epoll
 
