@@ -1,33 +1,21 @@
 # 021
 
-In this version we work through a player raycasting to on a server, hitting another player and applying damage to that player.
+In this version we start to work through a player raycasting to on a server, hitting another player and applying damage to that player.
 
-We cannot just send this event to the world database, since the world database does not own the real player state, and cannot modify the player health.
+We cannot just send this damage player event to the world database, since the world database does not own the real player state, and cannot modify the player health.
 
-So we must have a connection from each player server to other player servers, where we can send events.
+So we must have a connection from each player server to other player servers, where we can send events to affect other players.
 
 For example, "apply damage: [health to subtract]" -> player server that player is on.
 
-The question should be, how do we route from player server to the correct other player server?
+But then the question becomes, how do we route from player server to the correct other player server?
 
+The general idea moving forward is that now we have an "index server", which tracks the set of player servers active (and eventually also the definition of the world, world servers, and the world database servers assigned to it).
 
-Rework below, it's out of date...
-********
-To keep it general, maybe we could keep a map of session id -> player server the are on, and broadcast from each player server to each other player server?
+The player server connects to the index server on startup and is assigned a uint32 tag that identifies this player server globally in the system.
 
-eg. broadcast out player join [session id] and player leave [session id]?
+Every second the player server gets an updated list of all player servers active from the index server, so it can locally mirror the hash looking up player server addresses from tags.
 
-And then following this we can track where each player is across player servers, and automatically route to the correct player server instance.
+Then, in the future when we implement a raycast, the raycast would go out to the world databases via an async call, and the response would include both a tag, and a session id that identifies both the player and the player server the player is on.
 
-Hmmmm. But then when a new player server instance connects, it must be told -- on join, the entire state of all players connected to all other player server instances.
-
-And when a player server shuts down, it must broadcast to other player server instances that it is leaving the mesh.
-
-Thinking about this some more I really don't want to implement a service mesh or peer-to-peer thing between the player servers.
-
-I think I will cop it out and have an "index server" which is tracking things globally, and then player servers can each connect to it, rather than O(n^2), and get updated on player servers connecting, disconnecting, and on players joining and leaving.
-*******
-
-# Results
-
-...
+This way we can then send a damage player command to the correct player server if the raycast hits anything.

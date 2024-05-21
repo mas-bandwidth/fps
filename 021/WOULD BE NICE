@@ -1,9 +1,0 @@
-WOULD BE NICE
-
------------
-
-Would be really nice for world database cells to be represented simply as a convex volume, eg. a set of planes within which if the player happens to be within those planes then the player shallow state is sent to that world database.
-
-This way the action of the player servers could be completely decoupled from the geometry of the world databases.
-
------------

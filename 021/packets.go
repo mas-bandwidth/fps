@@ -19,19 +19,6 @@ type ServerData struct {
     address     *net.TCPAddr
 }
 
-type WorldConfig struct {
-    gridWidth  uint32
-    gridHeight uint32
-    gridSize   uint64
-    width      uint64
-    height     uint64
-}
-
-func (config *WorldConfig) calcDerived() {
-    config.width = uint64(config.gridWidth) * config.gridSize
-    config.height = uint64(config.gridHeight) * config.gridSize
-}
-
 // ---------------------------------------------------------
 
 func WriteAddress(buffer []byte, address *net.TCPAddr) {

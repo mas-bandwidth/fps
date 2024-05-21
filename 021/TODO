@@ -3,6 +3,18 @@ DONE
 	Modify the index server so it defines the world dimensions and grid size.
 
 TODO
+
+	I think it's important to generalize the definition of the world into zones.
+
+	The zones map to world databases.
+
+	Each zone is defined as a collection of one or more convex volumes.
+
+	This should be generic enough to loosely define any shape.
+
+	While in the 
+
+	-----------
 	
 	On player server connect, send down the definition of the world config to the player server, so it knows it.
 
