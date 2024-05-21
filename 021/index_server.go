@@ -3,13 +3,24 @@ package main
 import (
     "fmt"
     "os"
+    "sync"
+    "math/rand"
 
     "github.com/maurice2k/tcpserver"
 )
 
 const Port = 60000
 
+var playerServerMapByTag     map[uint32]*ServerData
+
+var playerServerMapByAddress map[string]*ServerData
+
+var serverMutex sync.Mutex
+
 func main() {
+
+    playerServerMapByTag = make(map[uint32]*ServerData)
+    playerServerMapByAddress = make(map[string]*ServerData)
 
     server, err := tcpserver.NewServer(fmt.Sprintf("127.0.0.1:%d", Port))
 
@@ -45,11 +56,76 @@ func requestHandler(conn tcpserver.Connection) {
 
         case IndexServerPacket_PlayerServerConnect:
 
-            fmt.Printf("player server %s connected\n", conn.GetClientAddr().String())
+            tag := rand.Uint32()        // todo: track player server tags and make sure unique
+
+            serverAddress := conn.GetClientAddr()
+
+            fmt.Printf("player server %s connected [0x%08x]\n", serverAddress, tag)
+
+            SendIndexServerPacket_PlayerServerConnectResponse(conn, tag)
+
+            serverData := &ServerData{
+                tag:        tag,
+                address:    serverAddress,
+            }
+
+            addressString := serverAddress.String()
+
+            serverMutex.Lock()
+            playerServerMapByTag[tag] = serverData
+            playerServerMapByAddress[addressString] = serverData
+            serverMutex.Unlock()
+
+        case IndexServerPacket_PlayerServerUpdate:
+
+            serverAddress := conn.GetClientAddr()
+
+            serverMutex.Lock()
+            serverData := playerServerMapByAddress[serverAddress.String()]
+            serverMutex.Unlock()
+
+            if serverData == nil {
+                fmt.Printf("warning: unknown player server %s\n", serverAddress)
+                return
+            }
+
+            tag := serverData.tag
+
+            fmt.Printf("player server %s update [0x%08x]\n", serverAddress, tag)
+
+            serverMutex.Lock()
+            playerServers := make([]*ServerData, len(playerServerMapByTag))
+            index := 0
+            for _,v := range playerServerMapByTag {
+                playerServers[index] = v
+                index++
+            }
+            serverMutex.Unlock()
+
+            SendIndexServerPacket_PlayerServerUpdateResponse(conn, playerServers)
 
         case IndexServerPacket_PlayerServerDisconnect:
 
-            fmt.Printf("player server %s disconnected\n", conn.GetClientAddr().String())
+            serverAddress := conn.GetClientAddr()
+
+            addressString := serverAddress.String()
+
+            serverMutex.Lock()
+            serverData := playerServerMapByAddress[addressString]
+            if serverData != nil {
+                delete(playerServerMapByTag, serverData.tag)
+                delete(playerServerMapByAddress, addressString)
+            }
+            serverMutex.Unlock()
+
+            if serverData == nil {
+                fmt.Printf("warning: unknown server %s disconnected\n", addressString)
+                return
+            }
+
+            fmt.Printf("player server %s disconnected [0x%08x]\n", addressString, serverData.tag)
+
+            SendIndexServerPacket_PlayerServerDisconnectResponse(conn)
         }
     }
 }

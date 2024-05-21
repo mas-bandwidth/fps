@@ -12,15 +12,11 @@ DONE
 
 	Make sure that index server sees player server connect
 
-TODO
-
 	Index server generate a tag for player server on connect.
 
 	Respond with tag in player server connect response.
 
 	Player server print out tag post connect, uint32.
-
-	-----------
 
 	Player server sends disconnect packet to index server on quit, waits for response.
 
@@ -28,19 +24,13 @@ TODO
 
 	Verify that player server shuts down clean on CTRL-C
 
-	-----------
-
 	Index server track the map of player servers under mutex, indexed by tag.
 
+	Disconnect player server looks up tag for server and prints it correctly
+
+TODO
+
 	Send down the player server connect response with all connected player servers at the time (excluding current connecting player server).
-
-	-----------
-
-	Concept of player server tag, eg. n
-
-	This way when I track what player server a player is on, I can respond with tag, instead of the address of the server
-
-	Player servers need to track the other player servers, and maintain a map of tag -> player server address.
 
 	-----------
 
@@ -54,17 +44,11 @@ TODO
 
 	-----------
 
-	Index server tracks which player server players are on
-
-	Async function to index server with a session id, will tell you which player server it is on, or NULL if unknown.
-
-	-----------
-
 	World server keeps track of which player server a player is on, via the player shallow state update.
 
 	Hack up world server raycast (pick random player)
 
-	When player is returned 
+	When player is returned pass tag + session id
 
 	-----------
 

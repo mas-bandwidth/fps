@@ -15,7 +15,7 @@ player_server_xdp.o: player_server_xdp.c player_server_worker
 
 else
 
-.PHONY: build
+.PHONY: build *.go
 build: client player world_database index_server
 
 endif

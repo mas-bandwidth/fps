@@ -9,6 +9,8 @@ import (
 	"syscall"
     "net"
     "math/rand"
+    "encoding/binary"
+    "sync"
 
     "github.com/maurice2k/tcpserver"
 )
@@ -16,6 +18,12 @@ import (
 const NumPlayers = 250
 
 var playerUpdates uint64
+
+var indexServer net.Conn
+var indexServerMutex sync.Mutex
+
+var playerServerMap map[uint32]*ServerData
+var playerServerMapMutex sync.Mutex
 
 func listenForCommands(port int) {
 
@@ -60,39 +68,108 @@ func requestHandler(conn tcpserver.Connection) {
 
 func connectToIndexServer() {
 
-	// connect to index server
+	// open tcp connection to index server
 
 	fmt.Printf( "connecting to index server\n" )
 
-    index_server, err := net.Dial("tcp", "127.0.0.1:60000")
+	var err error
+
+    indexServer, err = net.Dial("tcp", "127.0.0.1:60000")
     if err != nil {
         fmt.Printf("\nerror: could not connect to index server: %v\n\n", err)
         os.Exit(1)
     }
 
-    defer index_server.Close()
+	indexServerMutex.Lock()
 
- 	SendIndexServerPacket_Ping(index_server)
+	// ping it
 
-    pong := ReceivePacket(index_server)
+ 	SendIndexServerPacket_Ping(indexServer)
+
+    pong := ReceivePacket(indexServer)
     if pong == nil {
     	fmt.Printf("disconnected from index server\n")
     	return
     }
 
+	indexServerMutex.Unlock()
+
    	if pong[0] != IndexServerPacket_Pong {
     	panic("expected pong packet")
     }
 
-	fmt.Printf( "connected to index server\n" )
+    // connect to index server logically
 
- 	SendIndexServerPacket_PlayerServerConnect(index_server)
+	fmt.Printf("connected to index server\n")
 
-    // todo: send player server connect packet
+	indexServerMutex.Lock()
 
-    // todo: receive player server connect response packet
+ 	SendIndexServerPacket_PlayerServerConnect(indexServer)
 
-    // todo: goroutine, handle packets sent from the index server
+    packetData := ReceivePacket(indexServer)
+
+	indexServerMutex.Unlock()
+
+    if packetData == nil {
+    	fmt.Printf("disconnected from index server\n")
+        return
+    }
+
+    if packetData[0] != IndexServerPacket_PlayerServerConnectResponse {
+    	panic("expected player server connect response packet")
+    }
+
+    tag := binary.LittleEndian.Uint32(packetData[1:])
+
+    fmt.Printf("player server tag is 0x%08x\n", tag)
+
+    // update player servers from index server
+
+    updatePlayerServers()
+
+    go func() {
+	    ticker := time.NewTicker(time.Second)
+    	for {
+			<-ticker.C
+			updatePlayerServers()
+    	}
+    }()
+
+    // todo: update world servers from index server
+
+    // ...
+
+    // todo: update world database? Do we need direct talk?
+}
+
+func updatePlayerServers() {
+    
+    // update player servers
+
+	indexServerMutex.Lock()
+
+ 	SendIndexServerPacket_PlayerServerUpdate(indexServer)
+
+    packetData := ReceivePacket(indexServer)
+
+	indexServerMutex.Unlock()
+
+    if packetData[0] != IndexServerPacket_PlayerServerUpdateResponse {
+    	panic("expected player server update response packet")
+    }
+
+    numPlayerServers := binary.LittleEndian.Uint32(packetData[1:])
+
+
+
+    index := 1 + 4
+    for i := 0; i < int(numPlayerServers); i++ {
+        tag := binary.LittleEndian.Uint32(packetData[index:])
+        address := ReadAddress(packetData[index+4:])
+        fmt.Printf("[0x%08x] %s\n", tag, address.String())
+        // todo: store tag -> address mapping etc.
+        index += 4 + 6
+    }	
 }
 
 func updatePlayers() {
@@ -162,6 +239,36 @@ func printStats() {
  	}
 }
 
+func cleanShutdown() {
+
+	fmt.Printf("disconnecting\n")
+
+	indexServerMutex.Lock()
+
+ 	SendIndexServerPacket_PlayerServerDisconnect(indexServer)
+
+    packetData := ReceivePacket(indexServer)
+
+	indexServerMutex.Unlock()
+
+    if packetData == nil {
+    	fmt.Printf("disconnected from index server\n")
+        return
+    }
+
+    if packetData[0] != IndexServerPacket_PlayerServerDisconnectResponse {
+    	panic("expected player server disconnect response packet")
+    }
+
+    indexServer.Close()
+
+    playerServerMapMutex.Lock()
+	clear(playerServerMap)
+    playerServerMapMutex.Unlock()
+
+	fmt.Printf("disconnected\n")
+}
+
 func main() {
 
 	runtime.GOMAXPROCS(1)
@@ -181,4 +288,6 @@ func main() {
 	go printStats()
 
 	<- termChan
+
+	cleanShutdown()
 }

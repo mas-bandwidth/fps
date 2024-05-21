@@ -8,6 +8,28 @@ import (
 
 const PlayerStateBytes = 100
 
+type ServerData struct {
+    tag         uint32
+    address     *net.TCPAddr
+}
+
+// ---------------------------------------------------------
+
+func WriteAddress(buffer []byte, address *net.TCPAddr) {
+    ipv4 := address.IP.To4()
+    port := address.Port
+    buffer[0] = ipv4[0]
+    buffer[1] = ipv4[1]
+    buffer[2] = ipv4[2]
+    buffer[3] = ipv4[3]
+    buffer[4] = (byte)(port & 0xFF)
+    buffer[5] = (byte)(port >> 8)
+}
+
+func ReadAddress(buffer []byte) *net.TCPAddr {
+    return &net.TCPAddr{IP: net.IPv4(buffer[0], buffer[1], buffer[2], buffer[3]), Port: ((int)(binary.LittleEndian.Uint16(buffer[4:])))}
+}
+
 // ---------------------------------------------------------
 
 const WorldDatabasePacket_Ping = 0
@@ -47,8 +69,8 @@ const IndexServerPacket_PlayerServerConnect = 2
 const IndexServerPacket_PlayerServerConnectResponse = 3
 const IndexServerPacket_PlayerServerDisconnect = 4
 const IndexServerPacket_PlayerServerDisconnectResponse = 5
-const IndexServerPacket_PlayerServerConnected = 6
-const IndexServerPacket_PlayerServerDisconnected = 7
+const IndexServerPacket_PlayerServerUpdate = 6
+const IndexServerPacket_PlayerServerUpdateResponse = 7
 
 func SendIndexServerPacket_Ping(conn net.Conn) {
     ping := [5]byte{}
@@ -69,13 +91,48 @@ func SendIndexServerPacket_PlayerServerConnect(conn net.Conn) {
     binary.LittleEndian.PutUint32(packet[:4], 1)
     packet[4] = IndexServerPacket_PlayerServerConnect
     conn.Write(packet[:])
-    // todo: return tag?
+}
+
+func SendIndexServerPacket_PlayerServerConnectResponse(conn net.Conn, tag uint32) {
+    packet := make([]byte, 4+1+4+4)
+    binary.LittleEndian.PutUint32(packet[:4], uint32(len(packet)-4))
+    packet[4] = IndexServerPacket_PlayerServerConnectResponse
+    binary.LittleEndian.PutUint32(packet[1+4:], tag)
+    conn.Write(packet[:])
 }
 
 func SendIndexServerPacket_PlayerServerDisconnect(conn net.Conn) {
     packet := [5]byte{}
     binary.LittleEndian.PutUint32(packet[:4], 1)
     packet[4] = IndexServerPacket_PlayerServerDisconnect
+    conn.Write(packet[:])
+}
+
+func SendIndexServerPacket_PlayerServerDisconnectResponse(conn net.Conn) {
+    packet := [5]byte{}
+    binary.LittleEndian.PutUint32(packet[:4], 1)
+    packet[4] = IndexServerPacket_PlayerServerDisconnectResponse
+    conn.Write(packet[:])
+}
+
+func SendIndexServerPacket_PlayerServerUpdate(conn net.Conn) {
+    packet := [5]byte{}
+    binary.LittleEndian.PutUint32(packet[:4], 1)
+    packet[4] = IndexServerPacket_PlayerServerUpdate
+    conn.Write(packet[:])
+}
+
+func SendIndexServerPacket_PlayerServerUpdateResponse(conn net.Conn, playerServers []*ServerData) {
+    packet := make([]byte, 4+1+4+(4+6)*len(playerServers))
+    binary.LittleEndian.PutUint32(packet[:4], uint32(len(packet)-4))
+    packet[4] = IndexServerPacket_PlayerServerUpdateResponse
+    binary.LittleEndian.PutUint32(packet[4+1:], uint32(len(playerServers)))
+    index := 4 + 1 + 4
+    for i := range playerServers {
+        binary.LittleEndian.PutUint32(packet[index:], playerServers[i].tag)
+        WriteAddress(packet[index+4:], playerServers[i].address)
+        index += 4 + 6
+    }
     conn.Write(packet[:])
 }
 

@@ -11,6 +11,7 @@ import (
 )
 
 const Port = 50000
+
 const HistorySize = 1024
 
 type PlayerData struct {
