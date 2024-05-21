@@ -1,42 +1,26 @@
 DONE
 
-	Sketch out index server
-
-	Adjust packets so there are specific packet types per-component, eg. world server ping packet and so on.
-
-	Setup player.go so it has a listen TCP socket, so it has a TCP address that it can tell the index server to listen on.
-
-	Implement player server connect packet
-
-	Implement player server disconnect packet
-
-	Make sure that index server sees player server connect
-
-	Index server generate a tag for player server on connect.
-
-	Respond with tag in player server connect response.
-
-	Player server print out tag post connect, uint32.
-
-	Player server sends disconnect packet to index server on quit, waits for response.
-
-	Index server sends player server disconnect response.
-
-	Verify that player server shuts down clean on CTRL-C
-
-	Index server track the map of player servers under mutex, indexed by tag.
-
-	Disconnect player server looks up tag for server and prints it correctly
-
-	Protect the request/response stream with mutex from the player server to index server, so responses always line up to requests.
-
-	Implement a new packet once per-second to get the updated set of player servers from the index server.
-
-	Verify that the set of player servers updates correctly as player servers come and go.
+	Modify the index server so it defines the world dimensions and grid size.
 
 TODO
+	
+	On player server connect, send down the definition of the world config to the player server, so it knows it.
 
-	We need to track world database, so players can know where they are.
+	-----------
+
+	World database should definitely need to have the 
+
+	-----------
+
+	Implement world database connecting to index server and then being assigned to an open cell. 
+
+	-----------
+
+	Player servers need an update per-second for world database servers
+
+	-----------
+
+	This way I can just spam world database instances and they will autoassign on join.
 
 	-----------
 

@@ -17,7 +17,16 @@ var playerServerMapByAddress map[string]*ServerData
 
 var serverMutex sync.Mutex
 
+var worldConfig WorldConfig
+
 func main() {
+
+    worldConfig.gridWidth = 2
+    worldConfig.gridHeight = 2
+    worldConfig.gridSize = Kilometer
+    worldConfig.calcDerived()
+
+    fmt.Printf("world is a %dx%d grid across (0,0) -> (%.1f, %.1f) kms\n", worldConfig.gridWidth, worldConfig.gridHeight, float64(worldConfig.width)/float64(Kilometer), float64(worldConfig.height)/float64(Kilometer))
 
     playerServerMapByTag = make(map[uint32]*ServerData)
     playerServerMapByAddress = make(map[string]*ServerData)

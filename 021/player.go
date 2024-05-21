@@ -57,8 +57,6 @@ func requestHandler(conn tcpserver.Connection) {
 
         case PlayerServerPacket_Ping:
 
-            fmt.Printf("ping -> pong\n")
-
             SendPlayerServerPacket_Pong(conn)
 
         	// ...

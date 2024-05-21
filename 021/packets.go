@@ -8,9 +8,28 @@ import (
 
 const PlayerStateBytes = 100
 
+const Meter = 1000000
+const Kilometer = 1000 * Meter
+const Centimeter = Meter / 100
+const Millimeter = Meter / 1000
+const Micrometer = Meter / 1000000
+
 type ServerData struct {
     tag         uint32
     address     *net.TCPAddr
+}
+
+type WorldConfig struct {
+    gridWidth  uint32
+    gridHeight uint32
+    gridSize   uint64
+    width      uint64
+    height     uint64
+}
+
+func (config *WorldConfig) calcDerived() {
+    config.width = uint64(config.gridWidth) * config.gridSize
+    config.height = uint64(config.gridHeight) * config.gridSize
 }
 
 // ---------------------------------------------------------
