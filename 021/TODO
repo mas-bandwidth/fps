@@ -8,11 +8,15 @@ TODO
 
 	-----------
 
-	World database should definitely need to have the 
+	Implement world database connecting to index server and then being assigned to an open cell. 
+
+	The world database should be informed post connect which cell it is, and what it's bounds are.
+
+	Initially bounds could be an AABB, but eventually could be a convex zone defined by planes.
 
 	-----------
 
-	Implement world database connecting to index server and then being assigned to an open cell. 
+	I like the idea of having a constant time lookup in a static structure, eg. a grid for taking a position and getting the set of world database zones that are subscribed.
 
 	-----------
 
