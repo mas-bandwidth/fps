@@ -28,19 +28,15 @@ DONE
 
 	Disconnect player server looks up tag for server and prints it correctly
 
+	Protect the request/response stream with mutex from the player server to index server, so responses always line up to requests.
+
+	Implement a new packet once per-second to get the updated set of player servers from the index server.
+
+	Verify that the set of player servers updates correctly as player servers come and go.
+
 TODO
 
-	Send down the player server connect response with all connected player servers at the time (excluding current connecting player server).
-
-	-----------
-
-	Work out how to get multiple players servers running, eg. with HTTP_PORT env var?
-
-	When a player server connects, broadcast out to existing player servers that it has connected.
-
-	When a player server disconnects, broadcast out to existing player servers that it has disconnected.
-
-	Verify that a late connecting player server sees the set of player servers already connected when it connects.
+	We need to track world database, so players can know where they are.
 
 	-----------
 
@@ -53,29 +49,5 @@ TODO
 	-----------
 
 	Implement damage player
-
-	-----------
-
-	Implement index server packets for index server player server connect, index server player server disconnect, sent from player server to the index server.
-
-	Make player server respond to connect message with player server connect response, which will include the set of player servers that are currently connected to the index server.
-
-	Hook up each player server so it connects to the index server on startup, and sends a player server connect message on join, and reads the response.
-
-	Player server should have logs on player server
-
-	Extend the player server to send player server disconnect message to index server when it quits, and to wait for the response (or EOF), so it disconnects clean.
-
-	Add notification messages post-connect, so already connected player servers are notified when new player servers connect or disconnect from the index server.
-
-	Make sure that player servers are tracking the set of other player servers correctly with logs.
-
-	-----------
-
-	Extend to track the set of players on the player server.
-
-	eg. on player server connect, also respond with set of session ids on the player server right now.
-
-	and then as players connect and disconnect from the player server update the index server with this, player joined [session_id] player left [session_id].
 
 	-----------

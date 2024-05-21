@@ -154,14 +154,18 @@ func updatePlayerServers() {
 
 	indexServerMutex.Unlock()
 
+	if packetData == nil {
+		fmt.Printf("error: disconnected from index server\n")
+		os.Exit(1)
+	}
+
     if packetData[0] != IndexServerPacket_PlayerServerUpdateResponse {
     	panic("expected player server update response packet")
     }
 
     numPlayerServers := binary.LittleEndian.Uint32(packetData[1:])
 
-
-
+    fmt.Printf("----------------------------------------\n")
     index := 1 + 4
     for i := 0; i < int(numPlayerServers); i++ {
         tag := binary.LittleEndian.Uint32(packetData[index:])
@@ -170,6 +174,7 @@ func updatePlayerServers() {
         // todo: store tag -> address mapping etc.
         index += 4 + 6
     }	
+    fmt.Printf("----------------------------------------\n")
 }
 
 func updatePlayers() {

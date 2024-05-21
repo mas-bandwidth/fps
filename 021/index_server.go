@@ -50,13 +50,19 @@ func requestHandler(conn tcpserver.Connection) {
 
         case WorldDatabasePacket_Ping:
 
-            fmt.Printf("ping -> pong\n")
-
             SendIndexServerPacket_Pong(conn)
 
         case IndexServerPacket_PlayerServerConnect:
 
-            tag := rand.Uint32()        // todo: track player server tags and make sure unique
+            tag := rand.Uint32()
+            serverMutex.Lock()
+            for {
+                if playerServerMapByTag[tag] == nil {
+                    break
+                }
+                tag = rand.Uint32()
+            }
+            serverMutex.Unlock()
 
             serverAddress := conn.GetClientAddr()
 
