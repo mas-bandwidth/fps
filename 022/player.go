@@ -96,7 +96,7 @@ func connectToIndexServer() {
     	panic("expected pong packet")
     }
 
-    // connect to index server logically
+    // connect to index server
 
 	fmt.Printf("connected to index server\n")
 
@@ -137,7 +137,7 @@ func connectToIndexServer() {
 
     // ...
 
-    // todo: update world database? Do we need direct talk?
+    // todo: update world database? Do we need direct talk? Yes...
 }
 
 func updatePlayerServers() {
@@ -167,10 +167,10 @@ func updatePlayerServers() {
     index := 1 + 4
     for i := 0; i < int(numPlayerServers); i++ {
         tag := binary.LittleEndian.Uint32(packetData[index:])
-        address := ReadAddress(packetData[index+4:])
+        index += 4
+        address := ReadAddress(&index ,packetData)
         fmt.Printf("[0x%08x] %s\n", tag, address.String())
         // todo: store tag -> address mapping etc.
-        index += 4 + 6
     }	
     fmt.Printf("----------------------------------------\n")
 }
@@ -208,8 +208,8 @@ func updatePlayers() {
 
 		        pong := ReceivePacket(world_database)
 		        if pong == nil {
-		        	fmt.Printf("disconnected from world server\n")
-		        	return
+		        	fmt.Printf("error: disconnected from world server\n")
+		        	os.Exit(1)
 		        }
 
 		       	if pong[0] != WorldDatabasePacket_Pong {

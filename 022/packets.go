@@ -2,7 +2,9 @@ package main
 
 import (
 	"io"
+    "fmt"
 	"encoding/binary"
+    "math"
     "net"
 )
 
@@ -19,35 +21,402 @@ type ServerData struct {
     address     *net.TCPAddr
 }
 
-type WorldConfig struct {
-    gridWidth  uint32
-    gridHeight uint32
-    gridSize   uint64
-    width      uint64
-    height     uint64
+const MaxWorldPacketSize = 4 * 1024
+
+// ---------------------------------------------------------
+
+type Vector struct {
+    x int64
+    y int64
+    z int64
 }
 
-func (config *WorldConfig) crunch() {
-    config.width = uint64(config.gridWidth) * config.gridSize
-    config.height = uint64(config.gridHeight) * config.gridSize
-    // todo: build zones
+func (value *Vector) Write(data []byte, index *int) {
+    WriteInt64(data, index, value.x)
+    WriteInt64(data, index, value.y)
+    WriteInt64(data, index, value.z)
+}
+
+func (value *Vector) Read(data []byte, index *int) bool {
+    if !ReadInt64(data, index, &value.x) {
+        return false
+    }
+    if !ReadInt64(data, index, &value.y) {
+        return false
+    }
+    if !ReadInt64(data, index, &value.z) {
+        return false
+    }
+    return true
 }
 
 // ---------------------------------------------------------
 
-func WriteAddress(buffer []byte, address *net.TCPAddr) {
-    ipv4 := address.IP.To4()
-    port := address.Port
-    buffer[0] = ipv4[0]
-    buffer[1] = ipv4[1]
-    buffer[2] = ipv4[2]
-    buffer[3] = ipv4[3]
-    buffer[4] = (byte)(port & 0xFF)
-    buffer[5] = (byte)(port >> 8)
+type Plane struct {
+    normal Vector
+    d      int64
 }
 
-func ReadAddress(buffer []byte) *net.TCPAddr {
-    return &net.TCPAddr{IP: net.IPv4(buffer[0], buffer[1], buffer[2], buffer[3]), Port: ((int)(binary.LittleEndian.Uint16(buffer[4:])))}
+func (value *Plane) Write(data []byte, index *int) {
+    value.normal.Write(data, index)
+    WriteInt64(data, index, value.d)    
+}
+
+func (value *Plane) Read(data []byte, index *int) bool {
+    if !value.normal.Read(data, index) {
+        return false
+    }
+    if !ReadInt64(data, index, &value.d) {
+        return false
+    }
+    return true
+}
+
+// ---------------------------------------------------------
+
+type AABB struct {
+    min Vector
+    max Vector
+}
+
+func (value *AABB) Write(data []byte, index *int) {
+    value.min.Write(data, index)
+    value.max.Write(data, index)
+}
+
+func (value *AABB) Read(data []byte, index *int) bool {
+    if !value.min.Read(data, index) {
+        return false
+    }
+    if !value.max.Read(data, index) {
+        return false
+    }
+    return true
+}
+
+// ---------------------------------------------------------
+
+type Volume struct {
+    bounds AABB
+    planes []Plane
+}
+
+func (value *Volume) Write(data []byte, index *int) {
+    value.bounds.Write(data, index)
+    numPlanes := len(value.planes)
+    WriteInt(data, index, numPlanes)
+    for i := 0; i < numPlanes; i++ {
+        value.planes[i].Write(data, index)
+    }
+}
+
+func (value *Volume) Read(data []byte, index *int) bool {
+    if !value.bounds.Read(data, index) {
+        return false
+    }
+    var numPlanes int
+    if !ReadInt(data, index, &numPlanes) {
+        return false
+    }
+    for i := 0; i < numPlanes; i++ {
+        if !value.planes[i].Read(data, index) {
+            return false
+        }
+    }
+    return true
+}
+
+// ---------------------------------------------------------
+
+type Zone struct {
+    origin  Vector
+    bounds  AABB
+    volumes []Volume
+}
+
+func (value *Zone) Write(data []byte, index *int) {
+    value.origin.Write(data, index)
+    value.bounds.Write(data, index)
+    numVolumes := len(value.volumes)
+    WriteInt(data, index, numVolumes)
+    for i := 0; i < numVolumes; i++ {
+        value.volumes[i].Write(data, index)
+    }
+}
+
+func (value *Zone) Read(data []byte, index *int) bool {
+    if !value.origin.Read(data, index) {
+        return false
+    }
+    if !value.bounds.Read(data, index) {
+        return false
+    }
+    var numVolumes int
+    if !ReadInt(data, index, &numVolumes) {
+        return false
+    }
+    for i := 0; i < numVolumes; i++ {
+        if !value.volumes[i].Read(data, index) {
+            return false
+        }
+    }
+    return true
+}
+
+// ---------------------------------------------------------
+
+type World struct {
+    zones []Zone
+    bounds AABB
+}
+
+func (value *World) Write(data []byte, index *int) {
+    numZones := len(value.zones)
+    WriteInt(data, index, numZones)
+    for i := 0; i < numZones; i++ {
+        value.zones[i].Write(data, index)
+    }
+    value.bounds.Write(data, index)
+}
+
+func (value *World) Read(data []byte, index *int) bool {
+    var numZones int
+    if !ReadInt(data, index, &numZones) {
+        return false
+    }
+    for i := 0; i < numZones; i++ {
+        if !value.zones[i].Read(data, index) {
+            return false
+        }
+    }
+    if !value.bounds.Read(data, index) {
+        return false
+    }
+    return true
+}
+
+// ---------------------------------------------------------
+
+func generateGridWorld(i int64, j int64, k int64, cellSize uint64) *World {
+
+    fmt.Printf("generating grid world: %dx%dx%d\n", i, j, k)
+    
+    world := World{}
+    
+    // todo: generate grid world
+    
+    return &world
+}
+
+// ---------------------------------------------------------
+
+func WriteBool(data []byte, index *int, value bool) {
+    if value {
+        data[*index] = byte(1)
+    } else {
+        data[*index] = byte(0)
+    }
+
+    *index += 1
+}
+
+func WriteUint8(data []byte, index *int, value uint8) {
+    data[*index] = byte(value)
+    *index += 1
+}
+
+func WriteUint16(data []byte, index *int, value uint16) {
+    binary.LittleEndian.PutUint16(data[*index:], value)
+    *index += 2
+}
+
+func WriteUint32(data []byte, index *int, value uint32) {
+    binary.LittleEndian.PutUint32(data[*index:], value)
+    *index += 4
+}
+
+func WriteUint64(data []byte, index *int, value uint64) {
+    binary.LittleEndian.PutUint64(data[*index:], value)
+    *index += 8
+}
+
+func WriteInt64(data []byte, index *int, value int64) {
+    binary.LittleEndian.PutUint64(data[*index:], uint64(value))
+    *index += 8
+}
+
+func WriteInt(data []byte, index *int, value int) {
+    binary.LittleEndian.PutUint64(data[*index:], uint64(value))
+    *index += 8
+}
+
+func WriteFloat32(data []byte, index *int, value float32) {
+    uintValue := math.Float32bits(value)
+    WriteUint32(data, index, uintValue)
+}
+
+func WriteFloat64(data []byte, index *int, value float64) {
+    uintValue := math.Float64bits(value)
+    WriteUint64(data, index, uintValue)
+}
+
+func WriteString(data []byte, index *int, value string, maxStringLength uint32) {
+    stringLength := uint32(len(value))
+    if stringLength > maxStringLength {
+        panic("string is too long!\n")
+    }
+    binary.LittleEndian.PutUint32(data[*index:], stringLength)
+    *index += 4
+    for i := 0; i < int(stringLength); i++ {
+        data[*index] = value[i]
+        *index++
+    }
+}
+
+func WriteBytes(data []byte, index *int, value []byte, numBytes int) {
+    for i := 0; i < numBytes; i++ {
+        data[*index] = value[i]
+        *index++
+    }
+}
+
+func WriteAddress(index *int, buffer []byte, address *net.TCPAddr) {
+    ipv4 := address.IP.To4()
+    port := address.Port
+    buffer[*index+0] = ipv4[0]
+    buffer[*index+1] = ipv4[1]
+    buffer[*index+2] = ipv4[2]
+    buffer[*index+3] = ipv4[3]
+    buffer[*index+4] = (byte)(port & 0xFF)
+    buffer[*index+5] = (byte)(port >> 8)
+    *index += 6
+}
+
+// ------------------------------------------------------------------------
+
+func ReadBool(data []byte, index *int, value *bool) bool {
+
+    if *index+1 > len(data) {
+        return false
+    }
+
+    if data[*index] > 0 {
+        *value = true
+    } else {
+        *value = false
+    }
+
+    *index += 1
+    return true
+}
+
+func ReadUint8(data []byte, index *int, value *uint8) bool {
+    if *index+1 > len(data) {
+        return false
+    }
+    *value = data[*index]
+    *index += 1
+    return true
+}
+
+func ReadUint16(data []byte, index *int, value *uint16) bool {
+    if *index+2 > len(data) {
+        return false
+    }
+    *value = binary.LittleEndian.Uint16(data[*index:])
+    *index += 2
+    return true
+}
+
+func ReadUint32(data []byte, index *int, value *uint32) bool {
+    if *index+4 > len(data) {
+        return false
+    }
+    *value = binary.LittleEndian.Uint32(data[*index:])
+    *index += 4
+    return true
+}
+
+func ReadUint64(data []byte, index *int, value *uint64) bool {
+    if *index+8 > len(data) {
+        return false
+    }
+    *value = binary.LittleEndian.Uint64(data[*index:])
+    *index += 8
+    return true
+}
+
+func ReadInt64(data []byte, index *int, value *int64) bool {
+    if *index+8 > len(data) {
+        return false
+    }
+    *value = int64(binary.LittleEndian.Uint64(data[*index:]))
+    *index += 8
+    return true
+}
+
+func ReadInt(data []byte, index *int, value *int) bool {
+    if *index+8 > len(data) {
+        return false
+    }
+    *value = int(binary.LittleEndian.Uint64(data[*index:]))
+    *index += 8
+    return true
+}
+
+func ReadFloat32(data []byte, index *int, value *float32) bool {
+    var intValue uint32
+    if !ReadUint32(data, index, &intValue) {
+        return false
+    }
+    *value = math.Float32frombits(intValue)
+    return true
+}
+
+func ReadFloat64(data []byte, index *int, value *float64) bool {
+    var uintValue uint64
+    if !ReadUint64(data, index, &uintValue) {
+        return false
+    }
+    *value = math.Float64frombits(uintValue)
+    return true
+}
+
+func ReadString(data []byte, index *int, value *string, maxStringLength uint32) bool {
+    var stringLength uint32
+    if !ReadUint32(data, index, &stringLength) {
+        return false
+    }
+    if stringLength > maxStringLength {
+        return false
+    }
+    if *index+int(stringLength) > len(data) {
+        return false
+    }
+    stringData := make([]byte, stringLength)
+    for i := uint32(0); i < stringLength; i++ {
+        stringData[i] = data[*index]
+        *index++
+    }
+    *value = string(stringData)
+    return true
+}
+
+func ReadBytes(data []byte, index *int, value []byte, bytes uint32) bool {
+    if *index+int(bytes) > len(data) {
+        return false
+    }
+    for i := uint32(0); i < bytes; i++ {
+        value[i] = data[*index]
+        *index++
+    }
+    return true
+}
+
+func ReadAddress(index *int, buffer []byte) *net.TCPAddr {
+    address := net.TCPAddr{IP: net.IPv4(buffer[*index+0], buffer[*index+1], buffer[*index+2], buffer[*index+3]), Port: ((int)(binary.LittleEndian.Uint16(buffer[*index+4:])))}
+    *index += 6
+    return &address
 }
 
 // ---------------------------------------------------------
@@ -91,6 +460,8 @@ const IndexServerPacket_PlayerServerDisconnect = 4
 const IndexServerPacket_PlayerServerDisconnectResponse = 5
 const IndexServerPacket_PlayerServerUpdate = 6
 const IndexServerPacket_PlayerServerUpdateResponse = 7
+const IndexServerPacket_WorldRequest = 8
+const IndexServerPacket_WorldResponse = 9
 
 func SendIndexServerPacket_Ping(conn net.Conn) {
     ping := [5]byte{}
@@ -150,10 +521,27 @@ func SendIndexServerPacket_PlayerServerUpdateResponse(conn net.Conn, playerServe
     index := 4 + 1 + 4
     for i := range playerServers {
         binary.LittleEndian.PutUint32(packet[index:], playerServers[i].tag)
-        WriteAddress(packet[index+4:], playerServers[i].address)
-        index += 4 + 6
+        index += 4
+        WriteAddress(&index, packet, playerServers[i].address)
     }
     conn.Write(packet[:])
+}
+
+func SendIndexServerPacket_WorldRequest(conn net.Conn) {
+    packet := [5]byte{}
+    binary.LittleEndian.PutUint32(packet[:4], 1)
+    packet[4] = IndexServerPacket_WorldRequest
+    conn.Write(packet[:])
+}
+
+func SendIndexServerPacket_WorldResponse(conn net.Conn, world *World) {
+    packet := make([]byte, MaxWorldPacketSize)
+    binary.LittleEndian.PutUint32(packet[:4], 1)
+    packet[4] = IndexServerPacket_WorldResponse
+    index := 5
+    world.Write(packet, &index)
+    packet = packet[:index]
+    conn.Write(packet)
 }
 
 // ---------------------------------------------------------

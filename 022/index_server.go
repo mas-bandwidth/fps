@@ -17,16 +17,11 @@ var playerServerMapByAddress map[string]*ServerData
 
 var serverMutex sync.Mutex
 
-var worldConfig WorldConfig
+var world *World
 
 func main() {
 
-    worldConfig.gridWidth = 2
-    worldConfig.gridHeight = 2
-    worldConfig.gridSize = Kilometer
-    worldConfig.calcDerived()
-
-    fmt.Printf("world is a %dx%d grid across (0,0) -> (%.1f, %.1f) kms\n", worldConfig.gridWidth, worldConfig.gridHeight, float64(worldConfig.width)/float64(Kilometer), float64(worldConfig.height)/float64(Kilometer))
+    world = generateGridWorld(2, 2, 1, Kilometer)
 
     playerServerMapByTag = make(map[uint32]*ServerData)
     playerServerMapByAddress = make(map[string]*ServerData)
@@ -66,7 +61,7 @@ func requestHandler(conn tcpserver.Connection) {
             tag := rand.Uint32()
             serverMutex.Lock()
             for {
-                if playerServerMapByTag[tag] == nil {
+                if tag == 0 || playerServerMapByTag[tag] == nil {
                     break
                 }
                 tag = rand.Uint32()

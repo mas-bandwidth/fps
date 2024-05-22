@@ -6,7 +6,9 @@ Now we need to work out which world database (or databases?) should I send the r
 
 I propose that the world will be broken up into a bunch of zones. 
 
-Each zone is defined as the union of one or more convex volumes and maps one-to-one to a world database instance.
+Each zone is defined as the union of one or more convex volumes.
+
+Each zone maps one-to-one to a world database instance.
 
 Each player server shall have a complete mapping of zones at all times, so it can look up a location to the set of world databases that may be relevant to any query.
 
