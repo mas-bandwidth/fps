@@ -20,21 +20,17 @@ DONE
 
 	Rename world database to zone database
 
-TODO
-	
 	Implement code to generate the set of zones and world AABB for a grid cell world.
 
+TODO
+	
+	zones need an id
+
 	-----------
 
-	world server to zone server
+	Zone database connects to index server, and either says, give me any zone (zoneId=0), or give me a specific zone.
 
-	-----------
-
-	Implement world database connecting to index server and then being assigned to an open cell. 
-
-	The world database should be informed post connect which cell it is, and what it's bounds are.
-
-	Initially bounds could be an AABB, but eventually could be a convex zone defined by planes.
+	Zone database gets the world data down from the index server, and then stores its own zone for fast lookup.
 
 	-----------
 

@@ -200,16 +200,7 @@ func requestWorld() {
     	panic("could not read world\n")
     }
 
-    fmt.Printf("world has %d zones\n", len(world.zones))
-
-    fmt.Printf("world bounds are (%d,%d,%d) -> (%d,%d,%d)\n", 
-    	world.bounds.min.x,
-    	world.bounds.min.y,
-    	world.bounds.min.z,
-    	world.bounds.max.x,
-    	world.bounds.max.y,
-    	world.bounds.max.z,
-    )
+    world.Print()
 }
 
 func updatePlayers() {
@@ -241,7 +232,7 @@ func updatePlayers() {
 			for {
 			 	<-ticker.C
 
-			 	SendWorldDatabasePacket_Ping(zone_database)
+			 	SendZoneDatabasePacket_Ping(zone_database)
 
 		        pong := ReceivePacket(zone_database)
 		        if pong == nil {
@@ -249,11 +240,11 @@ func updatePlayers() {
 		        	os.Exit(1)
 		        }
 
-		       	if pong[0] != WorldDatabasePacket_Pong {
+		       	if pong[0] != ZoneDatabasePacket_Pong {
 		        	panic("expected pong packet")
 		        }
 
-		        SendWorldDatabasePacket_PlayerState(zone_database, sessionId, frame, t, state)
+		        SendZoneDatabasePacket_PlayerState(zone_database, sessionId, frame, t, state)
 		        
 		        t += dt
 		        frame++

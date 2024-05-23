@@ -21,7 +21,9 @@ var world *World
 
 func main() {
 
-    world = generateGridWorld(2, 2, 1, Kilometer)
+    world = generateGridWorld(2, 1, 2, Kilometer)
+
+    world.Print()
 
     playerServerMapByTag = make(map[uint32]*ServerData)
     playerServerMapByAddress = make(map[string]*ServerData)
@@ -52,7 +54,7 @@ func requestHandler(conn tcpserver.Connection) {
 
         switch packetData[0] {
 
-        case WorldDatabasePacket_Ping:
+        case ZoneDatabasePacket_Ping:
 
             SendIndexServerPacket_Pong(conn)
 

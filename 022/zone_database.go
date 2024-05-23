@@ -54,11 +54,11 @@ func requestHandler(conn tcpserver.Connection) {
 
         switch packetData[0] {
 
-        case WorldDatabasePacket_Ping:
+        case ZoneDatabasePacket_Ping:
 
-            SendWorldDatabasePacket_Pong(conn)
+            SendZoneDatabasePacket_Pong(conn)
 
-        case WorldDatabasePacket_PlayerState:
+        case ZoneDatabasePacket_PlayerState:
 
             if len(packetData) != 1 + 8 + 8 + 8 + PlayerStateBytes {
                 return

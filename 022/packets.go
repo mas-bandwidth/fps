@@ -118,6 +118,7 @@ func (value *Volume) Read(data []byte, index *int) bool {
     if !ReadInt(data, index, &numPlanes) {
         return false
     }
+    value.planes = make([]Plane, numPlanes)
     for i := 0; i < numPlanes; i++ {
         if !value.planes[i].Read(data, index) {
             return false
@@ -129,12 +130,14 @@ func (value *Volume) Read(data []byte, index *int) bool {
 // ---------------------------------------------------------
 
 type Zone struct {
+    id      uint32
     origin  Vector
     bounds  AABB
     volumes []Volume
 }
 
 func (value *Zone) Write(data []byte, index *int) {
+    WriteUint32(data, index, value.id)
     value.origin.Write(data, index)
     value.bounds.Write(data, index)
     numVolumes := len(value.volumes)
@@ -145,6 +148,9 @@ func (value *Zone) Write(data []byte, index *int) {
 }
 
 func (value *Zone) Read(data []byte, index *int) bool {
+    if !ReadUint32(data, index, &value.id) {
+        return false
+    }
     if !value.origin.Read(data, index) {
         return false
     }
@@ -155,6 +161,7 @@ func (value *Zone) Read(data []byte, index *int) bool {
     if !ReadInt(data, index, &numVolumes) {
         return false
     }
+    value.volumes = make([]Volume, numVolumes)
     for i := 0; i < numVolumes; i++ {
         if !value.volumes[i].Read(data, index) {
             return false
@@ -166,8 +173,42 @@ func (value *Zone) Read(data []byte, index *int) bool {
 // ---------------------------------------------------------
 
 type World struct {
-    bounds AABB
-    zones []Zone
+    bounds  AABB
+    zones   []Zone
+    zoneMap map[uint32]*Zone
+}
+
+func (world *World) Fixup() {
+    world.zoneMap = make(map[uint32]*Zone, len(world.zones))
+    for i := range world.zones {
+        world.zoneMap[world.zones[i].id] = &world.zones[i]
+    }
+}
+
+func (world *World) Print() {
+
+    fmt.Printf("world bounds are (%d,%d,%d) -> (%d,%d,%d)\n", 
+        world.bounds.min.x,
+        world.bounds.min.y,
+        world.bounds.min.z,
+        world.bounds.max.x,
+        world.bounds.max.y,
+        world.bounds.max.z,
+    )
+
+    fmt.Printf("world has %d zones:\n", len(world.zones))
+
+    for i := range world.zones {
+        fmt.Printf(" + 0x%08x: (%d,%d,%d) -> (%d,%d,%d)\n",
+            world.zones[i].id,
+            world.zones[i].bounds.min.x,
+            world.zones[i].bounds.min.y,
+            world.zones[i].bounds.min.z,
+            world.zones[i].bounds.max.x,
+            world.zones[i].bounds.max.y,
+            world.zones[i].bounds.max.z,
+        )
+    }
 }
 
 func (value *World) Write(data []byte, index *int) {
@@ -193,6 +234,7 @@ func (value *World) Read(data []byte, index *int) bool {
             return false
         }
     }
+    value.Fixup()
     return true
 }
 
@@ -214,23 +256,75 @@ func generateGridWorld(i int64, j int64, k int64, cellSize uint64) *World {
 
     index := 0
 
-    for z := int64(0); z < k; z++ {
+    for y := int64(0); y < j; y++ {
 
-        for y := int64(0); y < j; y++ {
+        for z := int64(0); z < k; z++ {
 
             for x := int64(0); x < i; x++ {
 
+                world.zones[index].id = uint32(index) + 1
+
                 world.zones[index].bounds.min.x = x * int64(cellSize)
                 world.zones[index].bounds.min.y = y * int64(cellSize)
-                world.zones[index].bounds.min.x = z * int64(cellSize)
+                world.zones[index].bounds.min.z = z * int64(cellSize)
 
                 world.zones[index].bounds.max.x = (x+1) * int64(cellSize)
                 world.zones[index].bounds.max.y = (y+1) * int64(cellSize)
-                world.zones[index].bounds.max.x = (z+1) * int64(cellSize)
+                world.zones[index].bounds.max.z = (z+1) * int64(cellSize)
 
                 world.zones[index].origin.x = ( world.zones[index].bounds.min.x + world.zones[index].bounds.max.x ) / 2
                 world.zones[index].origin.y = ( world.zones[index].bounds.min.y + world.zones[index].bounds.max.y ) / 2
                 world.zones[index].origin.z = ( world.zones[index].bounds.min.z + world.zones[index].bounds.max.z ) / 2
+
+                world.zones[index].volumes = make([]Volume, 1)
+
+                world.zones[index].volumes[0].bounds = world.zones[index].bounds
+
+                world.zones[index].volumes[0].planes = make([]Plane, 6)
+
+                // left plane
+
+                world.zones[index].volumes[0].planes[0].normal.x = Meter
+                world.zones[index].volumes[0].planes[0].normal.y = 0
+                world.zones[index].volumes[0].planes[0].normal.z = 0
+                world.zones[index].volumes[0].planes[0].d = x * Meter
+
+                // right plane
+
+                world.zones[index].volumes[0].planes[1].normal.x = -Meter
+                world.zones[index].volumes[0].planes[1].normal.y = 0
+                world.zones[index].volumes[0].planes[1].normal.z = 0
+                world.zones[index].volumes[0].planes[1].d = x * Meter + int64(cellSize)
+
+                // bottom plane
+
+                world.zones[index].volumes[0].planes[2].normal.x = 0
+                world.zones[index].volumes[0].planes[2].normal.y = Meter
+                world.zones[index].volumes[0].planes[2].normal.z = 0
+                world.zones[index].volumes[0].planes[2].d = y * Meter
+
+                // top plane
+
+                world.zones[index].volumes[0].planes[3].normal.x = 0
+                world.zones[index].volumes[0].planes[3].normal.y = -Meter
+                world.zones[index].volumes[0].planes[3].normal.z = 0
+                world.zones[index].volumes[0].planes[3].d = y * Meter + int64(cellSize)
+
+                // front plane
+
+                world.zones[index].volumes[0].planes[4].normal.x = 0
+                world.zones[index].volumes[0].planes[4].normal.y = 0
+                world.zones[index].volumes[0].planes[4].normal.z = Meter
+                world.zones[index].volumes[0].planes[4].d = z * Meter
+
+                // back plane
+
+                world.zones[index].volumes[0].planes[5].normal.x = 0
+                world.zones[index].volumes[0].planes[5].normal.y = 0
+                world.zones[index].volumes[0].planes[5].normal.z = -Meter
+                world.zones[index].volumes[0].planes[5].d = z * Meter + int64(cellSize)
+
+                index++
             }
 
         }
@@ -453,28 +547,28 @@ func ReadAddress(index *int, buffer []byte) *net.TCPAddr {
 
 // ---------------------------------------------------------
 
-const WorldDatabasePacket_Ping = 0
-const WorldDatabasePacket_Pong = 1
-const WorldDatabasePacket_PlayerState = 2
+const ZoneDatabasePacket_Ping = 0
+const ZoneDatabasePacket_Pong = 1
+const ZoneDatabasePacket_PlayerState = 2
 
-func SendWorldDatabasePacket_Ping(conn net.Conn) {
+func SendZoneDatabasePacket_Ping(conn net.Conn) {
     ping := [5]byte{}
     binary.LittleEndian.PutUint32(ping[:4], 1)
     ping[4] = PlayerServerPacket_Ping
     conn.Write(ping[:])
 }
 
-func SendWorldDatabasePacket_Pong(conn net.Conn) {
+func SendZoneDatabasePacket_Pong(conn net.Conn) {
     pong := [5]byte{}
     binary.LittleEndian.PutUint32(pong[:4], 1)
     pong[4] = PlayerServerPacket_Pong
     conn.Write(pong[:])
 }
 
-func SendWorldDatabasePacket_PlayerState(conn net.Conn, sessionId uint64, frame uint64, t uint64, state []byte) {
+func SendZoneDatabasePacket_PlayerState(conn net.Conn, sessionId uint64, frame uint64, t uint64, state []byte) {
     packet := [4+1+8+8+8+PlayerStateBytes]byte{}
     binary.LittleEndian.PutUint32(packet[:4], 1+8+8+8+PlayerStateBytes)
-    packet[4] = WorldDatabasePacket_PlayerState
+    packet[4] = ZoneDatabasePacket_PlayerState
     binary.LittleEndian.PutUint64(packet[5:], sessionId)
     binary.LittleEndian.PutUint64(packet[13:], frame)
     binary.LittleEndian.PutUint64(packet[21:], t)
