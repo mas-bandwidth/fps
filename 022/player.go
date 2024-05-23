@@ -222,13 +222,13 @@ func updatePlayers() {
 
 		go func(sessionId uint64) {
 
-	        world_database, err := net.Dial("tcp", "127.0.0.1:50000")
+	        zone_database, err := net.Dial("tcp", "127.0.0.1:50000")
 	        if err != nil {
-	            fmt.Printf("\nerror: could not connect to world database: %v\n\n", err)
+	            fmt.Printf("\nerror: could not connect to zone database: %v\n\n", err)
 	            os.Exit(1)
 	        }
 
-	        defer world_database.Close()
+	        defer zone_database.Close()
 
 	        ticker := time.NewTicker(time.Millisecond*10)
 
@@ -241,11 +241,11 @@ func updatePlayers() {
 			for {
 			 	<-ticker.C
 
-			 	SendWorldDatabasePacket_Ping(world_database)
+			 	SendWorldDatabasePacket_Ping(zone_database)
 
-		        pong := ReceivePacket(world_database)
+		        pong := ReceivePacket(zone_database)
 		        if pong == nil {
-		        	fmt.Printf("error: disconnected from world server\n")
+		        	fmt.Printf("error: disconnected from zone database\n")
 		        	os.Exit(1)
 		        }
 
@@ -253,7 +253,7 @@ func updatePlayers() {
 		        	panic("expected pong packet")
 		        }
 
-		        SendWorldDatabasePacket_PlayerState(world_database, sessionId, frame, t, state)
+		        SendWorldDatabasePacket_PlayerState(zone_database, sessionId, frame, t, state)
 		        
 		        t += dt
 		        frame++

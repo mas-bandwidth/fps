@@ -18,13 +18,13 @@ DONE
 
 	Implement code in the player server to request the world data and receive the response
 
+	Rename world database to zone database
+
 TODO
 	
 	Implement code to generate the set of zones and world AABB for a grid cell world.
 
 	-----------
-
-	Rename world database to zone database
 
 	world server to zone server
 
