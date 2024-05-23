@@ -136,6 +136,10 @@ func requestHandler(conn tcpserver.Connection) {
             fmt.Printf("player server %s disconnected [0x%08x]\n", addressString, serverData.tag)
 
             SendIndexServerPacket_PlayerServerDisconnectResponse(conn)
+
+        case IndexServerPacket_WorldRequest:
+
+            SendIndexServerPacket_WorldResponse(conn, world)
         }
     }
 }

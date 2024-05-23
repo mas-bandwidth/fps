@@ -25,6 +25,8 @@ var indexServerMutex sync.Mutex
 var playerServerMap map[uint32]*ServerData
 var playerServerMapMutex sync.Mutex
 
+var world *World
+
 func listenForCommands(port int) {
 
     server, err := tcpserver.NewServer(fmt.Sprintf("127.0.0.1:%d", port))
@@ -133,11 +135,9 @@ func connectToIndexServer() {
     	}
     }()
 
-    // todo: update world servers from index server
+    // get world from index server
 
-    // ...
-
-    // todo: update world database? Do we need direct talk? Yes...
+    requestWorld()
 }
 
 func updatePlayerServers() {
@@ -173,6 +173,43 @@ func updatePlayerServers() {
         // todo: store tag -> address mapping etc.
     }	
     fmt.Printf("----------------------------------------\n")
+}
+
+func requestWorld() {
+    
+	indexServerMutex.Lock()
+
+ 	SendIndexServerPacket_WorldRequest(indexServer)
+
+    packetData := ReceivePacket(indexServer)
+
+	indexServerMutex.Unlock()
+
+	if packetData == nil {
+		fmt.Printf("error: disconnected from index server\n")
+		os.Exit(1)
+	}
+
+    if packetData[0] != IndexServerPacket_WorldResponse {
+    	panic("expected worrd response packet")
+    }
+
+    world = &World{}
+    index := 1
+    if !world.Read(packetData, &index) {
+    	panic("could not read world\n")
+    }
+
+    fmt.Printf("world has %d zones\n", len(world.zones))
+
+    fmt.Printf("world bounds are (%d,%d,%d) -> (%d,%d,%d)\n", 
+    	world.bounds.min.x,
+    	world.bounds.min.y,
+    	world.bounds.min.z,
+    	world.bounds.max.x,
+    	world.bounds.max.y,
+    	world.bounds.max.z,
+    )
 }
 
 func updatePlayers() {

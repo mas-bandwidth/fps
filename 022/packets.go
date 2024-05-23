@@ -166,31 +166,32 @@ func (value *Zone) Read(data []byte, index *int) bool {
 // ---------------------------------------------------------
 
 type World struct {
-    zones []Zone
     bounds AABB
+    zones []Zone
 }
 
 func (value *World) Write(data []byte, index *int) {
+    value.bounds.Write(data, index)
     numZones := len(value.zones)
     WriteInt(data, index, numZones)
     for i := 0; i < numZones; i++ {
         value.zones[i].Write(data, index)
     }
-    value.bounds.Write(data, index)
 }
 
 func (value *World) Read(data []byte, index *int) bool {
+    if !value.bounds.Read(data, index) {
+        return false
+    }
     var numZones int
     if !ReadInt(data, index, &numZones) {
         return false
     }
+    value.zones = make([]Zone, numZones)
     for i := 0; i < numZones; i++ {
         if !value.zones[i].Read(data, index) {
             return false
         }
-    }
-    if !value.bounds.Read(data, index) {
-        return false
     }
     return true
 }
@@ -202,8 +203,39 @@ func generateGridWorld(i int64, j int64, k int64, cellSize uint64) *World {
     fmt.Printf("generating grid world: %dx%dx%d\n", i, j, k)
     
     world := World{}
-    
-    // todo: generate grid world
+
+    world.bounds.max.x = i * int64(cellSize)
+    world.bounds.max.y = j * int64(cellSize)
+    world.bounds.max.z = k * int64(cellSize)
+
+    numZones := i * j * k
+
+    world.zones = make([]Zone, numZones)
+
+    index := 0
+
+    for z := int64(0); z < k; z++ {
+
+        for y := int64(0); y < j; y++ {
+
+            for x := int64(0); x < i; x++ {
+
+                world.zones[index].bounds.min.x = x * int64(cellSize)
+                world.zones[index].bounds.min.y = y * int64(cellSize)
+                world.zones[index].bounds.min.x = z * int64(cellSize)
+
+                world.zones[index].bounds.max.x = (x+1) * int64(cellSize)
+                world.zones[index].bounds.max.y = (y+1) * int64(cellSize)
+                world.zones[index].bounds.max.x = (z+1) * int64(cellSize)
+
+                world.zones[index].origin.x = ( world.zones[index].bounds.min.x + world.zones[index].bounds.max.x ) / 2
+                world.zones[index].origin.y = ( world.zones[index].bounds.min.y + world.zones[index].bounds.max.y ) / 2
+                world.zones[index].origin.z = ( world.zones[index].bounds.min.z + world.zones[index].bounds.max.z ) / 2
+            }
+
+        }
+
+    }
     
     return &world
 }
@@ -536,11 +568,11 @@ func SendIndexServerPacket_WorldRequest(conn net.Conn) {
 
 func SendIndexServerPacket_WorldResponse(conn net.Conn, world *World) {
     packet := make([]byte, MaxWorldPacketSize)
-    binary.LittleEndian.PutUint32(packet[:4], 1)
     packet[4] = IndexServerPacket_WorldResponse
     index := 5
     world.Write(packet, &index)
     packet = packet[:index]
+    binary.LittleEndian.PutUint32(packet[:4], uint32(len(packet)-4))
     conn.Write(packet)
 }
 

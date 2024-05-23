@@ -14,12 +14,12 @@ DONE
 
 	Implement code to serialize the world.
 
-TODO
-
 	Extend so zones have origins
 
-	-----------
+	Implement code in the player server to request the world data and receive the response
 
+TODO
+	
 	Implement code to generate the set of zones and world AABB for a grid cell world.
 
 	-----------
