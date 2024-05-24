@@ -36,17 +36,11 @@ DONE
 
 	Zone database passes zoneId param to connect, give me any zone (zoneId=0), or give me a specific zone.
 
-TODO
-
 	A free zone is selected on connect if zero zone id is passed in, otherwise if zone is already free, disconnect the client.
-
-	-----------
 
 	Remove concept of player server "tag" and uniformly rename to id
 
-
-
-	-----------
+TODO
 
 	Implement a constant time lookup from position -> zone ids via a low resolution grid.
 

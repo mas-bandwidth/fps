@@ -12,9 +12,8 @@ import (
 
 const Port = 60000
 
-// todo: rename tag to id
 var playerServerMutex        sync.Mutex
-var playerServerMapByTag     map[uint32]*ServerData
+var playerServerMapById      map[uint32]*ServerData
 var playerServerMapByAddress map[string]*ServerData
 
 var zoneDatabaseMutex        sync.Mutex
@@ -29,7 +28,11 @@ func main() {
 
     world.Print()
 
-    playerServerMapByTag = make(map[uint32]*ServerData)
+    grid := createGrid(world, 100*Meter)
+
+    _ = grid
+
+    playerServerMapById = make(map[uint32]*ServerData)
     playerServerMapByAddress = make(map[string]*ServerData)
 
     zoneDatabaseMapById = make(map[uint32]*ServerData)
@@ -67,31 +70,31 @@ func requestHandler(conn tcpserver.Connection) {
 
         case IndexServerPacket_PlayerServerConnect:
 
-            tag := rand.Uint32()
+            id := rand.Uint32()
             playerServerMutex.Lock()
             for {
-                if tag == 0 || playerServerMapByTag[tag] == nil {
+                if id == 0 || playerServerMapById[id] == nil {
                     break
                 }
-                tag = rand.Uint32()
+                id = rand.Uint32()
             }
             playerServerMutex.Unlock()
 
             serverAddress := conn.GetClientAddr()
 
-            fmt.Printf("player server %s connected [0x%08x]\n", serverAddress, tag)
+            fmt.Printf("player server %s connected [0x%08x]\n", serverAddress, id)
 
-            SendIndexServerPacket_PlayerServerConnectResponse(conn, tag)
+            SendIndexServerPacket_PlayerServerConnectResponse(conn, id)
 
             serverData := &ServerData{
-                tag:        tag,
+                id:         id,
                 address:    serverAddress,
             }
 
             addressString := serverAddress.String()
 
             playerServerMutex.Lock()
-            playerServerMapByTag[tag] = serverData
+            playerServerMapById[id] = serverData
             playerServerMapByAddress[addressString] = serverData
             playerServerMutex.Unlock()
 
@@ -108,14 +111,14 @@ func requestHandler(conn tcpserver.Connection) {
                 return
             }
 
-            tag := serverData.tag
+            id := serverData.id
 
-            fmt.Printf("player server %s update [0x%08x]\n", serverAddress, tag)
+            fmt.Printf("player server %s update [0x%08x]\n", serverAddress, id)
 
             playerServerMutex.Lock()
-            playerServers := make([]*ServerData, len(playerServerMapByTag))
+            playerServers := make([]*ServerData, len(playerServerMapById))
             index := 0
-            for _,v := range playerServerMapByTag {
+            for _,v := range playerServerMapById {
                 playerServers[index] = v
                 index++
             }
@@ -132,7 +135,7 @@ func requestHandler(conn tcpserver.Connection) {
             playerServerMutex.Lock()
             serverData := playerServerMapByAddress[addressString]
             if serverData != nil {
-                delete(playerServerMapByTag, serverData.tag)
+                delete(playerServerMapById, serverData.id)
                 delete(playerServerMapByAddress, addressString)
             }
             playerServerMutex.Unlock()
@@ -142,7 +145,7 @@ func requestHandler(conn tcpserver.Connection) {
                 return
             }
 
-            fmt.Printf("player server %s disconnected [0x%08x]\n", addressString, serverData.tag)
+            fmt.Printf("player server %s disconnected [0x%08x]\n", addressString, serverData.id)
 
             SendIndexServerPacket_PlayerServerDisconnectResponse(conn)
 
@@ -194,7 +197,7 @@ func requestHandler(conn tcpserver.Connection) {
             }
 
             serverData := &ServerData{
-                tag:     zoneId,
+                id:     zoneId,
                 address: serverAddress,
             }
 
@@ -216,7 +219,7 @@ func requestHandler(conn tcpserver.Connection) {
             zoneDatabaseMutex.Lock()
             serverData := zoneDatabaseMapByAddress[addressString]
             if serverData != nil {
-                delete(zoneDatabaseMapById, serverData.tag) // todo: tag -> id
+                delete(zoneDatabaseMapById, serverData.id)
                 delete(zoneDatabaseMapByAddress, addressString)
             }
             zoneDatabaseMutex.Unlock()
@@ -226,7 +229,7 @@ func requestHandler(conn tcpserver.Connection) {
                 return
             }
 
-            fmt.Printf("zone database %s disconnected [0x%08x]\n", addressString, serverData.tag)
+            fmt.Printf("zone database %s disconnected [0x%08x]\n", addressString, serverData.id)
 
             SendIndexServerPacket_ZoneDatabaseDisconnectResponse(conn)
         }

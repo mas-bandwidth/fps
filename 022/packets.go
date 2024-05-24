@@ -17,7 +17,7 @@ const Millimeter = Meter / 1000
 const Micrometer = Meter / 1000000
 
 type ServerData struct {
-    tag         uint32
+    id          uint32
     address     *net.TCPAddr
 }
 
@@ -134,6 +134,11 @@ type Zone struct {
     origin  Vector
     bounds  AABB
     volumes []Volume
+}
+
+func Inside(zone *Zone, x int64, y int64, z int64) bool {
+    // ...
+    return false
 }
 
 func (value *Zone) Write(data []byte, index *int) {
@@ -332,6 +337,83 @@ func generateGridWorld(i int64, j int64, k int64, cellSize uint64) *World {
     }
     
     return &world
+}
+
+// ---------------------------------------------------------
+
+type GridCell struct {
+    zones []*Zone
+}
+
+type Grid struct {
+    i        int32
+    j        int32
+    k        int32
+    cellSize int64
+    bounds   AABB
+    cells    [][][]GridCell
+}
+
+func createGrid(world *World, cellSize uint64) *Grid {
+    
+    dx := world.bounds.max.x - world.bounds.min.x
+    dy := world.bounds.max.y - world.bounds.min.y
+    dz := world.bounds.max.z - world.bounds.min.z
+
+    cx := dx / int64(cellSize)
+    cy := dy / int64(cellSize)
+    cz := dz / int64(cellSize)
+
+    if dx % int64(cellSize) != 0 {
+        cx++
+    }
+
+    if dy % int64(cellSize) != 0 {
+        cy++
+    }
+
+    if dz % int64(cellSize) != 0 {
+        cz++
+    }
+
+    cellCount := cx * cy * cz
+
+    fmt.Printf("grid has %d cells\n", cellCount)
+
+    fmt.Printf("cx = %d\n", cx)
+    fmt.Printf("cy = %d\n", cy)
+    fmt.Printf("cz = %d\n", cz)
+
+    grid := &Grid{}
+
+    grid.cells = make([][][]GridCell, cz)
+
+    numZones := len(world.zones)
+
+    inside := make([]bool, numZones)
+
+    for k := 0; k < int(cz); k++ {
+        z := world.bounds.min.z + int64(cellSize) * int64(k)
+        grid.cells[k] = make([][]GridCell, cy)
+        for j := 0; j < int(cy); j++ {
+            y := world.bounds.min.y + int64(cellSize) * int64(j)
+            grid.cells[k][j] = make([]GridCell, cx)
+            for i := 0; i < int(cx); i++ {
+                x := world.bounds.min.x + int64(cellSize) * int64(i)
+                for n := 0; n < numZones; n++ {
+                    if Inside(&world.zones[n], x, y, z) {
+                        inside[n] = true
+                    } else {
+                        inside[n] = false
+                    }
+                }
+            }
+        } 
+    }
+
+    fmt.Printf("finished crunching grid\n")
+
+    return grid
 }
 
 // ---------------------------------------------------------
@@ -614,11 +696,11 @@ func SendIndexServerPacket_PlayerServerConnect(conn net.Conn) {
     conn.Write(packet[:])
 }
 
-func SendIndexServerPacket_PlayerServerConnectResponse(conn net.Conn, tag uint32) {
+func SendIndexServerPacket_PlayerServerConnectResponse(conn net.Conn, id uint32) {
     packet := make([]byte, 4+1+4+4)
     binary.LittleEndian.PutUint32(packet[:4], uint32(len(packet)-4))
     packet[4] = IndexServerPacket_PlayerServerConnectResponse
-    binary.LittleEndian.PutUint32(packet[4+1:], tag)
+    binary.LittleEndian.PutUint32(packet[4+1:], id)
     conn.Write(packet[:])
 }
 
@@ -650,7 +732,7 @@ func SendIndexServerPacket_PlayerServerUpdateResponse(conn net.Conn, playerServe
     binary.LittleEndian.PutUint32(packet[4+1:], uint32(len(playerServers)))
     index := 4 + 1 + 4
     for i := range playerServers {
-        binary.LittleEndian.PutUint32(packet[index:], playerServers[i].tag)
+        binary.LittleEndian.PutUint32(packet[index:], playerServers[i].id)
         index += 4
         WriteAddress(&index, packet, playerServers[i].address)
     }
