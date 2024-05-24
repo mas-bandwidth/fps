@@ -191,7 +191,7 @@ func requestWorld() {
 	}
 
     if packetData[0] != IndexServerPacket_WorldResponse {
-    	panic("expected worrd response packet")
+    	panic("expected world response packet")
     }
 
     world = &World{}

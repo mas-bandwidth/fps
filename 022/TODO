@@ -22,23 +22,41 @@ DONE
 
 	Implement code to generate the set of zones and world AABB for a grid cell world.
 
-TODO
-	
 	zones need an id
+
+	Fix various bugs setting up grid world zones
+
+	Zone database connects to index server
+
+	Zone database gets the world data down from the index server
+
+	Add new connect/disconnect messages for zone database
+
+	Make sure disconnect is sent on ctrl-c on zone database
+
+	Zone database passes zoneId param to connect, give me any zone (zoneId=0), or give me a specific zone.
+
+TODO
+
+	A free zone is selected on connect if zero zone id is passed in, otherwise if zone is already free, disconnect the client.
 
 	-----------
 
-	Zone database connects to index server, and either says, give me any zone (zoneId=0), or give me a specific zone.
+	Remove concept of player server "tag" and uniformly rename to id
 
-	Zone database gets the world data down from the index server, and then stores its own zone for fast lookup.
+
+
+	-----------
+
+	Implement a constant time lookup from position -> zone ids via a low resolution grid.
+
+	-----------
+
+	As player moves track the set of zones overlapping
 
 	-----------
 
 	I like the idea of having a constant time lookup in a static structure, eg. a grid for taking a position and getting the set of world database zones that are subscribed.
-
-	-----------
-
-	Player servers need an update per-second for world database servers
 
 	-----------
 

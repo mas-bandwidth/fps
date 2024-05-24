@@ -5,17 +5,21 @@ import (
     "os"
     "sync"
     "math/rand"
+    "encoding/binary"
 
     "github.com/maurice2k/tcpserver"
 )
 
 const Port = 60000
 
+// todo: rename tag to id
+var playerServerMutex        sync.Mutex
 var playerServerMapByTag     map[uint32]*ServerData
-
 var playerServerMapByAddress map[string]*ServerData
 
-var serverMutex sync.Mutex
+var zoneDatabaseMutex        sync.Mutex
+var zoneDatabaseMapById      map[uint32]*ServerData
+var zoneDatabaseMapByAddress map[string]*ServerData
 
 var world *World
 
@@ -27,6 +31,9 @@ func main() {
 
     playerServerMapByTag = make(map[uint32]*ServerData)
     playerServerMapByAddress = make(map[string]*ServerData)
+
+    zoneDatabaseMapById = make(map[uint32]*ServerData)
+    zoneDatabaseMapByAddress = make(map[string]*ServerData)
 
     server, err := tcpserver.NewServer(fmt.Sprintf("127.0.0.1:%d", Port))
 
@@ -61,14 +68,14 @@ func requestHandler(conn tcpserver.Connection) {
         case IndexServerPacket_PlayerServerConnect:
 
             tag := rand.Uint32()
-            serverMutex.Lock()
+            playerServerMutex.Lock()
             for {
                 if tag == 0 || playerServerMapByTag[tag] == nil {
                     break
                 }
                 tag = rand.Uint32()
             }
-            serverMutex.Unlock()
+            playerServerMutex.Unlock()
 
             serverAddress := conn.GetClientAddr()
 
@@ -83,18 +90,18 @@ func requestHandler(conn tcpserver.Connection) {
 
             addressString := serverAddress.String()
 
-            serverMutex.Lock()
+            playerServerMutex.Lock()
             playerServerMapByTag[tag] = serverData
             playerServerMapByAddress[addressString] = serverData
-            serverMutex.Unlock()
+            playerServerMutex.Unlock()
 
         case IndexServerPacket_PlayerServerUpdate:
 
             serverAddress := conn.GetClientAddr()
 
-            serverMutex.Lock()
+            playerServerMutex.Lock()
             serverData := playerServerMapByAddress[serverAddress.String()]
-            serverMutex.Unlock()
+            playerServerMutex.Unlock()
 
             if serverData == nil {
                 fmt.Printf("warning: unknown player server %s\n", serverAddress)
@@ -105,14 +112,14 @@ func requestHandler(conn tcpserver.Connection) {
 
             fmt.Printf("player server %s update [0x%08x]\n", serverAddress, tag)
 
-            serverMutex.Lock()
+            playerServerMutex.Lock()
             playerServers := make([]*ServerData, len(playerServerMapByTag))
             index := 0
             for _,v := range playerServerMapByTag {
                 playerServers[index] = v
                 index++
             }
-            serverMutex.Unlock()
+            playerServerMutex.Unlock()
 
             SendIndexServerPacket_PlayerServerUpdateResponse(conn, playerServers)
 
@@ -122,16 +129,16 @@ func requestHandler(conn tcpserver.Connection) {
 
             addressString := serverAddress.String()
 
-            serverMutex.Lock()
+            playerServerMutex.Lock()
             serverData := playerServerMapByAddress[addressString]
             if serverData != nil {
                 delete(playerServerMapByTag, serverData.tag)
                 delete(playerServerMapByAddress, addressString)
             }
-            serverMutex.Unlock()
+            playerServerMutex.Unlock()
 
             if serverData == nil {
-                fmt.Printf("warning: unknown server %s disconnected\n", addressString)
+                fmt.Printf("warning: unknown player server %s disconnected\n", addressString)
                 return
             }
 
@@ -142,6 +149,86 @@ func requestHandler(conn tcpserver.Connection) {
         case IndexServerPacket_WorldRequest:
 
             SendIndexServerPacket_WorldResponse(conn, world)
+
+        case IndexServerPacket_ZoneDatabaseConnect:
+
+            zoneId := binary.LittleEndian.Uint32(packetData[1:])
+
+            serverAddress := conn.GetClientAddr()
+
+            zoneDatabaseMutex.Lock()
+
+            if zoneId == 0 {
+
+                // find a free zone and assign it
+
+                found := false
+                for i := range world.zones {
+                    _, exists := zoneDatabaseMapById[world.zones[i].id]
+                    if !exists {
+                        fmt.Printf("found free zone 0x%08x\n", world.zones[i].id)
+                        zoneId = world.zones[i].id
+                        found = true
+                        break
+                    }
+                }
+
+                // no free zone
+
+                if !found {
+                    fmt.Printf("warning: no free zone available\n")
+                    return
+                }
+
+            } else {
+
+                // assign to a specific zone id
+
+                fmt.Printf("zone database connecting as specific zone id 0x%08x\n", zoneId)
+
+                _, exists := zoneDatabaseMapById[zoneId]
+                if exists {
+                    fmt.Printf("warning: zone 0x%08x is already allocated\n", zoneId)
+                    return
+                }
+            }
+
+            serverData := &ServerData{
+                tag:     zoneId,
+                address: serverAddress,
+            }
+
+            zoneDatabaseMapById[zoneId] = serverData
+            zoneDatabaseMapByAddress[serverAddress.String()] = serverData
+            
+            zoneDatabaseMutex.Unlock()
+
+            fmt.Printf("zone database %s connected [0x%08x]\n", serverAddress.String(), zoneId)
+
+            SendIndexServerPacket_ZoneDatabaseConnectResponse(conn, zoneId)
+
+        case IndexServerPacket_ZoneDatabaseDisconnect:
+
+            serverAddress := conn.GetClientAddr()
+
+            addressString := serverAddress.String()
+
+            zoneDatabaseMutex.Lock()
+            serverData := zoneDatabaseMapByAddress[addressString]
+            if serverData != nil {
+                delete(zoneDatabaseMapById, serverData.tag) // todo: tag -> id
+                delete(zoneDatabaseMapByAddress, addressString)
+            }
+            zoneDatabaseMutex.Unlock()
+
+            if serverData == nil {
+                fmt.Printf("warning: unknown zone database %s disconnected\n", addressString)
+                return
+            }
+
+            fmt.Printf("zone database %s disconnected [0x%08x]\n", addressString, serverData.tag)
+
+            SendIndexServerPacket_ZoneDatabaseDisconnectResponse(conn)
         }
     }
 }

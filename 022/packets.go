@@ -588,6 +588,10 @@ const IndexServerPacket_PlayerServerUpdate = 6
 const IndexServerPacket_PlayerServerUpdateResponse = 7
 const IndexServerPacket_WorldRequest = 8
 const IndexServerPacket_WorldResponse = 9
+const IndexServerPacket_ZoneDatabaseConnect = 10
+const IndexServerPacket_ZoneDatabaseConnectResponse = 11
+const IndexServerPacket_ZoneDatabaseDisconnect = 12
+const IndexServerPacket_ZoneDatabaseDisconnectResponse = 13
 
 func SendIndexServerPacket_Ping(conn net.Conn) {
     ping := [5]byte{}
@@ -614,7 +618,7 @@ func SendIndexServerPacket_PlayerServerConnectResponse(conn net.Conn, tag uint32
     packet := make([]byte, 4+1+4+4)
     binary.LittleEndian.PutUint32(packet[:4], uint32(len(packet)-4))
     packet[4] = IndexServerPacket_PlayerServerConnectResponse
-    binary.LittleEndian.PutUint32(packet[1+4:], tag)
+    binary.LittleEndian.PutUint32(packet[4+1:], tag)
     conn.Write(packet[:])
 }
 
@@ -668,6 +672,37 @@ func SendIndexServerPacket_WorldResponse(conn net.Conn, world *World) {
     packet = packet[:index]
     binary.LittleEndian.PutUint32(packet[:4], uint32(len(packet)-4))
     conn.Write(packet)
+}
+
+func SendIndexServerPacket_ZoneDatabaseConnect(conn net.Conn, zoneId uint32) {
+    packet := [4+1+4]byte{}
+    binary.LittleEndian.PutUint32(packet[:4], uint32(len(packet)-4))
+    packet[4] = IndexServerPacket_ZoneDatabaseConnect
+    binary.LittleEndian.PutUint32(packet[5:], zoneId)
+    conn.Write(packet[:])
+}
+
+func SendIndexServerPacket_ZoneDatabaseConnectResponse(conn net.Conn, zoneId uint32) {
+    fmt.Printf("write zone id of 0x%08x\n", zoneId)
+    packet := make([]byte, 4+1+4)
+    binary.LittleEndian.PutUint32(packet[:4], uint32(len(packet)-4))
+    packet[4] = IndexServerPacket_ZoneDatabaseConnectResponse
+    binary.LittleEndian.PutUint32(packet[4+1:], zoneId)
+    conn.Write(packet[:])
+}
+
+func SendIndexServerPacket_ZoneDatabaseDisconnect(conn net.Conn) {
+    packet := [5]byte{}
+    binary.LittleEndian.PutUint32(packet[:4], 1)
+    packet[4] = IndexServerPacket_ZoneDatabaseDisconnect
+    conn.Write(packet[:])
+}
+
+func SendIndexServerPacket_ZoneDatabaseDisconnectResponse(conn net.Conn) {
+    packet := [5]byte{}
+    binary.LittleEndian.PutUint32(packet[:4], 1)
+    packet[4] = IndexServerPacket_ZoneDatabaseDisconnectResponse
+    conn.Write(packet[:])
 }
 
 // ---------------------------------------------------------
