@@ -66,17 +66,17 @@ func requestHandler(conn tcpserver.Connection) {
     }
 }
 
-func connectToIndexServer() {
+func connectToWorldServer() {
 
-	// open tcp connection to index server
+	// open tcp connection to world server
 
-	fmt.Printf( "connecting to index server\n" )
+	fmt.Printf( "connecting to world server\n" )
 
 	var err error
 
     indexServer, err = net.Dial("tcp", "127.0.0.1:60000")
     if err != nil {
-        fmt.Printf("\nerror: could not connect to index server: %v\n\n", err)
+        fmt.Printf("\nerror: could not connect to world server: %v\n\n", err)
         os.Exit(1)
     }
 
@@ -84,38 +84,38 @@ func connectToIndexServer() {
 
 	// ping it
 
- 	SendIndexServerPacket_Ping(indexServer)
+ 	SendWorldServerPacket_Ping(indexServer)
 
     pong := ReceivePacket(indexServer)
     if pong == nil {
-    	fmt.Printf("disconnected from index server\n")
+    	fmt.Printf("disconnected from world server\n")
     	return
     }
 
 	indexServerMutex.Unlock()
 
-   	if pong[0] != IndexServerPacket_Pong {
+   	if pong[0] != WorldServerPacket_Pong {
     	panic("expected pong packet")
     }
 
-    // connect to index server
+    // connect to world server
 
-	fmt.Printf("connected to index server\n")
+	fmt.Printf("connected to world server\n")
 
 	indexServerMutex.Lock()
 
- 	SendIndexServerPacket_PlayerServerConnect(indexServer)
+ 	SendWorldServerPacket_PlayerServerConnect(indexServer)
 
     packetData := ReceivePacket(indexServer)
 
 	indexServerMutex.Unlock()
 
     if packetData == nil {
-    	fmt.Printf("disconnected from index server\n")
+    	fmt.Printf("disconnected from world server\n")
         return
     }
 
-    if packetData[0] != IndexServerPacket_PlayerServerConnectResponse {
+    if packetData[0] != WorldServerPacket_PlayerServerConnectResponse {
     	panic("expected player server connect response packet")
     }
 
@@ -123,7 +123,7 @@ func connectToIndexServer() {
 
     fmt.Printf("player server tag is 0x%08x\n", tag)
 
-    // update player servers from index server
+    // update player servers from world server
 
     updatePlayerServers()
 
@@ -135,7 +135,7 @@ func connectToIndexServer() {
     	}
     }()
 
-    // get world from index server
+    // get world from world server
 
     requestWorld()
 }
@@ -146,18 +146,18 @@ func updatePlayerServers() {
 
 	indexServerMutex.Lock()
 
- 	SendIndexServerPacket_PlayerServerUpdate(indexServer)
+ 	SendWorldServerPacket_PlayerServerUpdate(indexServer)
 
     packetData := ReceivePacket(indexServer)
 
 	indexServerMutex.Unlock()
 
 	if packetData == nil {
-		fmt.Printf("error: disconnected from index server\n")
+		fmt.Printf("error: disconnected from world server\n")
 		os.Exit(1)
 	}
 
-    if packetData[0] != IndexServerPacket_PlayerServerUpdateResponse {
+    if packetData[0] != WorldServerPacket_PlayerServerUpdateResponse {
     	panic("expected player server update response packet")
     }
 
@@ -179,18 +179,18 @@ func requestWorld() {
     
 	indexServerMutex.Lock()
 
- 	SendIndexServerPacket_WorldRequest(indexServer)
+ 	SendWorldServerPacket_WorldRequest(indexServer)
 
     packetData := ReceivePacket(indexServer)
 
 	indexServerMutex.Unlock()
 
 	if packetData == nil {
-		fmt.Printf("error: disconnected from index server\n")
+		fmt.Printf("error: disconnected from world server\n")
 		os.Exit(1)
 	}
 
-    if packetData[0] != IndexServerPacket_WorldResponse {
+    if packetData[0] != WorldServerPacket_WorldResponse {
     	panic("expected world response packet")
     }
 
@@ -276,18 +276,18 @@ func cleanShutdown() {
 
 	indexServerMutex.Lock()
 
- 	SendIndexServerPacket_PlayerServerDisconnect(indexServer)
+ 	SendWorldServerPacket_PlayerServerDisconnect(indexServer)
 
     packetData := ReceivePacket(indexServer)
 
 	indexServerMutex.Unlock()
 
     if packetData == nil {
-    	fmt.Printf("disconnected from index server\n")
+    	fmt.Printf("disconnected from world server\n")
         return
     }
 
-    if packetData[0] != IndexServerPacket_PlayerServerDisconnectResponse {
+    if packetData[0] != WorldServerPacket_PlayerServerDisconnectResponse {
     	panic("expected player server disconnect response packet")
     }
 
@@ -312,7 +312,7 @@ func main() {
 
 	listenForCommands(port)
 
-	connectToIndexServer()
+	connectToWorldServer()
 
 	go updatePlayers()
 

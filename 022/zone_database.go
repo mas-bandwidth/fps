@@ -33,17 +33,17 @@ var indexServerMutex sync.Mutex
 
 var world *World
 
-func connectToIndexServer(zoneId *uint32) {
+func connectToWorldServer(zoneId *uint32) {
 
-    // open tcp connection to index server
+    // open tcp connection to world server
 
-    fmt.Printf( "connecting to index server\n" )
+    fmt.Printf( "connecting to world server\n" )
 
     var err error
 
     indexServer, err = net.Dial("tcp", "127.0.0.1:60000")
     if err != nil {
-        fmt.Printf("\nerror: could not connect to index server: %v\n\n", err)
+        fmt.Printf("\nerror: could not connect to world server: %v\n\n", err)
         os.Exit(1)
     }
 
@@ -51,44 +51,44 @@ func connectToIndexServer(zoneId *uint32) {
 
     // ping it
 
-    SendIndexServerPacket_Ping(indexServer)
+    SendWorldServerPacket_Ping(indexServer)
 
     pong := ReceivePacket(indexServer)
     if pong == nil {
-        fmt.Printf("disconnected from index server\n")
+        fmt.Printf("disconnected from world server\n")
         return
     }
 
     indexServerMutex.Unlock()
 
-    if pong[0] != IndexServerPacket_Pong {
+    if pong[0] != WorldServerPacket_Pong {
         panic("expected pong packet")
     }
 
-    // connect to index server
+    // connect to world server
 
-    fmt.Printf("connected to index server\n")
+    fmt.Printf("connected to world server\n")
 
     indexServerMutex.Lock()
 
-    SendIndexServerPacket_ZoneDatabaseConnect(indexServer, *zoneId)
+    SendWorldServerPacket_ZoneDatabaseConnect(indexServer, *zoneId)
 
     packetData := ReceivePacket(indexServer)
 
     indexServerMutex.Unlock()
 
     if packetData == nil {
-        fmt.Printf("disconnected from index server\n")
+        fmt.Printf("disconnected from world server\n")
         return
     }
 
-    if packetData[0] != IndexServerPacket_ZoneDatabaseConnectResponse {
+    if packetData[0] != WorldServerPacket_ZoneDatabaseConnectResponse {
         panic("expected zone database connect response packet")
     }
 
     *zoneId = binary.LittleEndian.Uint32(packetData[1:])
 
-    // get world from index server
+    // get world from world server
 
     requestWorld()
 }
@@ -97,18 +97,18 @@ func requestWorld() {
     
     indexServerMutex.Lock()
 
-    SendIndexServerPacket_WorldRequest(indexServer)
+    SendWorldServerPacket_WorldRequest(indexServer)
 
     packetData := ReceivePacket(indexServer)
 
     indexServerMutex.Unlock()
 
     if packetData == nil {
-        fmt.Printf("error: disconnected from index server\n")
+        fmt.Printf("error: disconnected from world server\n")
         os.Exit(1)
     }
 
-    if packetData[0] != IndexServerPacket_WorldResponse {
+    if packetData[0] != WorldServerPacket_WorldResponse {
         panic("expected world response packet")
     }
 
@@ -127,18 +127,18 @@ func cleanShutdown() {
 
     indexServerMutex.Lock()
 
-    SendIndexServerPacket_ZoneDatabaseDisconnect(indexServer)
+    SendWorldServerPacket_ZoneDatabaseDisconnect(indexServer)
 
     packetData := ReceivePacket(indexServer)
 
     indexServerMutex.Unlock()
 
     if packetData == nil {
-        fmt.Printf("disconnected from index server\n")
+        fmt.Printf("disconnected from world server\n")
         return
     }
 
-    if packetData[0] != IndexServerPacket_ZoneDatabaseDisconnectResponse {
+    if packetData[0] != WorldServerPacket_ZoneDatabaseDisconnectResponse {
         panic("expected zone database disconnect response packet")
     }
 
@@ -162,7 +162,7 @@ func main() {
         zoneId = uint32(value)
     }
 
-    connectToIndexServer(&zoneId)
+    connectToWorldServer(&zoneId)
 
     fmt.Printf("zone id is 0x%08x\n", zoneId)
 
