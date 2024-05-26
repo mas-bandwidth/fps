@@ -38,5 +38,6 @@ clean:
 	rm -f player
 	rm -f player_server_worker
 	rm -f player_server
+	rm -f world_server
 	rm -f zone_database
 	rm -f *.o
