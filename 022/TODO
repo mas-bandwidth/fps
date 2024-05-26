@@ -40,25 +40,27 @@ DONE
 
 	Remove concept of player server "tag" and uniformly rename to id
 
-TODO
-
 	Implement a constant time lookup from position -> zone ids via a low resolution grid.
 
-	-----------
+	Implement convex volume inside test
 
-	As player moves track the set of zones overlapping
+TODO
 
-	-----------
-
-	I like the idea of having a constant time lookup in a static structure, eg. a grid for taking a position and getting the set of world database zones that are subscribed.
+	Unit test the convex volume inside test
 
 	-----------
 
-	This way I can just spam world database instances and they will autoassign on join.
+	Work out standard representation for position in the player state so it is known on both sides
 
 	-----------
 
-	World server keeps track of which player server a player is on, via the player shallow state update.
+	As player moves track the current set of zones subscribed to player state
+
+	-----------
+
+	Connect and disconnect TCP connections to the zone databases as the player moves
+
+	-----------
 
 	Hack up world server raycast (pick random player)
 

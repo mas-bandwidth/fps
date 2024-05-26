@@ -39,6 +39,15 @@ func (value *Vector) Read(data []byte, index *int) bool {
 
 // ---------------------------------------------------------
 
+func Dot(x int64, y int64, z int64, nx int64, ny int64, nz int64) int64 {
+    dx := ( x * nx ) / Meter
+    dy := ( y * ny ) / Meter
+    dz := ( z * nz ) / Meter
+    return dx + dy + dz
+}
+
+// ---------------------------------------------------------
+
 type Plane struct {
     normal Vector
     d      int64
@@ -88,6 +97,15 @@ type Volume struct {
     planes []Plane
 }
 
+func (volume *Volume) Inside(x int64, y int64, z int64) bool {
+    for i := range volume.planes {
+        if Dot(x, y, z, volume.planes[i].normal.x, volume.planes[i].normal.y, volume.planes[i].normal.z) < 0 {
+            return false
+        }
+    }
+    return true
+}
+
 func (value *Volume) Write(data []byte, index *int) {
     value.bounds.Write(data, index)
     numPlanes := len(value.planes)
@@ -123,8 +141,12 @@ type Zone struct {
     volumes []Volume
 }
 
-func Inside(zone *Zone, x int64, y int64, z int64) bool {
-    // ...
+func (zone *Zone) Inside(x int64, y int64, z int64) bool {
+    for i := range zone.volumes {
+        if zone.volumes[i].Inside(x, y, z) {
+            return true
+        }
+    }
     return false
 }
 
@@ -384,7 +406,7 @@ func createWorldGrid(world *World, cellSize uint64) *WorldGrid {
             for i := 0; i < int(cx); i++ {
                 x := world.bounds.min.x + int64(cellSize) * int64(i)
                 for n := 0; n < numZones; n++ {
-                    if Inside(&world.zones[n], x, y, z) {
+                    if world.zones[i].Inside(x, y, z) {
                         inside[n] = true
                     } else {
                         inside[n] = false
