@@ -99,7 +99,7 @@ type Volume struct {
 
 func (volume *Volume) Inside(x int64, y int64, z int64) bool {
     for i := range volume.planes {
-        if Dot(x, y, z, volume.planes[i].normal.x, volume.planes[i].normal.y, volume.planes[i].normal.z) < 0 {
+        if Dot(x, y, z, volume.planes[i].normal.x, volume.planes[i].normal.y, volume.planes[i].normal.z) < volume.planes[i].d {
             return false
         }
     }
