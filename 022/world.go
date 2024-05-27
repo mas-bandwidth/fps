@@ -4,7 +4,7 @@ import (
     "fmt"
 )
 
-const Meter = 1000000
+const Meter = int64(1000000)
 const Kilometer = 1000 * Meter
 const Centimeter = Meter / 100
 const Millimeter = Meter / 1000

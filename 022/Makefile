@@ -32,6 +32,10 @@ zone_database: zone_database.go
 world_server: world_server.go
 	go build world_server.go packets.go world.go
 
+.PHONY: test
+test: packets.go world.go world_test.go
+	go test packets.go world.go world_test.go
+
 .PHONY: clean
 clean:
 	rm -f client
