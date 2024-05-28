@@ -80,3 +80,18 @@ func Test_Inside_Volume(t *testing.T) {
 	assert.False(t, volume.Inside(0,0,-1))
 	assert.False(t, volume.Inside(Meter*2,Meter*2,Meter*2))
 }
+
+func Test_Grid_World(t *testing.T) {
+
+    world := generateWorld_Grid(10, 10, 10, Meter)
+
+    _ = world
+
+    for k := 0; k < 10; k++ {
+    	for j := 0; j < 10; j++ {
+    		for i := 0; i < 10; i++ {
+    			// ...
+    		}
+    	}
+    }
+}

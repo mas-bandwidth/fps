@@ -254,7 +254,7 @@ func (value *World) Read(data []byte, index *int) bool {
 
 // ---------------------------------------------------------
 
-func generateWorld_Grid(i int64, j int64, k int64, cellSize uint64) *World {
+func generateWorld_Grid(i int64, j int64, k int64, cellSize int64) *World {
 
     fmt.Printf("generating grid world: %dx%dx%d\n", i, j, k)
     
@@ -363,7 +363,7 @@ type WorldGrid struct {
     cells    [][][]WorldGridCell
 }
 
-func createWorldGrid(world *World, cellSize uint64) *WorldGrid {
+func createWorldGrid(world *World, cellSize int64) *WorldGrid {
     
     dx := world.bounds.max.x - world.bounds.min.x
     dy := world.bounds.max.y - world.bounds.min.y
