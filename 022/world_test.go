@@ -272,6 +272,7 @@ func Test_FindZoneId_World(t *testing.T) {
 
 	var parameters = []Params{
 		{In{2, 2, 2, Meter, Vector{Meter, Meter, Meter}}, Out{true, 1}},
+		{In{2, 2, 2, Meter, Vector{-Meter, -Meter, -Meter}}, Out{false, 0}},
 	}
 
 	for index, parameter := range parameters {
