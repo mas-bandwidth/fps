@@ -250,6 +250,21 @@ func Test_Inside_Zone(t *testing.T) {
 	}
 }
 
+func Test_Grid_World(t *testing.T) {
+
+	world := generateWorld_Grid(10, 10, 10, Meter)
+
+	_ = world
+
+	for k := 0; k < 10; k++ {
+		for j := 0; j < 10; j++ {
+			for i := 0; i < 10; i++ {
+				// ...
+			}
+		}
+	}
+}
+
 func Test_FindZoneId_World(t *testing.T) {
 
 	type In struct {
@@ -283,20 +298,5 @@ func Test_FindZoneId_World(t *testing.T) {
 			assert.Equal(t, parameter.out.found, found)
 			assert.Equal(t, parameter.out.zone_id, zone_id)
 		})
-	}
-}
-
-func Test_Grid_World(t *testing.T) {
-
-	world := generateWorld_Grid(10, 10, 10, Meter)
-
-	_ = world
-
-	for k := 0; k < 10; k++ {
-		for j := 0; j < 10; j++ {
-			for i := 0; i < 10; i++ {
-				// ...
-			}
-		}
 	}
 }
